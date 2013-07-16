@@ -5,7 +5,7 @@ import org.junit.{ Ignore, Test }
 import com.carrotsearch.junitbenchmarks.{ AbstractBenchmark, BenchmarkOptions }
 import com.jayway.jsonpath.{ JsonPath => JaywayJsonPath }
 
-import io.gatling.jsonpath.JsonPathResolver
+import io.gatling.jsonpath.jsonsmart.JsonPath
 
 class NicoBench extends AbstractBenchmark {
 
@@ -21,7 +21,7 @@ class NicoBench extends AbstractBenchmark {
 	@BenchmarkOptions(benchmarkRounds = 1, warmupRounds = 0, concurrency = 2)
 	def playground() {
 		val q = "$.results[?(@.from_user == 'origichara_bot')]"
-		val r = JsonPathResolver.compile(q).right.map(_.query(twitterJson))
+		val r = JsonPath.compile(q).right.map(_.query(twitterJson))
 		println(s"nico=$r")
 		val s = JaywayJsonPath.compile(q).read(twitterJson).toString
 		println(s"jayway=$s")
@@ -40,7 +40,7 @@ class NicoBench extends AbstractBenchmark {
 	//val twitterQuery = "$.completed_in"
 	//val twitterQuery = "$.results[?(@.from_user == 'origichara_bot')]"
 
-	val nicoJP = JsonPathResolver.compile(twitterQuery)
+	val nicoJP = JsonPath.compile(twitterQuery)
 
 	@Ignore
 	@Test

@@ -1,20 +1,19 @@
-package io.gatling.jsonpath
+package io.gatling.jsonpath.jsonsmart
 
 import java.util.{ List => JList, Map => JMap }
-
-import scala.collection.JavaConversions.{ asScalaBuffer, asScalaIterator }
 import scala.math.abs
-
 import net.minidev.json.JSONValue
+import io.gatling.jsonpath._
+import scala.collection.JavaConversions.{ asScalaIterator, asScalaBuffer }
 
 case class JPError(val reason: String)
 
-object JsonPathResolver {
+object JsonPath {
 	val parser = Parser
 
-	def compile(query: String): Either[JPError, JsonPathResolver] = {
+	def compile(query: String): Either[JPError, JsonPath] = {
 		val compileResult = parser.compile(query)
-		compileResult.map((q) => Right(new JsonPathResolver(q))).getOrElse(Left(JPError(compileResult.toString)))
+		compileResult.map((q) => Right(new JsonPath(q))).getOrElse(Left(JPError(compileResult.toString)))
 	}
 
 	def query(query: String, json: String): Either[JPError, Seq[Any]] = {
@@ -26,7 +25,7 @@ object JsonPathResolver {
 	}
 }
 
-class JsonPathResolver(val path: List[PathToken]) {
+class JsonPath(val path: List[PathToken]) {
 
 	def query(json: Any) = {
 		walk(json, path).toVector
@@ -135,7 +134,7 @@ class JsonPathResolver(val path: List[PathToken]) {
 			case _ => Iterator.empty
 		}
 
-	private[this] def sliceArray(array: JList[_], start: Option[Int], stop: Option[Int], step: Int): Iterator[Any] = {
+	private [this] def sliceArray(array: JList[_], start: Option[Int], stop: Option[Int], step: Int): Iterator[Any] = {
 		val size = array.size
 
 		def lenRelative(x: Int) = if (x >= 0) x else size + x

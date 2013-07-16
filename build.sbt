@@ -8,6 +8,7 @@ scalaVersion := "2.10.2"
 
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
+/// ScalaTest
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.0.M5b" % "test"
 
 /// JSON-Smart

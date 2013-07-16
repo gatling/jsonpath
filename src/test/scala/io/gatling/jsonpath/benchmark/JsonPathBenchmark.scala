@@ -1,7 +1,7 @@
 package io.gatling.jsonpath.benchmark
 
 import org.scalameter.api._
-import io.gatling.jsonpath.JsonPathResolver
+import io.gatling.jsonpath.jsonsmart.JsonPath
 
 
 object JsonPathBenchmark extends PerformanceTest.Quickbenchmark {
@@ -47,7 +47,7 @@ object JsonPathBenchmark extends PerformanceTest.Quickbenchmark {
 
 		measure method "query resolving" in {
 			using(queries) in {
-				JsonPathResolver.query(_, goessnerJson).toString
+				JsonPath.query(_, goessnerJson).toString
 			}
 		}
 
