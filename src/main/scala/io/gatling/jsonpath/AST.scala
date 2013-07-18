@@ -15,9 +15,9 @@ sealed trait ArrayAccessor extends PathToken
 /**
  * Slicing of an array, indices start at zero
  *
- * @start is the first item that you want (of course)
- * @stop is the first item that you do not want
- * @step, being positive or negative, defines whether you are moving
+ * @param start is the first item that you want (of course)
+ * @param stop is the first item that you do not want
+ * @param step, being positive or negative, defines whether you are moving
  */
 case class ArraySlice(val start: Option[Int], val stop: Option[Int], val step: Int = 1) extends ArrayAccessor 
 case class ArrayRandomAccess(val indices: List[Int]) extends ArrayAccessor 
