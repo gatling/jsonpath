@@ -206,12 +206,14 @@ class JsonPathSpec extends FlatSpec with ShouldMatchers with JsonPathMatchers {
 
 trait JsonPathMatchers {
 
-	class OrderedElementsMatcher(expected: Traversable[Any]) extends Matcher[Either[JPError, Traversable[Any]]] {
-		override def apply(left: Either[JPError, Traversable[Any]]): MatchResult =
+	class OrderedElementsMatcher(expected: Traversable[Any]) extends Matcher[Either[JPError, Iterator[Any]]] {
+		override def apply(left: Either[JPError, Iterator[Any]]): MatchResult =
 			left match {
-				case Right(seq) => MatchResult(seq == expected,
-					s"$seq does not contains the same elements as $expected",
-					s"$seq is equal to $expected but it shouldn't be")
+				case Right(it) =>
+					val seq = it.toVector
+					MatchResult(seq == expected,
+						s"$seq does not contains the same elements as $expected",
+						s"$seq is equal to $expected but it shouldn't be")
 				case Left(e) => MatchResult(false,
 					s"parsing issue, $e",
 					s"parsing issue, $e")
@@ -219,10 +221,11 @@ trait JsonPathMatchers {
 	}
 	def findOrderedElements(expected: Any*) = new OrderedElementsMatcher(expected)
 
-	class ElementsMatcher(expected: Traversable[Any]) extends Matcher[Either[JPError, Traversable[Any]]] {
-		override def apply(left: Either[JPError, Traversable[Any]]): MatchResult =
+	class ElementsMatcher(expected: Traversable[Any]) extends Matcher[Either[JPError, Iterator[Any]]] {
+		override def apply(left: Either[JPError, Iterator[Any]]): MatchResult =
 			left match {
-				case Right(seq) =>
+				case Right(it) =>
+					val seq = it.toVector
 					val missing = expected.toSeq.diff(seq.toSeq)
 					val added = seq.toSeq.diff(expected.toSeq)
 					MatchResult(missing.isEmpty && added.isEmpty,
