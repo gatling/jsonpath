@@ -2,17 +2,19 @@ name := "jsonpath"
 
 organization := "io.gatling"                                        
 
-version := "0.1-SNAPSHOT"                                                       
+version := "0.2-SNAPSHOT"                                                       
 
 scalaVersion := "2.10.2"   
 
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
+/// JSON-Smart
+libraryDependencies += "net.minidev" % "json-smart" % "2.0-RC2"
+
+
 /// ScalaTest
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.0.M5b" % "test"
 
-/// JSON-Smart
-libraryDependencies += "net.minidev" % "json-smart" % "2.0-RC2"
 
 /// ScalaMeter
 resolvers += "Sonatype OSS Snapshots" at
@@ -51,7 +53,7 @@ publishArtifact in Test := false
 pomIncludeRepository := { _ => false }
 
 pomExtra := (
-  <url>http://github.com/nremond/pbkdf2-scala</url>
+  <url>http://github.com/gatling/jsonpath</url>
   <licenses>
     <license>
       <name>Apache</name>
