@@ -134,7 +134,7 @@ class JsonPath(val path: List[PathToken]) {
 			case _ => Iterator.empty
 		}
 
-	private [this] def sliceArray(array: JList[_], start: Option[Int], stop: Option[Int], step: Int): Iterator[Any] = {
+	private[this] def sliceArray(array: JList[_], start: Option[Int], stop: Option[Int], step: Int): Iterator[Any] = {
 		val size = array.size
 
 		def lenRelative(x: Int) = if (x >= 0) x else size + x

@@ -20,11 +20,6 @@ class JsonPathSpec extends FlatSpec with ShouldMatchers with JsonPathMatchers {
 		o
 	})
 
-	"DEBUGGING" should "work..." in {
-		val json3 = jsonTree(""" { "foo":{"bar":1, "baz":2}, "second":{"bar":3} }""")
-		//JsonPathResolver.query("$[?(@.baz)]", json3) should findElements(jsonTree("""{"foo":{"bar":1,"baz":2}}"""))
-	}
-
 	"Support of Goessner test cases" should "work with test set 1" in {
 		val json = """{"a":"a","b":"b","c d":"e"}"""
 		JsonPath.query("$.a", json) should findElements(text("a"))
@@ -141,6 +136,9 @@ class JsonPathSpec extends FlatSpec with ShouldMatchers with JsonPathMatchers {
 
 		val json2 = jsonTree("""{"all":[{"foo":{"bar":1,"baz":2}},{"foo":3}]}""")
 		JsonPath.query("$.all[?(@.foo.bar)]", json2) should findElements(jsonTree("""{"foo":{"bar":1,"baz":2}}"""))
+
+		val json3 = jsonTree(""" { "foo":{"bar":1, "baz":2}, "second":{"bar":3} }  """)
+		JsonPath.query("$[?(@.baz)]", json3) should findElements(jsonTree("""{"bar":1,"baz":2}"""))
 	}
 
 	it should "get parsed with predefined binary operators" in {
@@ -225,8 +223,8 @@ trait JsonPathMatchers {
 		override def apply(left: Either[JPError, Traversable[Any]]): MatchResult =
 			left match {
 				case Right(seq) =>
-					val missing = (seq.toSeq.diff(expected.toSeq))
-					val added = (expected.toSeq.diff(seq.toSeq))
+					val missing = expected.toSeq.diff(seq.toSeq)
+					val added = seq.toSeq.diff(expected.toSeq)
 					MatchResult(missing.isEmpty && added.isEmpty,
 						s"$seq is missing $missing and should not contains $added",
 						s"$seq is equal to $expected but it shouldn't be")
