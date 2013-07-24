@@ -106,8 +106,11 @@ class JsonPathSpec extends FlatSpec with ShouldMatchers with JsonPathMatchers {
 
 	"Array field slicing" should "work with random accessors" in {
 		JsonPath.query("$[0]", ten) should findOrderedElements(int(1))
+		JsonPath.query("$[-1]", ten) should findOrderedElements(int(10))
 		JsonPath.query("$[9]", ten) should findOrderedElements(int(10))
 		JsonPath.query("$[2,7]", ten) should findOrderedElements(int(3), int(8))
+		JsonPath.query("$[2,-7]", ten) should findOrderedElements(int(3), int(4))
+		JsonPath.query("$[2,45]", ten) should findOrderedElements(int(3))
 	}
 
 	it should "work when the slice operator has one separator" in {

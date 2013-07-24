@@ -82,7 +82,10 @@ class JsonPath(val path: List[PathToken]) {
 
 			case ArrayRandomAccess(indices) => node match {
 				case array: JList[_] =>
-					indices.iterator.filter(i => i >= 0 && i < array.size).map(array.get(_))
+					indices.iterator
+						.map(i => if (i >= 0) i else array.size + i)
+						.filter(i => i >= 0 && i < array.size)
+						.map(array.get(_))
 				case _ => Iterator.empty
 			}
 
