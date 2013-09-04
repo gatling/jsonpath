@@ -41,7 +41,7 @@ case class HasFilter(val query:SubQuery) extends PathToken
 /**
  * Currently supported operators: ==, <=, <, >=, >
  */
-case class BinaryOpFilter(val operator:String, val lhs:FilterToken, val rhs:FilterToken) extends PathToken
+case class BinaryOpFilter(val operator:OrderedOperation, val lhs:FilterToken, val rhs:FilterToken) extends PathToken
 
 
 

@@ -44,6 +44,14 @@ object Parser extends RegexParsers {
 
 	/// filters parsers ///////////////////////////////////////////////////////
 
+	def orderedOperation(op: String) = op match {
+		case "==" => EqOperation
+		case "<" => LessOperation
+		case ">" => GreaterOperation
+		case "<=" => LessOrEqOperation
+		case ">=" => GreaterOrEqOperation
+	}
+
 	val numberValue: Parser[JPNumber] = """-?\d+(\.\d*)?""".r ^^ {
 		s => if (s.contains(".")) JPDouble(s.toDouble) else JPLong(s.toLong)
 	}
@@ -61,12 +69,12 @@ object Parser extends RegexParsers {
 	lazy val filter1: Parser[PathToken] =
 		subQuery ~ (binaryOperation ~ (subQuery | valueToken)).? ^^ {
 			case subq1 ~ None => HasFilter(subq1)
-			case lhs ~ Some(op ~ rhs) => BinaryOpFilter(op, lhs, rhs)
+			case lhs ~ Some(op ~ rhs) => BinaryOpFilter(orderedOperation(op), lhs, rhs)
 		}
 
 	lazy val filter2: Parser[PathToken] =
 		valueToken ~ binaryOperation ~ (subQuery | valueToken) ^^ {
-			case lhs ~ op ~ rhs => BinaryOpFilter(op, lhs, rhs)
+			case lhs ~ op ~ rhs => BinaryOpFilter(orderedOperation(op), lhs, rhs)
 		}
 
 	lazy val subscriptFilter: Parser[PathToken] =

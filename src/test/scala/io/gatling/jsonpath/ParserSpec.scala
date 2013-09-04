@@ -155,9 +155,9 @@ class ParserSpec extends FlatSpec with ShouldMatchers with ParsingMatchers {
 
 	it should "get parsed with predefined binary operators" in {
 		parse(subscriptFilter, "[?(@.foo == 2)]") should beParsedAs(
-			BinaryOpFilter("==", SubQuery(List(CurrentObject(), Field("foo", false))), JPLong(2)))
+			BinaryOpFilter(EqOperation, SubQuery(List(CurrentObject(), Field("foo", false))), JPLong(2)))
 		parse(subscriptFilter, "[?(2 == @['foo'])]") should beParsedAs(
-			BinaryOpFilter("==", JPLong(2), SubQuery(List(CurrentObject(), Field("foo", false)))))
+			BinaryOpFilter(EqOperation, JPLong(2), SubQuery(List(CurrentObject(), Field("foo", false)))))
 
 		compile("$.things[?(@.foo.bar)]").get should be(Root()
 			:: Field("things")
@@ -166,12 +166,12 @@ class ParserSpec extends FlatSpec with ShouldMatchers with ParsingMatchers {
 
 		compile("$['points'][?(@['y'] >= 3)].id").get should be(Root()
 			:: Field("points", false)
-			:: BinaryOpFilter(">=", SubQuery(List(CurrentObject(), Field("y", false))), JPLong(3))
+			:: BinaryOpFilter(GreaterOrEqOperation, SubQuery(List(CurrentObject(), Field("y", false))), JPLong(3))
 			:: Field("id", false) :: Nil)
 
 		compile("$.points[?(@['id']=='i4')].x").get should be(Root()
 			:: Field("points", false)
-			:: BinaryOpFilter("==", SubQuery(List(CurrentObject(), Field("id", false))), JPString("i4"))
+			:: BinaryOpFilter(EqOperation, SubQuery(List(CurrentObject(), Field("id", false))), JPString("i4"))
 			:: Field("x", false) :: Nil)
 
 	}

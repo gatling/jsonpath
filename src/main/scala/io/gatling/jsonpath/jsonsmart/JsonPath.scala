@@ -156,7 +156,7 @@ class JsonPath(val path: List[PathToken]) {
 			fromStartToEnd
 	}
 
-	private[this] def applyBinaryOp(node: Any, op: String, lhs: FilterToken, rhs: FilterToken): Boolean = {
+	private[this] def applyBinaryOp(node: Any, op: OrderedOperation, lhs: FilterToken, rhs: FilterToken): Boolean = {
 		val opEvaluation = for (
 			lhsNode <- resolveFilterToken(node, lhs);
 			rhsNode <- resolveFilterToken(node, rhs)
@@ -197,23 +197,15 @@ object OrderedOperator {
 		case _ => None
 	}
 
-	def apply(op: String, lhs: Any, rhs: Any): Boolean =
+	def apply(op: OrderedOperation, lhs: Any, rhs: Any): Boolean =
 		(lhs, rhs) match {
-			case (s1: String, s2: String) => eval(op, s1, s2)
+			case (s1: String, s2: String) => op(s1, s2)
 			case (i1, i2) if (isNumber(lhs) && isNumber(rhs)) =>
 				if (isIntegralNumber(lhs) && isIntegralNumber(rhs))
-					eval(op, asIntegralNumber(i1), asIntegralNumber(i2))
+					op(asIntegralNumber(i1), asIntegralNumber(i2))
 				else
-					eval(op, asFloatingPointNumber(i1), asFloatingPointNumber(i2))
+					op(asFloatingPointNumber(i1), asFloatingPointNumber(i2))
 			case _ => false
 		}
 
-	def eval[T <% Ordered[T]](op: String, lhs: T, rhs: T): Boolean =
-		op match {
-			case "==" => (lhs == rhs)
-			case ">=" => (lhs >= rhs)
-			case ">" => (lhs > rhs)
-			case "<=" => (lhs <= rhs)
-			case "<" => (lhs < rhs)
-		}
 }

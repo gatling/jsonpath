@@ -55,11 +55,10 @@ class JsonPathSpec extends FlatSpec with ShouldMatchers with JsonPathMatchers {
 		JsonPath.query("$.points[4].x", json) should findOrderedElements(int(0))
 		JsonPath.query("$.points[?(@['id']=='i4')].x", json) should findOrderedElements(int(-6))
 		JsonPath.query("$.points[*].x", json) should findOrderedElements(int(4), int(-2), int(8), int(-6), int(0), int(1))
-		// Not supported syntax "$['points'][?(@['x']*@['x']+@['y']*@['y'] > 50)].id"
+		// Non supported syntax "$['points'][?(@['x']*@['x']+@['y']*@['y'] > 50)].id"
 		JsonPath.query("$['points'][?(@['y'] >= 3)].id", json) should findOrderedElements(text("i3"), text("i6"))
 		JsonPath.query("$.points[?(@['z'])].id", json) should findOrderedElements(text("i2"), text("i5"))
-		// Not supported syntax "$.points[(count(@)-1)].id"
-
+		// Non supported syntax "$.points[(count(@)-1)].id"
 	}
 
 	"Field accessors" should "work with a simple object" in {
@@ -151,6 +150,15 @@ class JsonPathSpec extends FlatSpec with ShouldMatchers with JsonPathMatchers {
 
 		val json = jsonTree("""[{"foo":1},{"foo":2},{"bar":3}]""")
 		JsonPath.query("$[?(@.foo ==1 )]", json) should findOrderedElements(obj("foo" -> int(1)))
+	}
+
+	it should "work with non-alphanumeric values" in {
+		val json = jsonTree("""{ a:[{ a:5, '@':2, '$':3 },   
+						            { a:6, '@':3, '$':4 },  
+						            { a:7, '@':4, '$':5 } 
+						           ]}""")
+		JsonPath.query("$.a[?(@['@']==3)]", json) should findElements(jsonTree("""{"a":6,"@":3,"$":4}"""))
+		JsonPath.query("$.a[?(@['$']==5)]", json) should findElements(jsonTree("""{"a":7,"@":4,"$":5}"""))
 	}
 
 	/// Goessner reference examples ///////////////////////////////////////////
