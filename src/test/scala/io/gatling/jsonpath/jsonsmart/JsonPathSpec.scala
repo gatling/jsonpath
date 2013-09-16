@@ -143,13 +143,13 @@ class JsonPathSpec extends FlatSpec with ShouldMatchers with JsonPathMatchers {
 		JsonPath.query("$[?(@.baz)]", json3) should findElements(jsonTree("""{"bar":1,"baz":2}"""))
 	}
 
-	it should "get parsed with predefined binary operators" in {
-		val oneToFive = "[ 1,2,3,4,5 ]"
+	it should "work with some boolean operators" in {
+		val oneToFive = "[1,2,3,4,5]"
 		JsonPath.query("$[?(@ > 3)]", oneToFive) should findOrderedElements(int(4), int(5))
 		JsonPath.query("$[?(@ == 3)]", oneToFive) should findOrderedElements(int(3))
 
 		val json = jsonTree("""[{"foo":1},{"foo":2},{"bar":3}]""")
-		JsonPath.query("$[?(@.foo ==1 )]", json) should findOrderedElements(obj("foo" -> int(1)))
+		JsonPath.query("$[?(@.foo==1 )]", json) should findOrderedElements(obj("foo" -> int(1)))
 	}
 
 	it should "work with non-alphanumeric values" in {
@@ -159,6 +159,12 @@ class JsonPathSpec extends FlatSpec with ShouldMatchers with JsonPathMatchers {
 						           ]}""")
 		JsonPath.query("$.a[?(@['@']==3)]", json) should findElements(jsonTree("""{"a":6,"@":3,"$":4}"""))
 		JsonPath.query("$.a[?(@['$']==5)]", json) should findElements(jsonTree("""{"a":7,"@":4,"$":5}"""))
+	}
+
+	it should "work with some predefined comparison operators" in {
+		val oneToFive = "[1,2,3,4,5]"
+		JsonPath.query("$[?( @>1  && @<=4)]", oneToFive) should findOrderedElements(int(2), int(3), int(4))
+		JsonPath.query("$[?( @ == 1   || @ > 4)]", oneToFive) should findOrderedElements(int(1), int(5))
 	}
 
 	/// Goessner reference examples ///////////////////////////////////////////

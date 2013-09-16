@@ -44,7 +44,7 @@ object Parser extends RegexParsers {
 
 	/// filters parsers ///////////////////////////////////////////////////////
 
-	def orderedOperation(op: String) = op match {
+	def parseComparisonOperation(op: String) = op match {
 		case "==" => EqOperation
 		case "<" => LessOperation
 		case ">" => GreaterOperation
@@ -56,29 +56,43 @@ object Parser extends RegexParsers {
 		s => if (s.contains(".")) JPDouble(s.toDouble) else JPLong(s.toLong)
 	}
 	val stringValue: Parser[JPString] = quotedField ^^ { JPString(_) }
-	val valueToken: Parser[FilterToken] = (numberValue | stringValue)
+	val value: Parser[FilterValue] = (numberValue | stringValue)
 
-	// TODO do that in a single regex instead ?
-	val binaryOperation: Parser[String] = "==|<=|>=|<|>".r
+	val comparisonOperations: Parser[String] = "==|<=|>=|<|>".r
 
 	val current: Parser[PathToken] = "@" ^^ (_ => currentObject)
 
 	lazy val subQuery: Parser[SubQuery] =
 		current ~ pathSequence ^^ { case c ~ ps => SubQuery(c :: ps) }
 
-	lazy val filter1: Parser[PathToken] =
-		subQuery ~ (binaryOperation ~ (subQuery | valueToken)).? ^^ {
+	lazy val expression1: Parser[FilterToken] =
+		subQuery ~ (comparisonOperations ~ (subQuery | value)).? ^^ {
 			case subq1 ~ None => HasFilter(subq1)
-			case lhs ~ Some(op ~ rhs) => BinaryOpFilter(orderedOperation(op), lhs, rhs)
+			case lhs ~ Some(op ~ rhs) => ComparisonFilter(parseComparisonOperation(op), lhs, rhs)
 		}
 
-	lazy val filter2: Parser[PathToken] =
-		valueToken ~ binaryOperation ~ (subQuery | valueToken) ^^ {
-			case lhs ~ op ~ rhs => BinaryOpFilter(orderedOperation(op), lhs, rhs)
+	lazy val expression2: Parser[FilterToken] =
+		value ~ comparisonOperations ~ (subQuery | value) ^^ {
+			case lhs ~ op ~ rhs => ComparisonFilter(parseComparisonOperation(op), lhs, rhs)
+		}
+
+	lazy val expression: Parser[FilterToken] = expression1 | expression2
+
+	val booleanOperations: Parser[String] = """\|\||&&""".r
+
+	def parseBooleanOperation(op: String) = op match {
+		case "&&" => AndOperation
+		case "||" => OrOperation
+	}
+
+	lazy val booleanExpression: Parser[FilterToken] =
+		expression ~ (booleanOperations ~ expression).? ^^ {
+			case lhs ~ None => lhs
+			case lhs ~ Some(op ~ rhs) => BooleanFilter(parseBooleanOperation(op), lhs, rhs)
 		}
 
 	lazy val subscriptFilter: Parser[PathToken] =
-		"[?(" ~> (filter1 | filter2) <~ ")]"
+		"[?(" ~> (booleanExpression) <~ ")]"
 
 	/// child accessors parsers ///////////////////////////////////////////////
 
