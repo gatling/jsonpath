@@ -44,7 +44,7 @@ object Parser extends RegexParsers {
 
 	/// filters parsers ///////////////////////////////////////////////////////
 
-	def parseComparisonOperation(op: String) = op match {
+	def parseComparisonOperator(op: String) = op match {
 		case "==" => EqOperator
 		case "<" => LessOperator
 		case ">" => GreaterOperator
@@ -58,7 +58,7 @@ object Parser extends RegexParsers {
 	val stringValue: Parser[JPString] = quotedField ^^ { JPString(_) }
 	val value: Parser[FilterValue] = (numberValue | stringValue)
 
-	val comparisonOperations: Parser[String] = "==|<=|>=|<|>".r
+	val comparisonOperator: Parser[String] = "==|<=|>=|<|>".r
 
 	val current: Parser[PathToken] = "@" ^^ (_ => currentObject)
 
@@ -66,19 +66,19 @@ object Parser extends RegexParsers {
 		current ~ pathSequence ^^ { case c ~ ps => SubQuery(c :: ps) }
 
 	lazy val expression1: Parser[FilterToken] =
-		subQuery ~ (comparisonOperations ~ (subQuery | value)).? ^^ {
+		subQuery ~ (comparisonOperator ~ (subQuery | value)).? ^^ {
 			case subq1 ~ None => HasFilter(subq1)
-			case lhs ~ Some(op ~ rhs) => ComparisonFilter(parseComparisonOperation(op), lhs, rhs)
+			case lhs ~ Some(op ~ rhs) => ComparisonFilter(parseComparisonOperator(op), lhs, rhs)
 		}
 
 	lazy val expression2: Parser[FilterToken] =
-		value ~ comparisonOperations ~ (subQuery | value) ^^ {
-			case lhs ~ op ~ rhs => ComparisonFilter(parseComparisonOperation(op), lhs, rhs)
+		value ~ comparisonOperator ~ (subQuery | value) ^^ {
+			case lhs ~ op ~ rhs => ComparisonFilter(parseComparisonOperator(op), lhs, rhs)
 		}
 
 	lazy val expression: Parser[FilterToken] = expression1 | expression2
 
-	val booleanOperations: Parser[String] = """\|\||&&""".r
+	val booleanOperator: Parser[String] = """\|\||&&""".r
 
 	def parseBooleanOperator(op: String) = op match {
 		case "&&" => AndOperator
@@ -86,7 +86,7 @@ object Parser extends RegexParsers {
 	}
 
 	lazy val booleanExpression: Parser[FilterToken] =
-		expression ~ (booleanOperations ~ expression).? ^^ {
+		expression ~ (booleanOperator ~ expression).? ^^ {
 			case lhs ~ None => lhs
 			case lhs ~ Some(op ~ rhs) => BooleanFilter(parseBooleanOperator(op), lhs, rhs)
 		}
