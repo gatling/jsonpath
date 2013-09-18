@@ -148,8 +148,8 @@ class JsonPathSpec extends FlatSpec with ShouldMatchers with JsonPathMatchers {
 		JsonPath.query("$[?(@ > 3)]", oneToFive) should findOrderedElements(int(4), int(5))
 		JsonPath.query("$[?(@ == 3)]", oneToFive) should findOrderedElements(int(3))
 
-		val json = jsonTree("""[{"foo":1},{"foo":2},{"bar":3}]""")
-		JsonPath.query("$[?(@.foo==1 )]", json) should findOrderedElements(obj("foo" -> int(1)))
+		val json = jsonTree("""[{"foo":"a"},{"foo":"b"},{"bar":"c"}]""")
+		JsonPath.query("$[?(@.foo=='a' )]", json) should findOrderedElements(obj("foo" -> "a"))
 	}
 
 	it should "work with non-alphanumeric values" in {

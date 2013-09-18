@@ -45,11 +45,11 @@ object Parser extends RegexParsers {
 	/// filters parsers ///////////////////////////////////////////////////////
 
 	def parseComparisonOperation(op: String) = op match {
-		case "==" => EqOperation
-		case "<" => LessOperation
-		case ">" => GreaterOperation
-		case "<=" => LessOrEqOperation
-		case ">=" => GreaterOrEqOperation
+		case "==" => EqOperator
+		case "<" => LessOperator
+		case ">" => GreaterOperator
+		case "<=" => LessOrEqOperator
+		case ">=" => GreaterOrEqOperator
 	}
 
 	val numberValue: Parser[JPNumber] = """-?\d+(\.\d*)?""".r ^^ {
@@ -80,15 +80,15 @@ object Parser extends RegexParsers {
 
 	val booleanOperations: Parser[String] = """\|\||&&""".r
 
-	def parseBooleanOperation(op: String) = op match {
-		case "&&" => AndOperation
-		case "||" => OrOperation
+	def parseBooleanOperator(op: String) = op match {
+		case "&&" => AndOperator
+		case "||" => OrOperator
 	}
 
 	lazy val booleanExpression: Parser[FilterToken] =
 		expression ~ (booleanOperations ~ expression).? ^^ {
 			case lhs ~ None => lhs
-			case lhs ~ Some(op ~ rhs) => BooleanFilter(parseBooleanOperation(op), lhs, rhs)
+			case lhs ~ Some(op ~ rhs) => BooleanFilter(parseBooleanOperator(op), lhs, rhs)
 		}
 
 	lazy val subscriptFilter: Parser[PathToken] =

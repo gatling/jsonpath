@@ -35,8 +35,8 @@ case class SubQuery(val path: List[PathToken]) extends FilterValue
 
 sealed trait FilterToken extends PathToken
 case class HasFilter(val query: SubQuery) extends FilterToken
-case class ComparisonFilter(val operator: ComparisonOperation, val lhs: FilterValue, val rhs: FilterValue) extends FilterToken
-case class BooleanFilter(val fun: BinaryBooleanOperation, val lhs: FilterToken, val rhs: FilterToken) extends FilterToken
+case class ComparisonFilter(val operator: ComparisonOperator, val lhs: FilterValue, val rhs: FilterValue) extends FilterToken
+case class BooleanFilter(val fun: BinaryBooleanOperator, val lhs: FilterToken, val rhs: FilterToken) extends FilterToken
 
 // is it necessary ?
 object AST {

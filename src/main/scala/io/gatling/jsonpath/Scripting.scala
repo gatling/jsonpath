@@ -1,7 +1,7 @@
 package io.gatling.jsonpath
 
-// Ordered operations
-trait ComparisonOperation {
+// Comparison operators
+trait ComparisonOperator {
 
 	def isNumber(a: Any) = isIntegralNumber(a) || isFloatingPointNumber(a)
 
@@ -35,35 +35,35 @@ trait ComparisonOperation {
 		}
 }
 
-object EqOperation extends ComparisonOperation {
+object EqOperator extends ComparisonOperator {
 	override def compare[T <% Ordered[T]](lhs: T, rhs: T) = lhs == rhs
 }
 
-object LessOperation extends ComparisonOperation {
+object LessOperator extends ComparisonOperator {
 	override def compare[T <% Ordered[T]](lhs: T, rhs: T) = lhs < rhs
 }
 
-object GreaterOperation extends ComparisonOperation {
+object GreaterOperator extends ComparisonOperator {
 	override def compare[T <% Ordered[T]](lhs: T, rhs: T) = lhs > rhs
 }
 
-object LessOrEqOperation extends ComparisonOperation {
+object LessOrEqOperator extends ComparisonOperator {
 	override def compare[T <% Ordered[T]](lhs: T, rhs: T) = lhs <= rhs
 }
 
-object GreaterOrEqOperation extends ComparisonOperation {
+object GreaterOrEqOperator extends ComparisonOperator {
 	override def compare[T <% Ordered[T]](lhs: T, rhs: T) = lhs >= rhs
 }
 
-// Binary boolean operations
-trait BinaryBooleanOperation {
+// Binary boolean operators
+trait BinaryBooleanOperator {
 	def apply(lhs: Boolean, rhs: Boolean): Boolean
 }
 
-object AndOperation extends BinaryBooleanOperation {
+object AndOperator extends BinaryBooleanOperator {
 	def apply(lhs: Boolean, rhs: Boolean) = lhs && rhs
 }
 
-object OrOperation extends BinaryBooleanOperation {
+object OrOperator extends BinaryBooleanOperator {
 	def apply(lhs: Boolean, rhs: Boolean) = lhs || rhs
 }

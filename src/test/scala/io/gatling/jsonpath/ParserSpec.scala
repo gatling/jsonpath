@@ -163,48 +163,48 @@ class ParserSpec extends FlatSpec with ShouldMatchers with ParsingMatchers {
 
 		// Check all supported ordering operators
 		parse(subscriptFilter, "[?(@ == 2)]") should beParsedAs(
-			ComparisonFilter(EqOperation, SubQuery(List(CurrentObject())), JPLong(2)))
+			ComparisonFilter(EqOperator, SubQuery(List(CurrentObject())), JPLong(2)))
 		parse(subscriptFilter, "[?(@ <= 2)]") should beParsedAs(
-			ComparisonFilter(LessOrEqOperation, SubQuery(List(CurrentObject())), JPLong(2)))
+			ComparisonFilter(LessOrEqOperator, SubQuery(List(CurrentObject())), JPLong(2)))
 		parse(subscriptFilter, "[?(@ >= 2)]") should beParsedAs(
-			ComparisonFilter(GreaterOrEqOperation, SubQuery(List(CurrentObject())), JPLong(2)))
+			ComparisonFilter(GreaterOrEqOperator, SubQuery(List(CurrentObject())), JPLong(2)))
 		parse(subscriptFilter, "[?(@ < 2)]") should beParsedAs(
-			ComparisonFilter(LessOperation, SubQuery(List(CurrentObject())), JPLong(2)))
+			ComparisonFilter(LessOperator, SubQuery(List(CurrentObject())), JPLong(2)))
 		parse(subscriptFilter, "[?(@ > 2)]") should beParsedAs(
-			ComparisonFilter(GreaterOperation, SubQuery(List(CurrentObject())), JPLong(2)))
+			ComparisonFilter(GreaterOperator, SubQuery(List(CurrentObject())), JPLong(2)))
 
 		// Trickier Json path expressions
 		parse(subscriptFilter, "[?(@.foo == 2)]") should beParsedAs(
-			ComparisonFilter(EqOperation, SubQuery(List(CurrentObject(), Field("foo", false))), JPLong(2)))
+			ComparisonFilter(EqOperator, SubQuery(List(CurrentObject(), Field("foo", false))), JPLong(2)))
 		parse(subscriptFilter, "[?(2 == @['foo'])]") should beParsedAs(
-			ComparisonFilter(EqOperation, JPLong(2), SubQuery(List(CurrentObject(), Field("foo", false)))))
+			ComparisonFilter(EqOperator, JPLong(2), SubQuery(List(CurrentObject(), Field("foo", false)))))
 
 		compile("$['points'][?(@['y'] >= 3)].id").get should be(Root()
 			:: Field("points", false)
-			:: ComparisonFilter(GreaterOrEqOperation, SubQuery(List(CurrentObject(), Field("y", false))), JPLong(3))
+			:: ComparisonFilter(GreaterOrEqOperator, SubQuery(List(CurrentObject(), Field("y", false))), JPLong(3))
 			:: Field("id", false) :: Nil)
 
 		compile("$.points[?(@['id']=='i4')].x").get should be(Root()
 			:: Field("points", false)
-			:: ComparisonFilter(EqOperation, SubQuery(List(CurrentObject(), Field("id", false))), JPString("i4"))
+			:: ComparisonFilter(EqOperator, SubQuery(List(CurrentObject(), Field("id", false))), JPString("i4"))
 			:: Field("x", false) :: Nil)
 	}
 
 	it should "work with some predefined boolean operators" in {
 		parse(subscriptFilter, "[?(@.foo && @.bar)]") should beParsedAs(
-			BooleanFilter(AndOperation,
+			BooleanFilter(AndOperator,
 				HasFilter(SubQuery(List(CurrentObject(), Field("foo", false)))),
 				HasFilter(SubQuery(List(CurrentObject(), Field("bar", false))))))
 		
 		parse(subscriptFilter, "[?(@.foo || @.bar)]") should beParsedAs(
-			BooleanFilter(OrOperation,
+			BooleanFilter(OrOperator,
 				HasFilter(SubQuery(List(CurrentObject(), Field("foo", false)))),
 				HasFilter(SubQuery(List(CurrentObject(), Field("bar", false))))))
 		
 			parse(subscriptFilter, "[?(@.foo || @.bar <= 2)]") should beParsedAs(
-			BooleanFilter(OrOperation,
+			BooleanFilter(OrOperator,
 				HasFilter(SubQuery(List(CurrentObject(), Field("foo", false)))),
-				ComparisonFilter(LessOrEqOperation, SubQuery(List(CurrentObject(), Field("bar", false))), JPLong(2))))
+				ComparisonFilter(LessOrEqOperator, SubQuery(List(CurrentObject(), Field("bar", false))), JPLong(2))))
 	}
 
 }

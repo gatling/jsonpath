@@ -109,7 +109,7 @@ class JsonPath(val path: List[PathToken]) {
 				}
 			}
 
-		def applyBinaryOp(node: Any, op: ComparisonOperation, lhs: FilterValue, rhs: FilterValue): Boolean = {
+		def applyBinaryOp(node: Any, op: ComparisonOperator, lhs: FilterValue, rhs: FilterValue): Boolean = {
 			val opEvaluation = for (
 				lhsNode <- resolveFilterToken(node, lhs);
 				rhsNode <- resolveFilterToken(node, rhs)
