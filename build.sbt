@@ -9,7 +9,7 @@ scalaVersion := "2.10.2"
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
 /// JSON-Smart
-libraryDependencies += "net.minidev" % "json-smart" % "2.0-RC3"
+libraryDependencies += "net.minidev" % "json-smart" % "1.2"
 
 
 /// ScalaTest
