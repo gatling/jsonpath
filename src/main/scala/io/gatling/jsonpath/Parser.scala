@@ -60,10 +60,10 @@ object Parser extends RegexParsers {
 
 	val comparisonOperator: Parser[String] = "==|<=|>=|<|>".r
 
-	val current: Parser[PathToken] = "@" ^^ (_ => currentObject)
+	val current: Parser[PathToken] = "@" ^^ (_ => currentNode)
 
 	lazy val subQuery: Parser[SubQuery] =
-		current ~ pathSequence ^^ { case c ~ ps => SubQuery(c :: ps) }
+		(current | root) ~ pathSequence ^^ { case c ~ ps => SubQuery(c :: ps) }
 
 	lazy val expression1: Parser[FilterToken] =
 		subQuery ~ (comparisonOperator ~ (subQuery | value)).? ^^ {
@@ -126,7 +126,7 @@ object Parser extends RegexParsers {
 
 	lazy val pathSequence: Parser[List[PathToken]] = rep(childAccess | subscriptFilter)
 
-	val root: Parser[PathToken] = "$" ^^ (_ => rootObject)
+	val root: Parser[PathToken] = "$" ^^ (_ => rootNode)
 
 	lazy val query: Parser[List[PathToken]] =
 		phrase(root ~ pathSequence) ^^ { case r ~ ps => r :: ps }

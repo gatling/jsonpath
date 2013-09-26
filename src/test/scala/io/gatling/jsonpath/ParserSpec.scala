@@ -23,7 +23,7 @@ class ParserSpec extends FlatSpec with ShouldMatchers with ParsingMatchers {
 	}
 
 	it should "work with the root object" in {
-		parse(Parser.root, "$") should beParsedAs(Root())
+		parse(Parser.root, "$") should beParsedAs(RootNode())
 	}
 
 	it should "work when having multiple fields" in {
@@ -55,8 +55,8 @@ class ParserSpec extends FlatSpec with ShouldMatchers with ParsingMatchers {
 	}
 
 	it should "work with array access on the root object" in {
-		compile("$[1]").get should be(Root() :: ArrayRandomAccess(List(1)) :: Nil)
-		compile("$[*]").get should be(Root() :: ArraySlice(None, None) :: Nil)
+		compile("$[1]").get should be(RootNode() :: ArrayRandomAccess(List(1)) :: Nil)
+		compile("$[*]").get should be(RootNode() :: ArraySlice(None, None) :: Nil)
 	}
 
 	it should "work with array access on fields" in {
@@ -75,11 +75,11 @@ class ParserSpec extends FlatSpec with ShouldMatchers with ParsingMatchers {
 	}
 
 	it should "work on the root element" in {
-		compile("$.foo").get should be(Root() :: Field("foo", false) :: Nil)
-		compile("$['foo']").get should be(Root() :: Field("foo", false) :: Nil)
+		compile("$.foo").get should be(RootNode() :: Field("foo", false) :: Nil)
+		compile("$['foo']").get should be(RootNode() :: Field("foo", false) :: Nil)
 
 		// TODO  : how to access childs w/ ['xxx'] notation
-		compile("$..foo").get should be(Root() :: Field("foo", true) :: Nil)
+		compile("$..foo").get should be(RootNode() :: Field("foo", true) :: Nil)
 	}
 
 	// cf : http://goessner.net/articles/JsonPath
@@ -89,30 +89,30 @@ class ParserSpec extends FlatSpec with ShouldMatchers with ParsingMatchers {
 		}
 
 		shouldParse("$.store.book[0].title", List(
-			Root(),
+			RootNode(),
 			Field("store", false),
 			Field("book", false), ArrayRandomAccess(List(0)),
 			Field("title", false)))
 		shouldParse("$['store']['book'][0]['title']", List(
-			Root(),
+			RootNode(),
 			Field("store", false),
 			Field("book", false), ArrayRandomAccess(List(0)),
 			Field("title", false)))
 		shouldParse("$.store.book[*].author", List(
-			Root(),
+			RootNode(),
 			Field("store", false),
 			Field("book", false), ArraySlice(None, None),
 			Field("author", false)))
-		shouldParse("$..author", List(Root(), Field("author", true)))
-		shouldParse("$.store.*", List(Root(), Field("store", false), AnyField(false)))
-		shouldParse("$.store..price", List(Root(), Field("store", false), Field("price", true)))
-		shouldParse("$..*", List(Root(), AnyField(true)))
-		shouldParse("$.*", List(Root(), AnyField(false)))
-		shouldParse("$..book[2]", List(Root(), Field("book", true), ArrayRandomAccess(List(2))))
-		shouldParse("$.book[*]", List(Root(), Field("book", false), ArraySlice(None, None)))
-		shouldParse("$..book[*]", List(Root(), Field("book", true), ArraySlice(None, None)))
+		shouldParse("$..author", List(RootNode(), Field("author", true)))
+		shouldParse("$.store.*", List(RootNode(), Field("store", false), AnyField(false)))
+		shouldParse("$.store..price", List(RootNode(), Field("store", false), Field("price", true)))
+		shouldParse("$..*", List(RootNode(), AnyField(true)))
+		shouldParse("$.*", List(RootNode(), AnyField(false)))
+		shouldParse("$..book[2]", List(RootNode(), Field("book", true), ArrayRandomAccess(List(2))))
+		shouldParse("$.book[*]", List(RootNode(), Field("book", false), ArraySlice(None, None)))
+		shouldParse("$..book[*]", List(RootNode(), Field("book", true), ArraySlice(None, None)))
 		shouldParse("$.store['store']..book['book'][0].title..title['title'].*..*.book[*]..book[*]", List(
-			Root(),
+			RootNode(),
 			Field("store", false),
 			Field("store", false),
 			Field("book", true),
@@ -146,15 +146,15 @@ class ParserSpec extends FlatSpec with ShouldMatchers with ParsingMatchers {
 
 	"Filters" should "work with subqueries" in {
 		parse(subscriptFilter, "[?(@..foo)]") should beParsedAs(
-			HasFilter(SubQuery(List(CurrentObject(), Field("foo", true)))))
+			HasFilter(SubQuery(List(CurrentNode(), Field("foo", true)))))
 		parse(subscriptFilter, "[?(@.foo.baz)]") should beParsedAs(
-			HasFilter(SubQuery(List(CurrentObject(), Field("foo", false), Field("baz", false)))))
+			HasFilter(SubQuery(List(CurrentNode(), Field("foo", false), Field("baz", false)))))
 		parse(subscriptFilter, "[?(@['foo'])]") should beParsedAs(
-			HasFilter(SubQuery(List(CurrentObject(), Field("foo", false)))))
+			HasFilter(SubQuery(List(CurrentNode(), Field("foo", false)))))
 
-		compile("$.things[?(@.foo.bar)]").get should be(Root()
+		compile("$.things[?(@.foo.bar)]").get should be(RootNode()
 			:: Field("things")
-			:: HasFilter(SubQuery(CurrentObject() :: Field("foo") :: Field("bar") :: Nil))
+			:: HasFilter(SubQuery(CurrentNode() :: Field("foo") :: Field("bar") :: Nil))
 			:: Nil)
 
 	}
@@ -163,48 +163,52 @@ class ParserSpec extends FlatSpec with ShouldMatchers with ParsingMatchers {
 
 		// Check all supported ordering operators
 		parse(subscriptFilter, "[?(@ == 2)]") should beParsedAs(
-			ComparisonFilter(EqOperator, SubQuery(List(CurrentObject())), JPLong(2)))
+			ComparisonFilter(EqOperator, SubQuery(List(CurrentNode())), JPLong(2)))
 		parse(subscriptFilter, "[?(@ <= 2)]") should beParsedAs(
-			ComparisonFilter(LessOrEqOperator, SubQuery(List(CurrentObject())), JPLong(2)))
+			ComparisonFilter(LessOrEqOperator, SubQuery(List(CurrentNode())), JPLong(2)))
 		parse(subscriptFilter, "[?(@ >= 2)]") should beParsedAs(
-			ComparisonFilter(GreaterOrEqOperator, SubQuery(List(CurrentObject())), JPLong(2)))
+			ComparisonFilter(GreaterOrEqOperator, SubQuery(List(CurrentNode())), JPLong(2)))
 		parse(subscriptFilter, "[?(@ < 2)]") should beParsedAs(
-			ComparisonFilter(LessOperator, SubQuery(List(CurrentObject())), JPLong(2)))
+			ComparisonFilter(LessOperator, SubQuery(List(CurrentNode())), JPLong(2)))
 		parse(subscriptFilter, "[?(@ > 2)]") should beParsedAs(
-			ComparisonFilter(GreaterOperator, SubQuery(List(CurrentObject())), JPLong(2)))
+			ComparisonFilter(GreaterOperator, SubQuery(List(CurrentNode())), JPLong(2)))
 
 		// Trickier Json path expressions
 		parse(subscriptFilter, "[?(@.foo == 2)]") should beParsedAs(
-			ComparisonFilter(EqOperator, SubQuery(List(CurrentObject(), Field("foo", false))), JPLong(2)))
+			ComparisonFilter(EqOperator, SubQuery(List(CurrentNode(), Field("foo", false))), JPLong(2)))
 		parse(subscriptFilter, "[?(2 == @['foo'])]") should beParsedAs(
-			ComparisonFilter(EqOperator, JPLong(2), SubQuery(List(CurrentObject(), Field("foo", false)))))
+			ComparisonFilter(EqOperator, JPLong(2), SubQuery(List(CurrentNode(), Field("foo", false)))))
 
-		compile("$['points'][?(@['y'] >= 3)].id").get should be(Root()
+		// Allow reference to the root object
+		parse(subscriptFilter, "[?(@ == $['foo'])]") should beParsedAs(
+			ComparisonFilter(EqOperator, SubQuery(List(CurrentNode())), SubQuery(List(RootNode(), Field("foo", false)))))
+
+		compile("$['points'][?(@['y'] >= 3)].id").get should be(RootNode()
 			:: Field("points", false)
-			:: ComparisonFilter(GreaterOrEqOperator, SubQuery(List(CurrentObject(), Field("y", false))), JPLong(3))
+			:: ComparisonFilter(GreaterOrEqOperator, SubQuery(List(CurrentNode(), Field("y", false))), JPLong(3))
 			:: Field("id", false) :: Nil)
 
-		compile("$.points[?(@['id']=='i4')].x").get should be(Root()
+		compile("$.points[?(@['id']=='i4')].x").get should be(RootNode()
 			:: Field("points", false)
-			:: ComparisonFilter(EqOperator, SubQuery(List(CurrentObject(), Field("id", false))), JPString("i4"))
+			:: ComparisonFilter(EqOperator, SubQuery(List(CurrentNode(), Field("id", false))), JPString("i4"))
 			:: Field("x", false) :: Nil)
 	}
 
 	it should "work with some predefined boolean operators" in {
 		parse(subscriptFilter, "[?(@.foo && @.bar)]") should beParsedAs(
 			BooleanFilter(AndOperator,
-				HasFilter(SubQuery(List(CurrentObject(), Field("foo", false)))),
-				HasFilter(SubQuery(List(CurrentObject(), Field("bar", false))))))
-		
+				HasFilter(SubQuery(List(CurrentNode(), Field("foo", false)))),
+				HasFilter(SubQuery(List(CurrentNode(), Field("bar", false))))))
+
 		parse(subscriptFilter, "[?(@.foo || @.bar)]") should beParsedAs(
 			BooleanFilter(OrOperator,
-				HasFilter(SubQuery(List(CurrentObject(), Field("foo", false)))),
-				HasFilter(SubQuery(List(CurrentObject(), Field("bar", false))))))
-		
-			parse(subscriptFilter, "[?(@.foo || @.bar <= 2)]") should beParsedAs(
+				HasFilter(SubQuery(List(CurrentNode(), Field("foo", false)))),
+				HasFilter(SubQuery(List(CurrentNode(), Field("bar", false))))))
+
+		parse(subscriptFilter, "[?(@.foo || @.bar <= 2)]") should beParsedAs(
 			BooleanFilter(OrOperator,
-				HasFilter(SubQuery(List(CurrentObject(), Field("foo", false)))),
-				ComparisonFilter(LessOrEqOperator, SubQuery(List(CurrentObject(), Field("bar", false))), JPLong(2))))
+				HasFilter(SubQuery(List(CurrentNode(), Field("foo", false)))),
+				ComparisonFilter(LessOrEqOperator, SubQuery(List(CurrentNode(), Field("bar", false))), JPLong(2))))
 	}
 
 }

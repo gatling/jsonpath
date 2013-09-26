@@ -17,7 +17,7 @@ object JsonPath {
 	}
 
 	def query(query: String, json: String): Either[JPError, Iterator[Any]] = {
-		compile(query).right.map(_.query(json))
+		compile(query).right.map(_.query(JSONValue.parse(json)))
 	}
 
 	def query(query: String, json: Any): Either[JPError, Iterator[Any]] = {
@@ -26,14 +26,14 @@ object JsonPath {
 }
 
 class JsonPath(val path: List[PathToken]) {
-
 	def query(json: Any) = {
-		walk(json, path)
+		new JsonPathWalker(json, path).walk
 	}
+}
 
-	def query(json: String) = {
-		walk(JSONValue.parse(json), path)
-	}
+class JsonPathWalker(val rootNode: Any, val fullPath: List[PathToken]) {
+
+	def walk(): Iterator[Any] = walk(rootNode, fullPath)
 
 	// use @tailrec in Scala 2.11, cf: https://github.com/scala/scala/pull/2865
 	private[this] def walk(node: Any, path: List[PathToken]): Iterator[Any] = {
@@ -48,9 +48,9 @@ class JsonPath(val path: List[PathToken]) {
 
 	private[this] def walk1(node: Any, query: PathToken): Iterator[Any] = {
 		query match {
-			case Root() => Iterator.single(node)
+			case RootNode() => Iterator.single(rootNode)
 
-			case CurrentObject() => Iterator.single(node)
+			case CurrentNode() => Iterator.single(node)
 
 			case Field(name, false) => node match {
 				case obj: JMap[_, _] if (obj.containsKey(name)) =>
@@ -187,5 +187,4 @@ class JsonPath(val path: List[PathToken]) {
 		else
 			fromStartToEnd
 	}
-
 }

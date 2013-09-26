@@ -20,6 +20,20 @@ class JsonPathSpec extends FlatSpec with ShouldMatchers with JsonPathMatchers {
 		o
 	})
 
+	// Goessner JSON exemple
+
+	val book1 = """{"category":"reference","author":"Nigel Rees","title":"Sayings of the Century","price":8.95}"""
+	val book2 = """{"category":"fiction","author":"Evelyn Waugh","title":"Sword of Honour","price":12.99}"""
+	val book3 = """{"category":"fiction","author":"Herman Melville","title":"Moby Dick","isbn":"0-553-21311-3","price":8.99}"""
+	val book4 = """{"category":"fiction","author":"J. R. R. Tolkien","title":"The Lord of the Rings","isbn":"0-395-19395-8","price":22.99}"""
+	val allBooks = s"[$book1,$book2,$book3,$book4]"
+	val bicycle = s"""{"color":"red","price":19.95}"""
+	val allStore = s"""{"book":$allBooks, "bicycle":$bicycle}"""
+	val goessnerData = s"""{"store":$allStore}"""
+	val goessnerJson = jsonTree(goessnerData)
+
+	//////////////
+
 	"Support of Goessner test cases" should "work with test set 1" in {
 		val json = """{"a":"a","b":"b","c d":"e"}"""
 		JsonPath.query("$.a", json) should findElements(text("a"))
@@ -167,17 +181,17 @@ class JsonPathSpec extends FlatSpec with ShouldMatchers with JsonPathMatchers {
 		JsonPath.query("$[?( @ == 1   || @ > 4)]", oneToFive) should findOrderedElements(int(1), int(5))
 	}
 
-	/// Goessner reference examples ///////////////////////////////////////////
+	it should "support reference to the root-node" in {
+		val authors = """[{"pseudo":"Tolkien","name": "J. R. R. Tolkien"},{"pseudo":"Hugo","name":"Victor Hugo"}]"""
+		val library = s"""{"book":$allBooks,"authors":$authors}"""
 
-	val book1 = """{"category":"reference","author":"Nigel Rees","title":"Sayings of the Century","price":8.95}"""
-	val book2 = """{"category":"fiction","author":"Evelyn Waugh","title":"Sword of Honour","price":12.99}"""
-	val book3 = """{"category":"fiction","author":"Herman Melville","title":"Moby Dick","isbn":"0-553-21311-3","price":8.99}"""
-	val book4 = """{"category":"fiction","author":"J. R. R. Tolkien","title":"The Lord of the Rings","isbn":"0-395-19395-8","price":22.99}"""
-	val allBooks = s"[$book1,$book2,$book3,$book4]"
-	val bicycle = s"""{"color":"red","price":19.95}"""
-	val allStore = s"""{"book":$allBooks, "bicycle":$bicycle}"""
-	val goessnerData = s"""{"store":$allStore}"""
-	val goessnerJson = jsonTree(goessnerData)
+		JsonPath.query("""$.authors[?(@.pseudo=='Tolkien')].name""", library) should findElements(text("J. R. R. Tolkien"))
+		
+		JsonPath.query("""$.book[?(@.author==$.authors[?(@.pseudo=='Tolkien')].name)].title""", library) should findElements(text("The Lord of the Rings"))
+		JsonPath.query("""$.book[?(@.author==$.authors[?(@.pseudo=='Hugo')].name)].title""", library) should findElements()
+	}
+
+	/// Goessner reference examples ///////////////////////////////////////////
 
 	"Goessner examples" should "work with finding all the authors" in {
 
@@ -219,6 +233,9 @@ class JsonPathSpec extends FlatSpec with ShouldMatchers with JsonPathMatchers {
 		JsonPath.query("$..book[?(@.isbn)].title", goessnerJson) should findOrderedElements(
 			text("Moby Dick"), text("The Lord of the Rings"))
 	}
+
+	//////////////
+
 }
 
 trait JsonPathMatchers {
