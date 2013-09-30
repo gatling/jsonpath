@@ -2,11 +2,13 @@
 JSONPath
 ########
 
-This is an implementation of [JSONPath] in Scala. The library intendends to follow the semantics describted by Stefan Goessner on his blog. 
+This is an implementation of [JSONPath]_ in Scala. The library follows the semantics describted by Stefan Goessner on his blog. Due to the lack of 
 
 
 
-a
 
 
-[JSONPath]: http://goessner.net/articles/JsonPath "JSONPath - XPath for JSON"
+
+
+
+.. [JSONPath] JSONPath - XPath for JSON, http://goessner.net/articles/JsonPath
