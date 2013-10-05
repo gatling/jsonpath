@@ -1,12 +1,11 @@
 package io.gatling.jsonpath
 
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.matchers.Matcher
-import org.scalatest.matchers.MatchResult
+import org.scalatest.matchers.{ Matcher, MatchResult }
 import io.gatling.jsonpath.Parser._
+import org.scalatest.Matchers
 
-class ParserSpec extends FlatSpec with ShouldMatchers with ParsingMatchers {
+class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
 
 	"Field parsing" should "work with standard names" in {
 		def shouldParseField(name: String) = {

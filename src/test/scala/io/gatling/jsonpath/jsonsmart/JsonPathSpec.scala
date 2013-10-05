@@ -1,12 +1,15 @@
 package io.gatling.jsonpath.jsonsmart
 
-import java.util.{ HashMap => JHashMap, List => JList }
-import scala.collection.JavaConversions._
-import org.scalatest.FlatSpec
-import org.scalatest.matchers.{ MatchResult, Matcher, ShouldMatchers }
+import java.util.{HashMap => JHashMap, List => JList}
+
+import scala.collection.JavaConversions.seqAsJavaList
+
+import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.matchers.{MatchResult, Matcher}
+
 import net.minidev.json.JSONValue
 
-class JsonPathSpec extends FlatSpec with ShouldMatchers with JsonPathMatchers {
+class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
 
 	def jsonTree(s: String) = JSONValue.parse(s)
 	def bool(b: Boolean) = b
@@ -186,7 +189,7 @@ class JsonPathSpec extends FlatSpec with ShouldMatchers with JsonPathMatchers {
 		val library = s"""{"book":$allBooks,"authors":$authors}"""
 
 		JsonPath.query("""$.authors[?(@.pseudo=='Tolkien')].name""", library) should findElements(text("J. R. R. Tolkien"))
-		
+
 		JsonPath.query("""$.book[?(@.author==$.authors[?(@.pseudo=='Tolkien')].name)].title""", library) should findElements(text("The Lord of the Rings"))
 		JsonPath.query("""$.book[?(@.author==$.authors[?(@.pseudo=='Hugo')].name)].title""", library) should findElements()
 	}

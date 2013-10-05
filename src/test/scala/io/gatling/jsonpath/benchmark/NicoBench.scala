@@ -27,6 +27,7 @@ class NicoBench extends AbstractBenchmark {
 		println(s"jayway=$s")
 	}
 
+	@Ignore
 	@Test
 	@BenchmarkOptions(benchmarkRounds = 1, warmupRounds = 1, concurrency = 1)
 	def testZaShit() {
@@ -36,13 +37,12 @@ class NicoBench extends AbstractBenchmark {
 	}
 
 	//val twitterQuery = "$.results.from_user"
-	val twitterQuery = "$.results[:3].from_user"
+	//val twitterQuery = "$.results[:3].from_user"
 	//val twitterQuery = "$.completed_in"
-	//val twitterQuery = "$.results[?(@.from_user == 'origichara_bot')]"
+	val twitterQuery = "$.results[?(@.from_user == 'origichara_bot')]"
 
 	val nicoJP = JsonPath.compile(twitterQuery)
 
-	@Ignore
 	@Test
 	@BenchmarkOptions(benchmarkRounds = 80000, warmupRounds = 80000, concurrency = 4)
 	def nicoTwitter() {
@@ -50,7 +50,7 @@ class NicoBench extends AbstractBenchmark {
 	}
 
 	val jaywayJP = JaywayJsonPath.compile(twitterQuery)
-	@Ignore
+
 	@Test
 	@BenchmarkOptions(benchmarkRounds = 80000, warmupRounds = 80000, concurrency = 4)
 	def jaywayTwitter() {
