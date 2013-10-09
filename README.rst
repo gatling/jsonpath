@@ -82,7 +82,7 @@ The underlying engine for writing filter expressions currently support two diffe
 +-------------------+----------------------------------------------------+
 | Filter            | Example                                            |
 +===================+====================================================+
-| Has-child filter  | ``$$.store.book[?(@.isbn).title``                  |
+| Has-child filter  | ``$.store.book[?(@.isbn)].title``                  |
 +-------------------+----------------------------------------------------+
 | Comparison filter | ``$.store.book[?(@.category == 'fiction')].title`` |
 +-------------------+----------------------------------------------------+
