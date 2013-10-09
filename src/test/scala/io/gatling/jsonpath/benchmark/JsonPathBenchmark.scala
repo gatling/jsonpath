@@ -47,7 +47,7 @@ object JsonPathBenchmark extends PerformanceTest.Quickbenchmark {
 
 		measure method "query resolving" in {
 			using(queries) in {
-				JsonPath.query(_, goessnerJson).toString
+				JsonPath.queryJsonString(_, goessnerJson).right.map(_.toVector)
 			}
 		}
 
