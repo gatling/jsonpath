@@ -1,11 +1,11 @@
 package io.gatling.jsonpath.jsonsmart
 
-import java.util.{HashMap => JHashMap, List => JList}
+import java.util.{ HashMap => JHashMap, List => JList }
 
 import scala.collection.JavaConversions.seqAsJavaList
 
-import org.scalatest.{FlatSpec, Matchers}
-import org.scalatest.matchers.{MatchResult, Matcher}
+import org.scalatest.{ FlatSpec, Matchers }
+import org.scalatest.matchers.{ MatchResult, Matcher }
 
 import net.minidev.json.JSONValue
 
@@ -235,6 +235,11 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
 			jsonTree(book3), jsonTree(book4))
 		JsonPath.queryJsonObject("$..book[?(@.isbn)].title", goessnerJson) should findOrderedElements(
 			text("Moby Dick"), text("The Lord of the Rings"))
+		JsonPath.queryJsonObject("$.store.book[?(@.category == 'fiction')].title", goessnerJson) should findOrderedElements(
+			text("Sword of Honour"), text("Moby Dick"), text("The Lord of the Rings"))
+		JsonPath.queryJsonObject("$.store.book[?(@.price < 20 && @.price > 8.96)].title", goessnerJson) should findOrderedElements(
+			text("Sword of Honour"), text("Moby Dick"))
+
 	}
 
 	//////////////
