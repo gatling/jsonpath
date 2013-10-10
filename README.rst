@@ -11,7 +11,7 @@ Syntax
 JSONPath expressions
 --------------------
 
-In a JSONPath expression, the abstract name '$' is used to designate to the outer level object.
+In a JSONPath expression, the abstract name ``$`` is used to designate to the outer level object.
 
 JSONPath expressions can use the dot–notation ``$.store.book[0].title`` or the bracket–notation ``$['store']['book'][0]['title']``.
 
