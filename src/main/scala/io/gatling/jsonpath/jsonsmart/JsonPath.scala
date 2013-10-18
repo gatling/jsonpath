@@ -9,10 +9,12 @@ import scala.collection.JavaConversions.{ asScalaIterator, asScalaBuffer }
 case class JPError(val reason: String)
 
 object JsonPath {
-	val parser = Parser
+	val parser = new ThreadLocal[Parser]() {
+		override def initialValue() = new Parser
+	}
 
 	def compile(query: String): Either[JPError, JsonPath] = {
-		val compileResult = parser.compile(query)
+		val compileResult = parser.get.compile(query)
 		compileResult.map((q) => Right(new JsonPath(q))).getOrElse(Left(JPError(compileResult.toString)))
 	}
 

@@ -5,41 +5,37 @@ import io.gatling.jsonpath.AST._
 
 object Parser extends RegexParsers {
 
-	def compile(jsonpath: String): ParseResult[List[PathToken]] = {
-		parse(query, jsonpath)
-	}
-
 	/// general purpose parsers ///////////////////////////////////////////////
 
-	val number: Parser[Int] = """-?\d+""".r ^^ (_.toInt)
+	def number: Parser[Int] = """-?\d+""".r ^^ (_.toInt)
 
-	val field: Parser[String] = """[$_\p{L}][$_\-\d\p{L}]*""".r
+	def field: Parser[String] = """[$_\p{L}][$_\-\d\p{L}]*""".r
 
-	val quotedField: Parser[String] = "'" ~> "[^']+".r <~ "'"
+	def quotedField: Parser[String] = "'" ~> "[^']+".r <~ "'"
 
 	/// array parsers /////////////////////////////////////////////////////////
 
-	val arraySliceStep: Parser[Option[Int]] = ":" ~> number.?
+	def arraySliceStep: Parser[Option[Int]] = ":" ~> number.?
 
-	val arraySlice: Parser[ArraySlice] =
+	def arraySlice: Parser[ArraySlice] =
 		(":" ~> number.?) ~ arraySliceStep.? ^^ {
 			case end ~ step => ArraySlice(None, end, step.flatten.getOrElse(1))
 		}
 
-	val arrayRandomAccess: Parser[Option[ArrayRandomAccess]] =
+	def arrayRandomAccess: Parser[Option[ArrayRandomAccess]] =
 		rep("," ~> number).? ^^ (indices => indices.map(ArrayRandomAccess(_)))
 
-	val arrayPartial: Parser[ArrayAccessor] =
+	def arrayPartial: Parser[ArrayAccessor] =
 		number ~ (arraySlice | arrayRandomAccess) ^^ {
 			case i ~ None => ArrayRandomAccess(i :: Nil)
 			case i ~ Some(ArrayRandomAccess(indices)) => ArrayRandomAccess(i :: indices)
 			case i ~ (as @ ArraySlice(_, _, _)) => as.copy(start = Some(i))
 		}
 
-	val arrayAll: Parser[ArraySlice] =
+	def arrayAll: Parser[ArraySlice] =
 		"*" ^^ (_ => ArraySlice(None, None))
 
-	val arrayAccessors: Parser[ArrayAccessor] =
+	def arrayAccessors: Parser[ArrayAccessor] =
 		"[" ~> (arrayAll | arrayPartial | arraySlice) <~ "]"
 
 	/// filters parsers ///////////////////////////////////////////////////////
@@ -52,68 +48,68 @@ object Parser extends RegexParsers {
 		case ">=" => GreaterOrEqOperator
 	}
 
-	val numberValue: Parser[JPNumber] = """-?\d+(\.\d*)?""".r ^^ {
+	def numberValue: Parser[JPNumber] = """-?\d+(\.\d*)?""".r ^^ {
 		s => if (s.contains(".")) JPDouble(s.toDouble) else JPLong(s.toLong)
 	}
-	val stringValue: Parser[JPString] = quotedField ^^ { JPString(_) }
-	val value: Parser[FilterValue] = (numberValue | stringValue)
+	def stringValue: Parser[JPString] = quotedField ^^ { JPString(_) }
+	def value: Parser[FilterValue] = (numberValue | stringValue)
 
-	val comparisonOperator: Parser[String] = "==|<=|>=|<|>".r
+	def comparisonOperator: Parser[String] = "==|<=|>=|<|>".r
 
-	val current: Parser[PathToken] = "@" ^^ (_ => currentNode)
+	def current: Parser[PathToken] = "@" ^^ (_ => currentNode)
 
-	lazy val subQuery: Parser[SubQuery] =
+	def subQuery: Parser[SubQuery] =
 		(current | root) ~ pathSequence ^^ { case c ~ ps => SubQuery(c :: ps) }
 
-	lazy val expression1: Parser[FilterToken] =
+	def expression1: Parser[FilterToken] =
 		subQuery ~ (comparisonOperator ~ (subQuery | value)).? ^^ {
 			case subq1 ~ None => HasFilter(subq1)
 			case lhs ~ Some(op ~ rhs) => ComparisonFilter(parseComparisonOperator(op), lhs, rhs)
 		}
 
-	lazy val expression2: Parser[FilterToken] =
+	def expression2: Parser[FilterToken] =
 		value ~ comparisonOperator ~ (subQuery | value) ^^ {
 			case lhs ~ op ~ rhs => ComparisonFilter(parseComparisonOperator(op), lhs, rhs)
 		}
 
-	lazy val expression: Parser[FilterToken] = expression1 | expression2
+	def expression: Parser[FilterToken] = expression1 | expression2
 
-	val booleanOperator: Parser[String] = """\|\||&&""".r
+	def booleanOperator: Parser[String] = """\|\||&&""".r
 
 	def parseBooleanOperator(op: String) = op match {
 		case "&&" => AndOperator
 		case "||" => OrOperator
 	}
 
-	lazy val booleanExpression: Parser[FilterToken] =
+	def booleanExpression: Parser[FilterToken] =
 		expression ~ (booleanOperator ~ expression).? ^^ {
 			case lhs ~ None => lhs
 			case lhs ~ Some(op ~ rhs) => BooleanFilter(parseBooleanOperator(op), lhs, rhs)
 		}
 
-	lazy val subscriptFilter: Parser[PathToken] =
+	def subscriptFilter: Parser[PathToken] =
 		"[?(" ~> (booleanExpression) <~ ")]"
 
 	/// child accessors parsers ///////////////////////////////////////////////
 
-	val subscriptField: Parser[FieldAccessor] =
+	def subscriptField: Parser[FieldAccessor] =
 		"[" ~> repsep(quotedField, ",") <~ "]" ^^ {
 			case f1 :: Nil => Field(f1, false)
 			case fields => MultiField(fields)
 		}
 
-	val dotField: Parser[FieldAccessor] =
+	def dotField: Parser[FieldAccessor] =
 		"." ~> field ^^ (Field(_, false))
 
 	// TODO recursive with `subscriptField`
-	val recursiveField: Parser[FieldAccessor] =
+	def recursiveField: Parser[FieldAccessor] =
 		".." ~> field ^^ (Field(_, true))
 
-	val anyChild: Parser[FieldAccessor] = (".*" | "['*']") ^^ (_ => anyField)
+	def anyChild: Parser[FieldAccessor] = (".*" | "['*']") ^^ (_ => anyField)
 
-	val anyRecursive: Parser[FieldAccessor] = "..*" ^^ (_ => anyRecursiveField)
+	def anyRecursive: Parser[FieldAccessor] = "..*" ^^ (_ => anyRecursiveField)
 
-	val fieldAccessors = (
+	def fieldAccessors = (
 		dotField
 		| anyRecursive
 		| anyChild
@@ -122,13 +118,16 @@ object Parser extends RegexParsers {
 
 	/// Main parsers //////////////////////////////////////////////////////////
 
-	val childAccess = (fieldAccessors | arrayAccessors)
+	def childAccess = (fieldAccessors | arrayAccessors)
 
-	val pathSequence: Parser[List[PathToken]] = rep(childAccess | subscriptFilter)
+	def pathSequence: Parser[List[PathToken]] = rep(childAccess | subscriptFilter)
 
-	val root: Parser[PathToken] = "$" ^^ (_ => rootNode)
+	def root: Parser[PathToken] = "$" ^^ (_ => rootNode)
 
-	lazy val query: Parser[List[PathToken]] =
+	def query: Parser[List[PathToken]] =
 		phrase(root ~ pathSequence) ^^ { case r ~ ps => r :: ps }
+}
 
+class Parser {
+	def compile(jsonpath: String): Parser.ParseResult[List[PathToken]] = Parser.parse(Parser.query, jsonpath)
 }

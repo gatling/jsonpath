@@ -54,8 +54,8 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
 	}
 
 	it should "work with array access on the root object" in {
-		compile("$[1]").get should be(RootNode() :: ArrayRandomAccess(List(1)) :: Nil)
-		compile("$[*]").get should be(RootNode() :: ArraySlice(None, None) :: Nil)
+		new Parser().compile("$[1]").get should be(RootNode() :: ArrayRandomAccess(List(1)) :: Nil)
+		new Parser().compile("$[*]").get should be(RootNode() :: ArraySlice(None, None) :: Nil)
 	}
 
 	it should "work with array access on fields" in {
@@ -74,17 +74,17 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
 	}
 
 	it should "work on the root element" in {
-		compile("$.foo").get should be(RootNode() :: Field("foo", false) :: Nil)
-		compile("$['foo']").get should be(RootNode() :: Field("foo", false) :: Nil)
+		new Parser().compile("$.foo").get should be(RootNode() :: Field("foo", false) :: Nil)
+		new Parser().compile("$['foo']").get should be(RootNode() :: Field("foo", false) :: Nil)
 
 		// TODO  : how to access childs w/ ['xxx'] notation
-		compile("$..foo").get should be(RootNode() :: Field("foo", true) :: Nil)
+		new Parser().compile("$..foo").get should be(RootNode() :: Field("foo", true) :: Nil)
 	}
 
 	// cf : http://goessner.net/articles/JsonPath
 	"Expressions from Goessner specs" should "be correctly parsed" in {
 		def shouldParse(query: String, expected: Any) = {
-			compile(query).get should be(expected)
+			new Parser().compile(query).get should be(expected)
 		}
 
 		shouldParse("$.store.book[0].title", List(
@@ -127,7 +127,7 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
 
 	"Failures" should "be handled gracefully" in {
 		def gracefulFailure(query: String) =
-			compile(query) match {
+			new Parser().compile(query) match {
 				case Parser.Failure(msg, _) =>
 					info(s"""that's an expected failure for "$query": $msg""")
 				case other =>
@@ -151,7 +151,7 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
 		parse(subscriptFilter, "[?(@['foo'])]") should beParsedAs(
 			HasFilter(SubQuery(List(CurrentNode(), Field("foo", false)))))
 
-		compile("$.things[?(@.foo.bar)]").get should be(RootNode()
+		new Parser().compile("$.things[?(@.foo.bar)]").get should be(RootNode()
 			:: Field("things")
 			:: HasFilter(SubQuery(CurrentNode() :: Field("foo") :: Field("bar") :: Nil))
 			:: Nil)
@@ -182,12 +182,12 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
 		parse(subscriptFilter, "[?(@ == $['foo'])]") should beParsedAs(
 			ComparisonFilter(EqOperator, SubQuery(List(CurrentNode())), SubQuery(List(RootNode(), Field("foo", false)))))
 
-		compile("$['points'][?(@['y'] >= 3)].id").get should be(RootNode()
+		new Parser().compile("$['points'][?(@['y'] >= 3)].id").get should be(RootNode()
 			:: Field("points", false)
 			:: ComparisonFilter(GreaterOrEqOperator, SubQuery(List(CurrentNode(), Field("y", false))), JPLong(3))
 			:: Field("id", false) :: Nil)
 
-		compile("$.points[?(@['id']=='i4')].x").get should be(RootNode()
+		new Parser().compile("$.points[?(@['id']=='i4')].x").get should be(RootNode()
 			:: Field("points", false)
 			:: ComparisonFilter(EqOperator, SubQuery(List(CurrentNode(), Field("id", false))), JPString("i4"))
 			:: Field("x", false) :: Nil)
