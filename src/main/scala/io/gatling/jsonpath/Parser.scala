@@ -124,7 +124,7 @@ object Parser extends RegexParsers {
 
 	val childAccess = (fieldAccessors | arrayAccessors)
 
-	lazy val pathSequence: Parser[List[PathToken]] = rep(childAccess | subscriptFilter)
+	val pathSequence: Parser[List[PathToken]] = rep(childAccess | subscriptFilter)
 
 	val root: Parser[PathToken] = "$" ^^ (_ => rootNode)
 

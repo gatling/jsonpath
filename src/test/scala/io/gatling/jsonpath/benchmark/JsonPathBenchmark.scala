@@ -54,11 +54,19 @@ object JsonPathBenchmark extends PerformanceTest.Quickbenchmark {
 		"$.store.book[?(@.category == 'fiction')].title",
 		"$.store.book[?(@.price < 10 && @.price >4)].title")
 
+	val compiledQueries = queries.map(JsonPath.compile(_))
+
 	performance of "JsonPath" in {
 
 		measure method "query resolving" in {
 			using(queries) in {
 				JsonPath.queryJsonObject(_, goessnerJson).right.map(_.toVector)
+			}
+		}
+
+		measure method "pre-compiled query resolving" in {
+			using(compiledQueries) in {
+				q => q.right.map(_.queryJsonObject(goessnerJson)).right.map(_.toVector)
 			}
 		}
 

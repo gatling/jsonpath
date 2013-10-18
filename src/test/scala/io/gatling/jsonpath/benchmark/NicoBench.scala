@@ -36,7 +36,7 @@ class NicoBench extends AbstractBenchmark {
 	@Test
 	@BenchmarkOptions(benchmarkRounds = 20000, warmupRounds = 5000, concurrency = 8)
 	def nicoTwitter() {
-		nicoJP.right.map(_.query(twitterJson)).right.map(_.toVector)
+		nicoJP.right.map(_.queryJsonString(twitterJson)).right.map(_.toVector)
 	}
 
 	val jaywayJP = JaywayJsonPath.compile(twitterQuery)

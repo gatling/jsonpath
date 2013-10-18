@@ -16,18 +16,22 @@ object JsonPath {
 		compileResult.map((q) => Right(new JsonPath(q))).getOrElse(Left(JPError(compileResult.toString)))
 	}
 
-	def queryJsonString(query: String, json: String): Either[JPError, Iterator[Any]] = {
-		compile(query).right.map(_.query(JSONValue.parse(json)))
+	def queryJsonString(query: String, jsonString: String): Either[JPError, Iterator[Any]] = {
+		compile(query).right.map(_.queryJsonString(jsonString))
 	}
 
-	def queryJsonObject(query: String, json: Any): Either[JPError, Iterator[Any]] = {
-		compile(query).right.map(_.query(json))
+	def queryJsonObject(query: String, jsonObject: Any): Either[JPError, Iterator[Any]] = {
+		compile(query).right.map(_.queryJsonObject(jsonObject))
 	}
 }
 
 class JsonPath(val path: List[PathToken]) {
-	def query(json: Any) = {
-		new JsonPathWalker(json, path).walk
+	def queryJsonObject(jsonObject: Any) = {
+		new JsonPathWalker(jsonObject, path).walk
+	}
+
+	def queryJsonString(jsonString: String) = {
+		new JsonPathWalker(JSONValue.parse(jsonString), path).walk
 	}
 }
 
