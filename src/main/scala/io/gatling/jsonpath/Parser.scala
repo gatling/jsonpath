@@ -113,7 +113,7 @@ object Parser extends RegexParsers {
 
 	val anyRecursive: Parser[FieldAccessor] = "..*" ^^ (_ => anyRecursiveField)
 
-	lazy val fieldAccessors = (
+	val fieldAccessors = (
 		dotField
 		| anyRecursive
 		| anyChild
@@ -122,7 +122,7 @@ object Parser extends RegexParsers {
 
 	/// Main parsers //////////////////////////////////////////////////////////
 
-	lazy val childAccess = (fieldAccessors | arrayAccessors)
+	val childAccess = (fieldAccessors | arrayAccessors)
 
 	lazy val pathSequence: Parser[List[PathToken]] = rep(childAccess | subscriptFilter)
 
