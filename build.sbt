@@ -13,7 +13,7 @@ libraryDependencies += "net.minidev" % "json-smart" % "1.2"
 
 
 /// ScalaTest
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.0.RC1" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "2.0.RC2" % "test"
 
 
 /// ScalaMeter
@@ -27,15 +27,6 @@ testFrameworks += new TestFramework("org.scalameter.ScalaMeterFramework")
 
 /// Jayway JsonPath - for benchmarking purpose
 libraryDependencies += "com.jayway.jsonpath" % "json-path" % "0.9.0" % "test"
-
-
-/// Junit-Benchmark
-libraryDependencies += "junit" % "junit" % "4.11" % "test"
-
-libraryDependencies += "com.carrotsearch" % "junit-benchmarks" % "0.6.0" % "test"
-
-
-
 
 /// Publishing
 publishTo <<= version { v: String =>
