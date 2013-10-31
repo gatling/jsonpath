@@ -5,13 +5,20 @@ import io.gatling.jsonpath.AST._
 
 object Parser extends RegexParsers {
 
+	val numberRegex = """-?\d+""".r
+	val fieldRegex = """[$_\p{L}][$_\-\d\p{L}]*""".r
+	val quotedFieldRegex = "[^']+".r
+	val numberValueRegex = """-?\d+(\.\d*)?""".r
+	val comparisonOperatorRegex = "==|<=|>=|<|>".r
+	val booleanOperatorRegex = """\|\||&&""".r
+
 	/// general purpose parsers ///////////////////////////////////////////////
 
-	def number: Parser[Int] = """-?\d+""".r ^^ (_.toInt)
+	def number: Parser[Int] = numberRegex ^^ (_.toInt)
 
-	def field: Parser[String] = """[$_\p{L}][$_\-\d\p{L}]*""".r
+	def field: Parser[String] = fieldRegex
 
-	def quotedField: Parser[String] = "'" ~> "[^']+".r <~ "'"
+	def quotedField: Parser[String] = "'" ~> quotedFieldRegex <~ "'"
 
 	/// array parsers /////////////////////////////////////////////////////////
 
@@ -48,13 +55,13 @@ object Parser extends RegexParsers {
 		case ">=" => GreaterOrEqOperator
 	}
 
-	def numberValue: Parser[JPNumber] = """-?\d+(\.\d*)?""".r ^^ {
+	def numberValue: Parser[JPNumber] = numberValueRegex ^^ {
 		s => if (s.contains(".")) JPDouble(s.toDouble) else JPLong(s.toLong)
 	}
 	def stringValue: Parser[JPString] = quotedField ^^ { JPString }
 	def value: Parser[FilterValue] = (numberValue | stringValue)
 
-	def comparisonOperator: Parser[String] = "==|<=|>=|<|>".r
+	def comparisonOperator: Parser[String] = comparisonOperatorRegex
 
 	def current: Parser[PathToken] = "@" ^^ (_ => currentNode)
 
@@ -74,7 +81,7 @@ object Parser extends RegexParsers {
 
 	def expression: Parser[FilterToken] = expression1 | expression2
 
-	def booleanOperator: Parser[String] = """\|\||&&""".r
+	def booleanOperator: Parser[String] = booleanOperatorRegex
 
 	def parseBooleanOperator(op: String) = op match {
 		case "&&" => AndOperator
@@ -129,5 +136,6 @@ object Parser extends RegexParsers {
 }
 
 class Parser {
-	def compile(jsonpath: String): Parser.ParseResult[List[PathToken]] = Parser.parse(Parser.query, jsonpath)
+	val query = Parser.query
+	def compile(jsonpath: String): Parser.ParseResult[List[PathToken]] = Parser.parse(query, jsonpath)
 }
