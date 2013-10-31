@@ -27,16 +27,16 @@ case class CurrentNode() extends PathToken
 sealed trait FilterValue extends AstToken
 
 sealed trait JPNumber extends FilterValue
-case class JPLong(val i: Long) extends JPNumber
-case class JPDouble(val d: Double) extends JPNumber
-case class JPString(val s: String) extends FilterValue
+case class JPLong(i: Long) extends JPNumber
+case class JPDouble(d: Double) extends JPNumber
+case class JPString(s: String) extends FilterValue
 
-case class SubQuery(val path: List[PathToken]) extends FilterValue
+case class SubQuery(path: List[PathToken]) extends FilterValue
 
 sealed trait FilterToken extends PathToken
-case class HasFilter(val query: SubQuery) extends FilterToken
-case class ComparisonFilter(val operator: ComparisonOperator, val lhs: FilterValue, val rhs: FilterValue) extends FilterToken
-case class BooleanFilter(val fun: BinaryBooleanOperator, val lhs: FilterToken, val rhs: FilterToken) extends FilterToken
+case class HasFilter(query: SubQuery) extends FilterToken
+case class ComparisonFilter(operator: ComparisonOperator, lhs: FilterValue, rhs: FilterValue) extends FilterToken
+case class BooleanFilter(fun: BinaryBooleanOperator, lhs: FilterToken, rhs: FilterToken) extends FilterToken
 
 // is it necessary ?
 object AST {
