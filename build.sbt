@@ -26,7 +26,7 @@ testFrameworks += new TestFramework("org.scalameter.ScalaMeterFramework")
 
 
 /// Jayway JsonPath - for benchmarking purpose
-libraryDependencies += "com.jayway.jsonpath" % "json-path" % "0.9.0" % "test"
+libraryDependencies += "com.jayway.jsonpath" % "json-path" % "0.9.1" % "test"
 
 /// Publishing
 publishTo <<= version { v: String =>
