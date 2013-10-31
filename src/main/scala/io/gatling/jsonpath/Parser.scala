@@ -1,5 +1,6 @@
 package io.gatling.jsonpath
 
+import scala.annotation.switch
 import scala.util.parsing.combinator._
 import io.gatling.jsonpath.AST._
 
@@ -47,16 +48,14 @@ object Parser extends RegexParsers {
 
 	/// filters parsers ///////////////////////////////////////////////////////
 
-	def parseComparisonOperator(op: String) = op match {
-		case "==" => EqOperator
-		case "<" => LessOperator
-		case ">" => GreaterOperator
-		case "<=" => LessOrEqOperator
-		case ">=" => GreaterOrEqOperator
+	def parseComparisonOperator(op: String) = (op.charAt(0): @switch) match {
+		case '=' => EqOperator
+		case '<' => if (op.size == 1) LessOperator else LessOrEqOperator
+		case '>' => if (op.size == 1) GreaterOperator else GreaterOrEqOperator
 	}
 
 	def numberValue: Parser[JPNumber] = numberValueRegex ^^ {
-		s => if (s.contains(".")) JPDouble(s.toDouble) else JPLong(s.toLong)
+		s => if (s.indexOf('.') != -1) JPDouble(s.toDouble) else JPLong(s.toLong)
 	}
 	def stringValue: Parser[JPString] = quotedField ^^ { JPString }
 	def value: Parser[FilterValue] = (numberValue | stringValue)
@@ -83,9 +82,9 @@ object Parser extends RegexParsers {
 
 	def booleanOperator: Parser[String] = booleanOperatorRegex
 
-	def parseBooleanOperator(op: String) = op match {
-		case "&&" => AndOperator
-		case "||" => OrOperator
+	def parseBooleanOperator(op: String) = (op.charAt(0): @switch) match {
+		case '&' => AndOperator
+		case '|' => OrOperator
 	}
 
 	def booleanExpression: Parser[FilterToken] =
