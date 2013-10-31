@@ -68,7 +68,7 @@ class JsonPathWalker(val rootNode: Any, val fullPath: List[PathToken]) {
 
 			case MultiField(fieldNames) => node match {
 				case obj: JMap[_, _] =>
-					fieldNames.iterator.filter(obj.containsKey(_)).map(obj.get)
+					fieldNames.iterator.collect { case fieldName if obj.containsKey(fieldName) => obj.get(fieldName) }
 				case _ => Iterator.empty
 			}
 
@@ -90,9 +90,10 @@ class JsonPathWalker(val rootNode: Any, val fullPath: List[PathToken]) {
 			case ArrayRandomAccess(indices) => node match {
 				case array: JList[_] =>
 					indices.iterator
-						.map(i => if (i >= 0) i else array.size + i)
-						.filter(i => i >= 0 && i < array.size)
-						.map(array.get)
+						.collect {
+							case i if i >= 0 && i < array.size => array.get(i)
+							case i if i < 0 && i >= -array.size => array.get(i + array.size)
+						}
 				case _ => Iterator.empty
 			}
 
