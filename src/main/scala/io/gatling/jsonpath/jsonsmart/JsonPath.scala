@@ -68,7 +68,7 @@ class JsonPathWalker(val rootNode: Any, val fullPath: List[PathToken]) {
 
 			case MultiField(fieldNames) => node match {
 				case obj: JMap[_, _] =>
-					fieldNames.iterator.filter(obj.containsKey(_)).map(obj.get(_))
+					fieldNames.iterator.filter(obj.containsKey(_)).map(obj.get)
 				case _ => Iterator.empty
 			}
 
@@ -92,7 +92,7 @@ class JsonPathWalker(val rootNode: Any, val fullPath: List[PathToken]) {
 					indices.iterator
 						.map(i => if (i >= 0) i else array.size + i)
 						.filter(i => i >= 0 && i < array.size)
-						.map(array.get(_))
+						.map(array.get)
 				case _ => Iterator.empty
 			}
 
@@ -116,10 +116,10 @@ class JsonPathWalker(val rootNode: Any, val fullPath: List[PathToken]) {
 			}
 
 		def applyBinaryOp(node: Any, op: ComparisonOperator, lhs: FilterValue, rhs: FilterValue): Boolean = {
-			val opEvaluation = for (
-				lhsNode <- resolveFilterToken(node, lhs);
+			val opEvaluation = for {
+				lhsNode <- resolveFilterToken(node, lhs)
 				rhsNode <- resolveFilterToken(node, rhs)
-			) yield op(lhsNode, rhsNode)
+			} yield op(lhsNode, rhsNode)
 
 			opEvaluation.getOrElse(false)
 		}
@@ -157,9 +157,9 @@ class JsonPathWalker(val rootNode: Any, val fullPath: List[PathToken]) {
 		def _recFieldFilter(node: Any): Iterator[Any] =
 			node match {
 				case obj: JMap[_, _] =>
-					val (filtered, toExplore) = obj.entrySet().iterator.partition(e => e.getKey == name)
+					val (filtered, toExplore) = obj.entrySet.iterator.partition(_.getKey == name)
 					filtered.map(_.getValue) ++ toExplore.flatMap(e => _recFieldFilter(e.getValue))
-				case list: JList[_] => list.iterator.flatMap(_recFieldFilter(_))
+				case list: JList[_] => list.iterator.flatMap(_recFieldFilter)
 				case _ => Iterator.empty
 			}
 
@@ -169,9 +169,9 @@ class JsonPathWalker(val rootNode: Any, val fullPath: List[PathToken]) {
 	def recFieldExplorer(node: Any): Iterator[Any] =
 		node match {
 			case obj: JMap[_, _] =>
-				obj.values.iterator ++ obj.values.iterator.flatMap(recFieldExplorer(_))
+				obj.values.iterator ++ obj.values.iterator.flatMap(recFieldExplorer)
 			case list: JList[_] =>
-				list.iterator.flatMap(recFieldExplorer(_))
+				list.iterator.flatMap(recFieldExplorer)
 			case _ => Iterator.empty
 		}
 
@@ -181,11 +181,11 @@ class JsonPathWalker(val rootNode: Any, val fullPath: List[PathToken]) {
 		def lenRelative(x: Int) = if (x >= 0) x else size + x
 		def stepRelative(x: Int) = if (step >= 0) x else -1 - x
 		def relative = lenRelative _ compose stepRelative _
-		val absStart = start.map(relative(_)).getOrElse(0)
-		val absEnd = stop.map(relative(_)).getOrElse(size)
+		val absStart = start.map(relative).getOrElse(0)
+		val absEnd = stop.map(relative).getOrElse(size)
 		val absStep = abs(step)
 
-		val elts: Iterator[Any] = if (step < 0) array.toBuffer.reverseIterator else array.iterator
+		val elts: Iterator[Any] = if (step < 0) array.reverseIterator else array.iterator
 		val fromStartToEnd = elts.slice(absStart, absEnd)
 
 		if (absStep != 1)

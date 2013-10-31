@@ -23,7 +23,7 @@ object Parser extends RegexParsers {
 		}
 
 	def arrayRandomAccess: Parser[Option[ArrayRandomAccess]] =
-		rep("," ~> number).? ^^ (indices => indices.map(ArrayRandomAccess(_)))
+		rep("," ~> number).? ^^ (indices => indices.map(ArrayRandomAccess))
 
 	def arrayPartial: Parser[ArrayAccessor] =
 		number ~ (arraySlice | arrayRandomAccess) ^^ {
@@ -51,7 +51,7 @@ object Parser extends RegexParsers {
 	def numberValue: Parser[JPNumber] = """-?\d+(\.\d*)?""".r ^^ {
 		s => if (s.contains(".")) JPDouble(s.toDouble) else JPLong(s.toLong)
 	}
-	def stringValue: Parser[JPString] = quotedField ^^ { JPString(_) }
+	def stringValue: Parser[JPString] = quotedField ^^ { JPString }
 	def value: Parser[FilterValue] = (numberValue | stringValue)
 
 	def comparisonOperator: Parser[String] = "==|<=|>=|<|>".r
