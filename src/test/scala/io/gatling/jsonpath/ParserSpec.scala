@@ -104,10 +104,10 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
 			Field("book", false), ArraySlice(None, None),
 			Field("author", false)))
 		shouldParse("$..author", List(RootNode, Field("author", true)))
-		shouldParse("$.store.*", List(RootNode, Field("store", false), AnyField(false)))
+		shouldParse("$.store.*", List(RootNode, Field("store", false), AnyField))
 		shouldParse("$.store..price", List(RootNode, Field("store", false), Field("price", true)))
-		shouldParse("$..*", List(RootNode, AnyField(true)))
-		shouldParse("$.*", List(RootNode, AnyField(false)))
+		shouldParse("$..*", List(RootNode, RecursiveAnyField))
+		shouldParse("$.*", List(RootNode, AnyField))
 		shouldParse("$..book[2]", List(RootNode, Field("book", true), ArrayRandomAccess(List(2))))
 		shouldParse("$.book[*]", List(RootNode, Field("book", false), ArraySlice(None, None)))
 		shouldParse("$..book[*]", List(RootNode, Field("book", true), ArraySlice(None, None)))
@@ -120,8 +120,8 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
 			Field("title", false),
 			Field("title", true),
 			Field("title", false),
-			AnyField(false),
-			AnyField(true),
+			AnyField,
+			RecursiveAnyField,
 			Field("book", false), ArraySlice(None, None),
 			Field("book", true), ArraySlice(None, None)))
 	}

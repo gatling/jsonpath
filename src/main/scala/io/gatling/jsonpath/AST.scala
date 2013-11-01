@@ -8,7 +8,8 @@ object AST {
 	case object RootNode extends FieldAccessor
 	case class Field(val name: String, val recursive: Boolean = false) extends FieldAccessor
 	case class MultiField(val names: List[String]) extends FieldAccessor
-	case class AnyField(val recursive: Boolean = false) extends FieldAccessor
+	case object AnyField extends FieldAccessor
+	case object RecursiveAnyField extends FieldAccessor
 
 	sealed trait ArrayAccessor extends PathToken
 
@@ -38,7 +39,4 @@ object AST {
 	case class HasFilter(query: SubQuery) extends FilterToken
 	case class ComparisonFilter(operator: ComparisonOperator, lhs: FilterValue, rhs: FilterValue) extends FilterToken
 	case class BooleanFilter(fun: BinaryBooleanOperator, lhs: FilterToken, rhs: FilterToken) extends FilterToken
-
-	val anyField = AnyField(false)
-	val anyRecursiveField = AnyField(true)
 }

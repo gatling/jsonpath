@@ -67,7 +67,7 @@ class JsonPathWalker(val rootNode: Any, val fullPath: List[PathToken]) {
 				case _ => Iterator.empty
 			}
 
-			case AnyField(false) => node match {
+			case AnyField => node match {
 				case obj: JMap[_, _] => obj.values.iterator
 				case _ => Iterator.empty
 			}
@@ -94,7 +94,7 @@ class JsonPathWalker(val rootNode: Any, val fullPath: List[PathToken]) {
 
 			case filterToken: FilterToken => applyFilter(filterToken, node)
 
-			case AnyField(true) => recFieldExplorer(node)
+			case RecursiveAnyField => recFieldExplorer(node)
 		}
 	}
 
