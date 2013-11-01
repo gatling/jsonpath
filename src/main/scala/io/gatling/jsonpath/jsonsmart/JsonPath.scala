@@ -49,9 +49,9 @@ class JsonPathWalker(val rootNode: Any, val fullPath: List[PathToken]) {
 
 	private[this] def walk1(node: Any, query: PathToken): Iterator[Any] = {
 		query match {
-			case RootNode() => Iterator.single(rootNode)
+			case RootNode => Iterator.single(rootNode)
 
-			case CurrentNode() => Iterator.single(node)
+			case CurrentNode => Iterator.single(node)
 
 			case Field(name, false) => node match {
 				case obj: JMap[_, _] if obj.containsKey(name) =>

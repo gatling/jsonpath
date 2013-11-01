@@ -62,7 +62,7 @@ object Parser extends RegexParsers {
 
 	def comparisonOperator: Parser[String] = comparisonOperatorRegex
 
-	def current: Parser[PathToken] = "@" ^^ (_ => currentNode)
+	def current: Parser[PathToken] = "@" ^^ (_ => CurrentNode)
 
 	def subQuery: Parser[SubQuery] =
 		(current | root) ~ pathSequence ^^ { case c ~ ps => SubQuery(c :: ps) }
@@ -128,7 +128,7 @@ object Parser extends RegexParsers {
 
 	def pathSequence: Parser[List[PathToken]] = rep(childAccess | subscriptFilter)
 
-	def root: Parser[PathToken] = "$" ^^ (_ => rootNode)
+	def root: Parser[PathToken] = "$" ^^ (_ => RootNode)
 
 	def query: Parser[List[PathToken]] =
 		phrase(root ~ pathSequence) ^^ { case r ~ ps => r :: ps }

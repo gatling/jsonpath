@@ -5,7 +5,7 @@ object AST {
 	sealed trait PathToken extends AstToken
 
 	sealed trait FieldAccessor extends PathToken
-	case class RootNode() extends FieldAccessor
+	case object RootNode extends FieldAccessor
 	case class Field(val name: String, val recursive: Boolean = false) extends FieldAccessor
 	case class MultiField(val names: List[String]) extends FieldAccessor
 	case class AnyField(val recursive: Boolean = false) extends FieldAccessor
@@ -24,7 +24,7 @@ object AST {
 
 	// JsonPath Filter AST //////////////////////////////////////////////
 
-	case class CurrentNode() extends PathToken
+	case object CurrentNode extends PathToken
 	sealed trait FilterValue extends AstToken
 
 	sealed trait JPNumber extends FilterValue
@@ -39,8 +39,6 @@ object AST {
 	case class ComparisonFilter(operator: ComparisonOperator, lhs: FilterValue, rhs: FilterValue) extends FilterToken
 	case class BooleanFilter(fun: BinaryBooleanOperator, lhs: FilterToken, rhs: FilterToken) extends FilterToken
 
-	val rootNode = RootNode()
 	val anyField = AnyField(false)
 	val anyRecursiveField = AnyField(true)
-	val currentNode = CurrentNode()
 }
