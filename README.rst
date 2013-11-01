@@ -124,7 +124,7 @@ Benchmark vs Jayway's implementation
 +-----------------------------------------------------------+---------+--------+
 
 Conclusion: not as fast as Jayway on compilation (to be expected due to Parser Combinators).
-However, that doesn't matter once compiled and cached (like in Gatling). Graph traversal can be even better on some complex use cases (liek the last one).
+However, that doesn't matter once compiled and cached (like in Gatling). Graph traversal can be even better on some complex use cases (like the last one).
 
 Licence
 =======
