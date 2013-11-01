@@ -1,7 +1,7 @@
 package io.gatling.jsonpath
 
 // Comparison operators
-trait ComparisonOperator {
+sealed trait ComparisonOperator {
 
 	def compare[T: Ordering](lhs: T, rhs: T): Boolean
 
@@ -63,7 +63,7 @@ object GreaterOrEqOperator extends ComparisonOperator {
 }
 
 // Binary boolean operators
-trait BinaryBooleanOperator {
+sealed trait BinaryBooleanOperator {
 	def apply(lhs: Boolean, rhs: Boolean): Boolean
 }
 

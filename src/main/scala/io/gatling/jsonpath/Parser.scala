@@ -94,22 +94,22 @@ object Parser extends RegexParsers {
 		}
 
 	def subscriptFilter: Parser[PathToken] =
-		"[?(" ~> (booleanExpression) <~ ")]"
+		"[?(" ~> booleanExpression <~ ")]"
 
 	/// child accessors parsers ///////////////////////////////////////////////
 
 	def subscriptField: Parser[FieldAccessor] =
 		"[" ~> repsep(quotedField, ",") <~ "]" ^^ {
-			case f1 :: Nil => Field(f1, false)
+			case f1 :: Nil => Field(f1)
 			case fields => MultiField(fields)
 		}
 
 	def dotField: Parser[FieldAccessor] =
-		"." ~> field ^^ (Field(_, false))
+		"." ~> field ^^ Field
 
 	// TODO recursive with `subscriptField`
 	def recursiveField: Parser[FieldAccessor] =
-		".." ~> field ^^ (Field(_, true))
+		".." ~> field ^^ RecursiveField
 
 	def anyChild: Parser[FieldAccessor] = (".*" | "['*']") ^^ (_ => AnyField)
 

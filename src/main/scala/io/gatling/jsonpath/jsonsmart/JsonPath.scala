@@ -7,7 +7,7 @@ import net.minidev.json.JSONValue
 import scala.math.abs
 import scala.collection.JavaConversions.{ asScalaIterator, asScalaBuffer }
 
-case class JPError(val reason: String)
+case class JPError(reason: String)
 
 object JsonPath {
 	val parser = new ThreadLocal[Parser]() {
@@ -26,7 +26,7 @@ object JsonPath {
 		compile(query).right.map(_.queryJsonObject(jsonObject))
 }
 
-class JsonPath(val path: List[PathToken]) {
+class JsonPath(path: List[PathToken]) {
 	def queryJsonObject(jsonObject: Any) = {
 		new JsonPathWalker(jsonObject, path).walk
 	}
@@ -36,7 +36,7 @@ class JsonPath(val path: List[PathToken]) {
 	}
 }
 
-class JsonPathWalker(val rootNode: Any, val fullPath: List[PathToken]) {
+class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
 
 	def walk(): Iterator[Any] = walk(rootNode, fullPath)
 
@@ -53,13 +53,13 @@ class JsonPathWalker(val rootNode: Any, val fullPath: List[PathToken]) {
 
 			case CurrentNode => Iterator.single(node)
 
-			case Field(name, false) => node match {
+			case Field(name) => node match {
 				case obj: JMap[_, _] if obj.containsKey(name) =>
 					Iterator.single(obj.get(name))
 				case _ => Iterator.empty
 			}
 
-			case Field(name, true) => recFieldFilter(node, name)
+			case RecursiveField(name) => recFieldFilter(node, name)
 
 			case MultiField(fieldNames) => node match {
 				case obj: JMap[_, _] =>

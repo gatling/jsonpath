@@ -6,8 +6,9 @@ object AST {
 
 	sealed trait FieldAccessor extends PathToken
 	case object RootNode extends FieldAccessor
-	case class Field(val name: String, val recursive: Boolean = false) extends FieldAccessor
-	case class MultiField(val names: List[String]) extends FieldAccessor
+	case class Field(name: String) extends FieldAccessor
+	case class RecursiveField(name: String) extends FieldAccessor
+	case class MultiField(names: List[String]) extends FieldAccessor
 	case object AnyField extends FieldAccessor
 	case object RecursiveAnyField extends FieldAccessor
 
@@ -20,8 +21,8 @@ object AST {
 	 * @param stop is the first item that you do not want
 	 * @param step, being positive or negative, defines whether you are moving
 	 */
-	case class ArraySlice(val start: Option[Int], val stop: Option[Int], val step: Int = 1) extends ArrayAccessor
-	case class ArrayRandomAccess(val indices: List[Int]) extends ArrayAccessor
+	case class ArraySlice(start: Option[Int], stop: Option[Int], step: Int = 1) extends ArrayAccessor
+	case class ArrayRandomAccess(indices: List[Int]) extends ArrayAccessor
 
 	// JsonPath Filter AST //////////////////////////////////////////////
 
