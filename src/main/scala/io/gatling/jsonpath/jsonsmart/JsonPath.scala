@@ -1,9 +1,10 @@
 package io.gatling.jsonpath.jsonsmart
 
 import java.util.{ List => JList, Map => JMap }
-import scala.math.abs
+import io.gatling.jsonpath.{ Parser, ComparisonOperator }
+import io.gatling.jsonpath.AST._
 import net.minidev.json.JSONValue
-import io.gatling.jsonpath._
+import scala.math.abs
 import scala.collection.JavaConversions.{ asScalaIterator, asScalaBuffer }
 
 case class JPError(val reason: String)

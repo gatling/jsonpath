@@ -3,6 +3,7 @@ package io.gatling.jsonpath
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.{ Matcher, MatchResult }
 import io.gatling.jsonpath.Parser._
+import io.gatling.jsonpath.AST._
 import org.scalatest.Matchers
 
 class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
