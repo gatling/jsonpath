@@ -100,6 +100,28 @@ This implementation currently relies on `Json-Smart <http://code.google.com/p/js
 eg :  
 ``JsonPath.query("$.a", """{"a":"A","b":"B"}""").right.map(_.toVector)`` gives you ``Right(Vector("A"))``
 
+Benchmark vs Jayway's implementation
+====================================
+
++-----------------------------------------------------------+---------+--------+
+| twitterQueries                                            | Gatling | Jayway |
++===========================================================+=========+========+
+| $.results[:3].from_user                                   | 0.162   | 0.05   |
++-----------------------------------------------------------+---------+--------+
+| $.completed_in                                            | 0.07    | 0.022  |
++-----------------------------------------------------------+---------+--------+
+| $.results[?(@.from_user == 'origichara_bot')]             | 0.307   | 0.185  |
++-----------------------------------------------------------+---------+--------+
+| $.results[:3].from_user precompiled                       | 0.021   | 0.019  |
++-----------------------------------------------------------+---------+--------+
+| $.completed_in precompiled                                | 0.006   | 0.006  |
++-----------------------------------------------------------+---------+--------+
+| $.results[?(@.from_user == 'origichara_bot')] precompiled | 0.094   | 0.159  |
++-----------------------------------------------------------+---------+--------+
+
+Conclusion: not as fast as Jayway on compilation (to be expected due to Parser Combinators).
+However, that doesn't matter once compiled and cached (like in Gatling). Graph traversal can be even better on some complex use cases (liek the last one).
+
 Licence
 =======
 
