@@ -16,14 +16,11 @@ libraryDependencies += "org.parboiled2" %% "parboiled" % "2.0.0-SNAPSHOT"
 
 
 /// ScalaTest
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.0.RC2" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "2.0" % "test"
 
 
 /// ScalaMeter
-resolvers += "Sonatype OSS Snapshots" at
-  "https://oss.sonatype.org/content/repositories/snapshots"
-
-libraryDependencies += "com.github.axel22" %% "scalameter" % "0.4-SNAPSHOT" % "test"
+libraryDependencies += "com.github.axel22" %% "scalameter" % "0.4" % "test"
 
 testFrameworks += new TestFramework("org.scalameter.ScalaMeterFramework")
 
