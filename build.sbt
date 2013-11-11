@@ -11,6 +11,9 @@ scalacOptions ++= Seq("-unchecked", "-deprecation")
 /// JSON-Smart
 libraryDependencies += "net.minidev" % "json-smart" % "1.2"
 
+/// Parboiled
+libraryDependencies += "org.parboiled2" %% "parboiled" % "2.0.0-SNAPSHOT"
+
 
 /// ScalaTest
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.0.RC2" % "test"
