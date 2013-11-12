@@ -1,11 +1,13 @@
 package io.gatling.jsonpath.jsonsmart
 
 import java.util.{ List => JList, Map => JMap }
-import io.gatling.jsonpath.{ Parser, ComparisonOperator }
+
+import scala.collection.JavaConversions.{ asScalaBuffer, asScalaIterator }
+import scala.math.abs
+
+import io.gatling.jsonpath.{ ComparisonOperator, Parser }
 import io.gatling.jsonpath.AST._
 import net.minidev.json.JSONValue
-import scala.math.abs
-import scala.collection.JavaConversions.{ asScalaIterator, asScalaBuffer }
 
 case class JPError(reason: String)
 
@@ -14,10 +16,11 @@ object JsonPath {
 		override def initialValue() = new Parser
 	}
 
-	def compile(query: String): Either[JPError, JsonPath] = {
-		val compileResult = parser.get.compile(query)
-		compileResult.map((q) => Right(new JsonPath(q))).getOrElse(Left(JPError(compileResult.toString)))
-	}
+	def compile(query: String): Either[JPError, JsonPath] =
+		parser.get.compile(query) match {
+			case Parser.Success(q, _) => Right(new JsonPath(q))
+			case ns: Parser.NoSuccess => Left(JPError(ns.msg))
+		}
 
 	def queryJsonString(query: String, jsonString: String): Either[JPError, Iterator[Any]] =
 		compile(query).right.map(_.queryJsonString(jsonString))
