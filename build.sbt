@@ -8,9 +8,8 @@ scalaVersion := "2.10.3"
 
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
-/// JSON-Smart
-libraryDependencies += "net.minidev" % "json-smart" % "1.2"
-
+/// Jackson
+libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % "2.3.0"
 
 /// ScalaTest
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.0" % "test"

@@ -1,41 +1,38 @@
-package io.gatling.jsonpath
+package io.gatling.jsonpath.jackson
+
+import com.fasterxml.jackson.databind.node.NumericNode
+import com.fasterxml.jackson.databind.node.ValueNode
 
 // Comparison operators
 sealed trait ComparisonOperator {
 
 	def compare[T: Ordering](lhs: T, rhs: T): Boolean
 
-	def apply(lhs: Any, rhs: Any): Boolean = lhs match {
-		case s1: String => rhs match {
-			case s2: String => compare(s1, s2)
+	def apply(lhs: ValueNode, rhs: ValueNode): Boolean = lhs match {
+		case s1 if s1.isTextual => rhs match {
+			case s2 if s2.isTextual => compare(s1.textValue, s2.textValue)
 			case _ => false
 		}
-		case i1: Int => rhs match {
-			case i2: Int => compare(i1, i2)
-			case i2: Long => compare(i1, i2)
-			case i2: Double => compare(i1, i2)
-			case i2: Float => compare(i1, i2)
+		case f1 if f1.isFloat => rhs match {
+			case x2 if x2.isFloat => compare(f1.floatValue, x2.floatValue)
+			case x2 if x2.isInt => compare(f1.floatValue, x2.intValue)
+			case x2 if x2.isDouble => compare(f1.floatValue, x2.doubleValue)
+			case x2 if x2.isLong => compare(f1.floatValue, x2.longValue)
 			case _ => false
 		}
-		case i1: Long => rhs match {
-			case i2: Int => compare(i1, i2)
-			case i2: Long => compare(i1, i2)
-			case i2: Double => compare(i1, i2)
-			case i2: Float => compare(i1, i2)
+		case i1 if i1.isInt => rhs match {
+			case x2 if x2.isInt || x2.isFloat => compare(i1.intValue, x2.intValue)
+			case x2 if x2.isLong => compare(i1.longValue, x2.longValue)
+			case x2 if x2.isDouble => compare(i1.doubleValue, x2.doubleValue)
 			case _ => false
 		}
-		case i1: Double => rhs match {
-			case i2: Int => compare(i1, i2)
-			case i2: Long => compare(i1, i2)
-			case i2: Double => compare(i1, i2)
-			case i2: Float => compare(i1, i2)
+		case d1 if d1.isDouble => rhs match {
+			case x2 if x2.isDouble || x2.isInt || x2.isFloat => compare(d1.doubleValue, x2.doubleValue)
+			case x2 if x2.isLong => compare(d1.longValue, x2.longValue)
 			case _ => false
 		}
-		case i1: Float => rhs match {
-			case i2: Int => compare(i1, i2)
-			case i2: Long => compare(i1, i2)
-			case i2: Double => compare(i1, i2)
-			case i2: Float => compare(i1, i2)
+		case l1 if l1.isLong => rhs match {
+			case x2 if x2.isNumber => compare(l1.longValue, x2.longValue)
 			case _ => false
 		}
 		case _ => false

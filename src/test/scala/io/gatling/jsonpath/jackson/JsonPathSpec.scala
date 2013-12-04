@@ -1,24 +1,27 @@
-package io.gatling.jsonpath.jsonsmart
+package io.gatling.jsonpath.jackson
 
-import java.util.{ HashMap => JHashMap, List => JList }
+import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.matchers.{MatchResult, Matcher}
 
-import scala.collection.JavaConversions.seqAsJavaList
-
-import org.scalatest.{ FlatSpec, Matchers }
-import org.scalatest.matchers.{ MatchResult, Matcher }
-
-import net.minidev.json.JSONValue
+import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
+import com.fasterxml.jackson.databind.node._
 
 class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
 
-	def jsonTree(s: String) = JSONValue.parse(s)
-	def bool(b: Boolean) = b
-	def int(i: Int) = i
-	def double(f: Double) = f
-	def text(s: String) = s
-	def nullNode: Any = null
-	def array(elts: Any*): JList[Any] = elts
-	def obj(elts: (String, Any)*) = elts.foldLeft(new JHashMap[String, Any]())((o: JHashMap[String, Any], e) => {
+	val mapper = new ObjectMapper
+
+	def jsonTree(s: String) = mapper.readTree(s)
+	def bool(b: Boolean) = BooleanNode.valueOf(b)
+	def int(i: Int) = IntNode.valueOf(i)
+	def double(f: Double) = DoubleNode.valueOf(f)
+	def text(s: String) = TextNode.valueOf(s)
+	def nullNode = NullNode.getInstance
+	def array(elts: JsonNode*) = {
+		val a = mapper.createArrayNode
+		elts.foreach(e => a.add(e))
+		a
+	}
+	def obj(elts: (String, JsonNode)*) = elts.foldLeft(mapper.createObjectNode)((o: ObjectNode, e) => {
 		o.put(e._1, e._2)
 		o
 	})
@@ -81,7 +84,7 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
 	"Field accessors" should "work with a simple object" in {
 		val json = """{"foo" : "bar"}"""
 		JsonPath.queryJsonString("$.*", json) should findElements(text("bar"))
-		JsonPath.queryJsonString("$.foo", json) should findElements("bar")
+		JsonPath.queryJsonString("$.foo", json) should findElements(text("bar"))
 		JsonPath.queryJsonString("$..foo", json) should findElements(text("bar"))
 		JsonPath.queryJsonString("$.bar", json) should findElements()
 	}
@@ -166,16 +169,16 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
 		JsonPath.queryJsonString("$[?(@ == 3)]", oneToFive) should findOrderedElements(int(3))
 
 		val json = jsonTree("""[{"foo":"a"},{"foo":"b"},{"bar":"c"}]""")
-		JsonPath.queryJsonObject("$[?(@.foo=='a' )]", json) should findOrderedElements(obj("foo" -> "a"))
+		JsonPath.queryJsonObject("$[?(@.foo=='a' )]", json) should findOrderedElements(obj("foo" -> text("a")))
 	}
 
 	it should "work with non-alphanumeric values" in {
-		val json = jsonTree("""{ a:[{ a:5, '@':2, '$':3 },   
-						            { a:6, '@':3, '$':4 },  
-						            { a:7, '@':4, '$':5 } 
-						           ]}""")
-		JsonPath.queryJsonObject("$.a[?(@['@']==3)]", json) should findElements(jsonTree("""{"a":6,"@":3,"$":4}"""))
-		JsonPath.queryJsonObject("$.a[?(@['$']==5)]", json) should findElements(jsonTree("""{"a":7,"@":4,"$":5}"""))
+		val json = jsonTree("""{ "a":[{ "a":5, "@":2, "$":3 },   
+						              { "a":6, "@":3, "$":4 },  
+						              { "a":7, "@":4, "$":5 } 
+						             ]}""")
+		JsonPath.queryJsonObject("""$.a[?(@['@']==3)]""", json) should findElements(jsonTree("""{"a":6,"@":3,"$":4}"""))
+		JsonPath.queryJsonObject("""$.a[?(@['$']==5)]""", json) should findElements(jsonTree("""{"a":7,"@":4,"$":5}"""))
 	}
 
 	it should "work with some predefined comparison operators" in {

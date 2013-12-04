@@ -1,5 +1,8 @@
 package io.gatling.jsonpath
 
+import io.gatling.jsonpath.jackson.ComparisonOperator
+import io.gatling.jsonpath.jackson.BinaryBooleanOperator
+
 object AST {
 	sealed trait AstToken
 	sealed trait PathToken extends AstToken
