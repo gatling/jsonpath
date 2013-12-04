@@ -4,6 +4,7 @@ import org.scalameter.api._
 import io.gatling.jsonpath.jsonsmart.JsonPath
 import net.minidev.json.JSONValue
 import com.jayway.jsonpath.{ JsonPath => JaywayJsonPath }
+import io.gatling.jsonpath.jsonsmart.FastJsonPath
 
 object JsonPathBenchmark extends PerformanceTest.Quickbenchmark {
 
@@ -71,6 +72,15 @@ object JsonPathBenchmark extends PerformanceTest.Quickbenchmark {
 			}
 			using(twitterQueries) in {
 				JsonPath.queryJsonObject(_, twitterJson).right.map(_.toVector)
+			}
+		}
+
+		measure method "FAST query resolving" in {
+			using(goessnerQueries) in {
+				FastJsonPath.queryJsonObject(_, goessnerJson).right.map(_.toVector)
+			}
+			using(twitterQueries) in {
+				FastJsonPath.queryJsonObject(_, twitterJson).right.map(_.toVector)
 			}
 		}
 

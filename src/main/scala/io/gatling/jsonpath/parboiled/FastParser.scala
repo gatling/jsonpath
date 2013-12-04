@@ -18,16 +18,18 @@ class FastParser(val input: ParserInput) extends Parser {
 	def digit = rule { "0" - "9" }
 
 	///// 
-	def field = rule { capture(zeroOrMore(char)) ~> (Field(_)) }
-	def dotField = rule { "." ~ field }
+	def dotFieldName = rule { capture(zeroOrMore(char)) }
+	def dotField = rule { dotFieldName ~> (Field(_)) }
+	def dotRecursiveField = rule { dotFieldName ~> (RecursiveField(_)) }
 
 	def dotAnyChild = rule { "*" ~ push(AnyField) }
-	def dotRecursiveAnyChild = rule { ".*" ~ push(RecursiveAnyField) }
-	def dotMembers = rule { "." ~ (dotAnyChild | dotRecursiveAnyChild | field) }
+	def dotRecursiveMember = rule { "." ~ ("*" ~ push(RecursiveAnyField) | dotRecursiveField) }
+	def dotMember = rule { "." ~ (dotAnyChild | dotRecursiveMember | dotField) }
 
-	def arrayMembers = rule { "['*']" ~ push(AnyField) }
+	def arrayField = rule { ("*") ~ push(AnyField) }
+	def arrayMembers = rule { "[" ~ arrayField ~ "]" }
 
-	def childAccess = rule { dotMembers | arrayMembers }
+	def childAccess = rule { dotMember | arrayMembers }
 
 	//def pathSequence: Parser[List[PathToken]] = rep(childAccess | subscriptFilter)
 	def pathSequence = rule { zeroOrMore(childAccess) }

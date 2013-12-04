@@ -6,6 +6,7 @@ import io.gatling.jsonpath.AST._
 import net.minidev.json.JSONValue
 import scala.math.abs
 import scala.collection.JavaConversions.{ asScalaIterator, asScalaBuffer }
+import io.gatling.jsonpath.parboiled.FastParser
 
 case class JPError(reason: String)
 
@@ -24,6 +25,15 @@ object JsonPath {
 
 	def queryJsonObject(query: String, jsonObject: Any): Either[JPError, Iterator[Any]] =
 		compile(query).right.map(_.queryJsonObject(jsonObject))
+}
+
+object FastJsonPath {
+	def queryJsonObject(query: String, jsonObject: Any): Either[JPError, Iterator[Any]] =
+		FastParser.parse(query) match {
+			case Left(err) => Left(JPError(err))
+			case Right(q) => Right(new JsonPath(q.toList).queryJsonObject(jsonObject))
+
+		}
 }
 
 class JsonPath(path: List[PathToken]) {
