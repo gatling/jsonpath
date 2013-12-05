@@ -14,12 +14,10 @@ libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % "2.3.
 /// ScalaTest
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.0" % "test"
 
-
 /// ScalaMeter
 libraryDependencies += "com.github.axel22" %% "scalameter" % "0.4" % "test"
 
 testFrameworks += new TestFramework("org.scalameter.ScalaMeterFramework")
-
 
 /// Jayway JsonPath - for benchmarking purpose
 libraryDependencies += "com.jayway.jsonpath" % "json-path" % "0.9.1" % "test"
