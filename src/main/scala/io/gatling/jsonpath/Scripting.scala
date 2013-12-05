@@ -1,6 +1,4 @@
-package io.gatling.jsonpath.jackson
-
-import com.fasterxml.jackson.databind.node.NumericNode
+package io.gatling.jsonpath
 import com.fasterxml.jackson.databind.node.ValueNode
 
 // Comparison operators

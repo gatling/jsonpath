@@ -5,7 +5,6 @@ import org.scalatest.matchers.{ Matcher, MatchResult }
 import io.gatling.jsonpath.Parser._
 import io.gatling.jsonpath.AST._
 import org.scalatest.Matchers
-import io.gatling.jsonpath.jackson._
 
 class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
 

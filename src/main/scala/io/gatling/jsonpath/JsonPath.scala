@@ -1,10 +1,9 @@
-package io.gatling.jsonpath.jackson
+package io.gatling.jsonpath
 
-import scala.collection.JavaConversions.{ asScalaIterator, iterableAsScalaIterable }
 import scala.math.abs
+import scala.collection.JavaConversions._
 import com.fasterxml.jackson.databind.{ JsonNode, ObjectMapper }
 import com.fasterxml.jackson.databind.node._
-import io.gatling.jsonpath.{ Parser }
 import io.gatling.jsonpath.AST._
 
 case class JPError(reason: String)

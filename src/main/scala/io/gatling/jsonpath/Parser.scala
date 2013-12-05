@@ -3,7 +3,7 @@ package io.gatling.jsonpath
 import scala.annotation.switch
 import scala.util.parsing.combinator._
 import io.gatling.jsonpath.AST._
-import io.gatling.jsonpath.jackson._
+
 
 object Parser extends RegexParsers {
 

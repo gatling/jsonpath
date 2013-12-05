@@ -1,7 +1,7 @@
 package io.gatling.jsonpath.benchmark
 
 import org.scalameter.api._
-import io.gatling.jsonpath.jackson.JsonPath
+import io.gatling.jsonpath.JsonPath
 import net.minidev.json.JSONValue
 import com.jayway.jsonpath.{ JsonPath => JaywayJsonPath }
 import com.fasterxml.jackson.databind.ObjectMapper

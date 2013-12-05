@@ -1,8 +1,7 @@
-package io.gatling.jsonpath.jackson
+package io.gatling.jsonpath
 
 import org.scalatest.{FlatSpec, Matchers}
 import org.scalatest.matchers.{MatchResult, Matcher}
-
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import com.fasterxml.jackson.databind.node._
 
