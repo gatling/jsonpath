@@ -153,7 +153,7 @@ class JsonPathWalker(rootNode: JsonNode, fullPath: List[PathToken]) {
 
 	def recFieldFilter(node: JsonNode, name: String): Iterator[JsonNode] = {
 
-		node.findValues(name).iterator
+		node.findValues(name).iterator.filter(!_.isMissingNode)
 
 		// use @tailrec in Scala 2.11, cf: https://github.com/scala/scala/pull/2865
 		//		def _recFieldFilter(node: JsonNode): Iterator[JsonNode] =
