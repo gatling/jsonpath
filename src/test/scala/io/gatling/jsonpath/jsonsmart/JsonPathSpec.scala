@@ -81,7 +81,7 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
 	"Field accessors" should "work with a simple object" in {
 		val json = """{"foo" : "bar"}"""
 		JsonPath.queryJsonString("$.*", json) should findElements(text("bar"))
-		JsonPath.queryJsonString("$.foo", json) should findElements("bar")
+		JsonPath.queryJsonString("$.foo", json) should findElements(text("bar"))
 		JsonPath.queryJsonString("$..foo", json) should findElements(text("bar"))
 		JsonPath.queryJsonString("$.bar", json) should findElements()
 	}
@@ -166,16 +166,16 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
 		JsonPath.queryJsonString("$[?(@ == 3)]", oneToFive) should findOrderedElements(int(3))
 
 		val json = jsonTree("""[{"foo":"a"},{"foo":"b"},{"bar":"c"}]""")
-		JsonPath.queryJsonObject("$[?(@.foo=='a' )]", json) should findOrderedElements(obj("foo" -> "a"))
+		JsonPath.queryJsonObject("$[?(@.foo=='a' )]", json) should findOrderedElements(obj("foo" -> text("a")))
 	}
 
 	it should "work with non-alphanumeric values" in {
-		val json = jsonTree("""{ a:[{ a:5, '@':2, '$':3 },   
-						            { a:6, '@':3, '$':4 },  
-						            { a:7, '@':4, '$':5 } 
-						           ]}""")
-		JsonPath.queryJsonObject("$.a[?(@['@']==3)]", json) should findElements(jsonTree("""{"a":6,"@":3,"$":4}"""))
-		JsonPath.queryJsonObject("$.a[?(@['$']==5)]", json) should findElements(jsonTree("""{"a":7,"@":4,"$":5}"""))
+		val json = jsonTree("""{ "a":[{ "a":5, "@":2, "$":3 },   
+						              { "a":6, "@":3, "$":4 },  
+						              { "a":7, "@":4, "$":5 } 
+						             ]}""")
+		JsonPath.queryJsonObject("""$.a[?(@['@']==3)]""", json) should findElements(jsonTree("""{"a":6,"@":3,"$":4}"""))
+		JsonPath.queryJsonObject("""$.a[?(@['$']==5)]""", json) should findElements(jsonTree("""{"a":7,"@":4,"$":5}"""))
 	}
 
 	it should "work with some predefined comparison operators" in {
