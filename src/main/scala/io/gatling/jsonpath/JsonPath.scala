@@ -1,13 +1,26 @@
-package io.gatling.jsonpath.jsonsmart
+/**
+ * Copyright 2011-2013 Gatling (gatling.io)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * 		http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package io.gatling.jsonpath
 
 import java.util.{ List => JList, Map => JMap }
 
 import scala.collection.JavaConversions.{ asScalaBuffer, asScalaIterator }
 import scala.math.abs
 
-import io.gatling.jsonpath.{ ComparisonOperator, Parser }
 import io.gatling.jsonpath.AST._
-import net.minidev.json.JSONValue
 
 case class JPError(reason: String)
 
@@ -22,20 +35,13 @@ object JsonPath {
 			case ns: Parser.NoSuccess => Left(JPError(ns.msg))
 		}
 
-	def queryJsonString(query: String, jsonString: String): Either[JPError, Iterator[Any]] =
-		compile(query).right.map(_.queryJsonString(jsonString))
-
-	def queryJsonObject(query: String, jsonObject: Any): Either[JPError, Iterator[Any]] =
+	def query(query: String, jsonObject: Any): Either[JPError, Iterator[Any]] =
 		compile(query).right.map(_.queryJsonObject(jsonObject))
 }
 
 class JsonPath(path: List[PathToken]) {
 	def queryJsonObject(jsonObject: Any) = {
 		new JsonPathWalker(jsonObject, path).walk
-	}
-
-	def queryJsonString(jsonString: String) = {
-		new JsonPathWalker(JSONValue.parse(jsonString), path).walk
 	}
 }
 

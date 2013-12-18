@@ -8,22 +8,10 @@ scalaVersion := "2.10.3"
 
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
-/// JSON-Smart
-libraryDependencies += "net.minidev" % "json-smart" % "1.2"
-
-
 /// ScalaTest
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.0" % "test"
 
-
-/// ScalaMeter
-libraryDependencies += "com.github.axel22" %% "scalameter" % "0.4" % "test"
-
-testFrameworks += new TestFramework("org.scalameter.ScalaMeterFramework")
-
-
-/// Jayway JsonPath - for benchmarking purpose
-libraryDependencies += "com.jayway.jsonpath" % "json-path" % "0.9.1" % "test"
+libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % "2.3.0" % "test"
 
 /// Publishing
 publishTo <<= version { v: String =>
