@@ -36,11 +36,11 @@ object JsonPath {
 		}
 
 	def query(query: String, jsonObject: Any): Either[JPError, Iterator[Any]] =
-		compile(query).right.map(_.queryJsonObject(jsonObject))
+		compile(query).right.map(_.query(jsonObject))
 }
 
 class JsonPath(path: List[PathToken]) {
-	def queryJsonObject(jsonObject: Any) = {
+	def query(jsonObject: Any) = {
 		new JsonPathWalker(jsonObject, path).walk
 	}
 }
