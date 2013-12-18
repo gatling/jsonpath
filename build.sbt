@@ -13,6 +13,11 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "2.0" % "test"
 
 libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % "2.3.0" % "test"
 
+/// ScalaMeter
+libraryDependencies += "com.github.axel22" %% "scalameter" % "0.4" % "test"
+
+testFrameworks += new TestFramework("org.scalameter.ScalaMeterFramework")
+
 /// Publishing
 publishTo <<= version { v: String =>
   val nexus = "https://oss.sonatype.org/"
