@@ -162,8 +162,10 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
 		def _recFieldFilter(node: Any): Iterator[Any] =
 			node match {
 				case obj: JMap[_, _] =>
-					val (filtered, toExplore) = obj.entrySet.iterator.partition(_.getKey == name)
-					filtered.map(_.getValue) ++ toExplore.flatMap(e => _recFieldFilter(e.getValue))
+					obj.entrySet.iterator.flatMap(e => e.getKey match {
+						case `name` => Iterator.single(e.getValue)
+						case key => _recFieldFilter(e.getValue)
+					})
 				case list: JList[_] => list.iterator.flatMap(_recFieldFilter)
 				case _ => Iterator.empty
 			}
