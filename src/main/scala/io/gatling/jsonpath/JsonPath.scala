@@ -114,10 +114,9 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
 				case JPLong(l) => Some(l)
 				case JPDouble(d) => Some(d)
 				case JPString(s) => Some(s)
-				case SubQuery(q) => {
+				case SubQuery(q) =>
 					val it = walk(node, q)
 					if (it.hasNext) Some(it.next) else None
-				}
 			}
 
 		def applyBinaryOp(node: Any, op: ComparisonOperator, lhs: FilterValue, rhs: FilterValue): Boolean = {
