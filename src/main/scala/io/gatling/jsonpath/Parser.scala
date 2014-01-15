@@ -15,7 +15,6 @@
  */
 package io.gatling.jsonpath
 
-import scala.annotation.switch
 import scala.util.parsing.combinator.RegexParsers
 
 import io.gatling.jsonpath.AST._
@@ -26,8 +25,6 @@ object Parser extends RegexParsers {
 	val fieldRegex = """[$_\p{L}][$_\-\d\p{L}]*""".r
 	val quotedFieldRegex = "[^']+".r
 	val numberValueRegex = """-?\d+(\.\d*)?""".r
-	val comparisonOperatorRegex = "==|<=|>=|<|>".r
-	val booleanOperatorRegex = """\|\||&&""".r
 
 	/// general purpose parsers ///////////////////////////////////////////////
 
@@ -64,19 +61,18 @@ object Parser extends RegexParsers {
 
 	/// filters parsers ///////////////////////////////////////////////////////
 
-	def parseComparisonOperator(op: String) = (op.charAt(0): @switch) match {
-		case '=' => EqOperator
-		case '<' => if (op.size == 1) LessOperator else LessOrEqOperator
-		case '>' => if (op.size == 1) GreaterOperator else GreaterOrEqOperator
-	}
-
 	def numberValue: Parser[JPNumber] = numberValueRegex ^^ {
 		s => if (s.indexOf('.') != -1) JPDouble(s.toDouble) else JPLong(s.toLong)
 	}
 	def stringValue: Parser[JPString] = quotedField ^^ { JPString }
 	def value: Parser[FilterValue] = (numberValue | stringValue)
 
-	def comparisonOperator: Parser[String] = comparisonOperatorRegex
+	def comparisonOperator: Parser[ComparisonOperator] =
+		"==" ^^ (_ => EqOperator) |
+			"<=" ^^ (_ => LessOrEqOperator) |
+			"<" ^^ (_ => LessOperator) |
+			">=" ^^ (_ => GreaterOrEqOperator) |
+			">" ^^ (_ => GreaterOperator)
 
 	def current: Parser[PathToken] = "@" ^^ (_ => CurrentNode)
 
@@ -86,27 +82,22 @@ object Parser extends RegexParsers {
 	def expression1: Parser[FilterToken] =
 		subQuery ~ (comparisonOperator ~ (subQuery | value)).? ^^ {
 			case subq1 ~ None => HasFilter(subq1)
-			case lhs ~ Some(op ~ rhs) => ComparisonFilter(parseComparisonOperator(op), lhs, rhs)
+			case lhs ~ Some(op ~ rhs) => ComparisonFilter(op, lhs, rhs)
 		}
 
 	def expression2: Parser[FilterToken] =
 		value ~ comparisonOperator ~ (subQuery | value) ^^ {
-			case lhs ~ op ~ rhs => ComparisonFilter(parseComparisonOperator(op), lhs, rhs)
+			case lhs ~ op ~ rhs => ComparisonFilter(op, lhs, rhs)
 		}
 
 	def expression: Parser[FilterToken] = expression1 | expression2
 
-	def booleanOperator: Parser[String] = booleanOperatorRegex
-
-	def parseBooleanOperator(op: String) = (op.charAt(0): @switch) match {
-		case '&' => AndOperator
-		case '|' => OrOperator
-	}
+	def booleanOperator: Parser[BinaryBooleanOperator] = "&&" ^^ (_ => AndOperator) | "||" ^^ (_ => OrOperator)
 
 	def booleanExpression: Parser[FilterToken] =
 		expression ~ (booleanOperator ~ expression).? ^^ {
 			case lhs ~ None => lhs
-			case lhs ~ Some(op ~ rhs) => BooleanFilter(parseBooleanOperator(op), lhs, rhs)
+			case lhs ~ Some(op ~ rhs) => BooleanFilter(op, lhs, rhs)
 		}
 
 	def subscriptFilter: Parser[PathToken] =
@@ -140,7 +131,7 @@ object Parser extends RegexParsers {
 
 	/// Main parsers //////////////////////////////////////////////////////////
 
-	def childAccess = (fieldAccessors | arrayAccessors)
+	def childAccess = fieldAccessors | arrayAccessors
 
 	def pathSequence: Parser[List[PathToken]] = rep(childAccess | subscriptFilter)
 
