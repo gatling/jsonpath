@@ -114,10 +114,9 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
 				case JPLong(l) => Some(l)
 				case JPDouble(d) => Some(d)
 				case JPString(s) => Some(s)
-				case SubQuery(q) => {
+				case SubQuery(q) =>
 					val it = walk(node, q)
 					if (it.hasNext) Some(it.next) else None
-				}
 			}
 
 		def applyBinaryOp(node: Any, op: ComparisonOperator, lhs: FilterValue, rhs: FilterValue): Boolean = {
@@ -162,8 +161,10 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
 		def _recFieldFilter(node: Any): Iterator[Any] =
 			node match {
 				case obj: JMap[_, _] =>
-					val (filtered, toExplore) = obj.entrySet.iterator.partition(_.getKey == name)
-					filtered.map(_.getValue) ++ toExplore.flatMap(e => _recFieldFilter(e.getValue))
+					obj.entrySet.iterator.flatMap(e => e.getKey match {
+						case `name` => Iterator.single(e.getValue)
+						case key => _recFieldFilter(e.getValue)
+					})
 				case list: JList[_] => list.iterator.flatMap(_recFieldFilter)
 				case _ => Iterator.empty
 			}
