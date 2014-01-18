@@ -42,16 +42,22 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
 	}
 
 	it should "work when having multiple fields" in {
-		parse(subscriptField, "['foo', 'bar', 'baz']") should beParsedAs(MultiField(List("foo", "bar", "baz")))
-		parse(subscriptField, "['a', 'b c', 'd.e']") should beParsedAs(MultiField(List("a", "b c", "d.e")))
+		parse(fieldAccessors, "['foo', 'bar', 'baz']") should beParsedAs(MultiField(List("foo", "bar", "baz")))
+		parse(fieldAccessors, "['a', 'b c', 'd.e']") should beParsedAs(MultiField(List("a", "b c", "d.e")))
 	}
 
-	it should "support single quoted fiels" in {
-		parse(subscriptField, "['foo']") should beParsedAs(Field("foo"))
+	it should "support single quoted fields" in {
+		parse(fieldAccessors, "['foo']") should beParsedAs(Field("foo"))
 	}
 
-	it should "support double quoted fiels" in {
-		parse(subscriptField, """["foo"]""") should beParsedAs(Field("foo"))
+	it should "support double quoted fields" in {
+		parse(fieldAccessors, """["foo"]""") should beParsedAs(Field("foo"))
+	}
+
+	it should "support the 'any fields' syntax" in {
+		parse(fieldAccessors, ".*") should beParsedAs(AnyField)
+		parse(fieldAccessors, "['*']") should beParsedAs(AnyField)
+		parse(fieldAccessors, """["*"]""") should beParsedAs(AnyField)
 	}
 
 	"Array parsing" should "work with random array accessors" in {
