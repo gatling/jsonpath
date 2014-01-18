@@ -46,6 +46,14 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
 		parse(subscriptField, "['a', 'b c', 'd.e']") should beParsedAs(MultiField(List("a", "b c", "d.e")))
 	}
 
+	it should "support single quoted fiels" in {
+		parse(subscriptField, "['foo']") should beParsedAs(Field("foo"))
+	}
+
+	it should "support double quoted fiels" in {
+		parse(subscriptField, """["foo"]""") should beParsedAs(Field("foo"))
+	}
+
 	"Array parsing" should "work with random array accessors" in {
 		parse(arrayAccessors, "[1]") should beParsedAs(ArrayRandomAccess(1 :: Nil))
 		parse(arrayAccessors, "[42]") should beParsedAs(ArrayRandomAccess(42 :: Nil))
