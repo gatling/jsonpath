@@ -119,7 +119,7 @@ object Parser extends RegexParsers {
 	def recursiveField: Parser[FieldAccessor] =
 		".." ~> field ^^ RecursiveField
 
-	def anyChild: Parser[FieldAccessor] = (".*" | "['*']") ^^ (_ => AnyField)
+	def anyChild: Parser[FieldAccessor] = (".*" | "['*']" | """["*"]""") ^^ (_ => AnyField)
 
 	def anyRecursive: Parser[FieldAccessor] = "..*" ^^ (_ => RecursiveAnyField)
 
