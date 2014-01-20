@@ -40,9 +40,7 @@ object JsonPath {
 }
 
 class JsonPath(path: List[PathToken]) {
-	def query(jsonObject: Any) = {
-		new JsonPathWalker(jsonObject, path).walk
-	}
+	def query(jsonObject: Any) = new JsonPathWalker(jsonObject, path).walk
 }
 
 class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
