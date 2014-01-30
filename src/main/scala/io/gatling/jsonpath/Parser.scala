@@ -87,7 +87,7 @@ object Parser extends RegexParsers {
 		}
 
 	def expression2: Parser[FilterToken] =
-		value ~ comparisonOperator ~ (subQuery | value) ^^ {
+		value ~ comparisonOperator ~ subQuery ^^ {
 			case lhs ~ op ~ rhs => ComparisonFilter(op, lhs, rhs)
 		}
 
