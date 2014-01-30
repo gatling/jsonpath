@@ -93,12 +93,12 @@ You can also combine them with boolean operators, eg: ``$.store.book[?(@.price <
 Implementation
 ==============
 
-This implementation currently relies on `Json-Smart <http://code.google.com/p/json-smart>`_ for parsing the JSON document. The library can easily be adapted to use different JSON providers. 
+This implementation is JSON provider agnostic, but it requires to have JSON representation based on raw types from the JVM. For instance, with `Jackson <http://jackson.codehaus.org>`_, one could do the following: ``val jsonSample = (new ObjectMapper).readValue("""{"a":"A","b":"B"}""", classOf[Object])``.
 
-``JsonPath.query("$.a", """{"a":"A","b":"B"}""")`` gives you ``Right(non-empty iterator)``. This will allow you to iterate over all possible solutions to the query. 
+``JsonPath.query("$.a", jsonSample)`` gives you ``Right(non-empty iterator)``. This will allow you to iterate over all possible solutions to the query. 
 
 eg :  
-``JsonPath.query("$.a", """{"a":"A","b":"B"}""").right.map(_.toVector)`` gives you ``Right(Vector("A"))``
+``JsonPath.query("$.a", jsonSample).right.map(_.toVector)`` gives you ``Right(Vector("A"))``
 
 Benchmark vs Jayway's implementation
 ====================================
