@@ -18,6 +18,9 @@ libraryDependencies += "com.github.axel22" %% "scalameter" % "0.4" % "test"
 
 testFrameworks += new TestFramework("org.scalameter.ScalaMeterFramework")
 
+/// Scoverage plugin
+ScoverageSbtPlugin.instrumentSettings
+
 /// Publishing
 publishTo <<= version { v: String =>
   val nexus = "https://oss.sonatype.org/"
