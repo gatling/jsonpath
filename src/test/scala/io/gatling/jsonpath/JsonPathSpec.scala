@@ -54,6 +54,10 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
 
 	//////////////
 
+	"Incorrect JsonPath expressions" should "be handled properly" in {
+		JsonPath.query("€.$", goessnerJson) should be('left)
+	}
+
 	"Support of Goessner test cases" should "work with test set 1" in {
 		val json = parseJson("""{"a":"a","b":"b","c d":"e"}""")
 		JsonPath.query("$.a", json) should findElements(text("a"))
@@ -131,12 +135,14 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
 	"Multi-fields accessors" should "be interpreted correctly" in {
 		val json = parseJson("""{"menu":{"year":2013,"file":"open","options":[{"bold":true},{"font":"helvetica"},{"size":3}]}}""")
 		JsonPath.query("$.menu['file','year']", json) should findElements(text("open"), int(2013))
+		JsonPath.query("$..options['foo','bar']", json) should findElements()
 		JsonPath.query("$..options[*]['bold','size']", json) should findOrderedElements(bool(true), int(3))
 	}
 
 	val ten = parseJson("[1,2,3,4,5,6,7,8,9,10]")
 
 	"Array field slicing" should "work with random accessors" in {
+		JsonPath.query("$[0]", goessnerJson) should findElements()
 		JsonPath.query("$[0]", ten) should findOrderedElements(int(1))
 		JsonPath.query("$[-1]", ten) should findOrderedElements(int(10))
 		JsonPath.query("$[9]", ten) should findOrderedElements(int(10))
@@ -146,6 +152,7 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
 	}
 
 	it should "work when the slice operator has one separator" in {
+		JsonPath.query("$[:-1]", goessnerJson) should findElements()
 		JsonPath.query("$[:]", ten) should findOrderedElements(
 			int(1), int(2), int(3), int(4), int(5), int(6), int(7), int(8), int(9), int(10))
 		JsonPath.query("$[7:]", ten) should findOrderedElements(int(8), int(9), int(10))
@@ -196,6 +203,7 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
 
 	it should "work with some predefined comparison operators" in {
 		val oneToFive = parseJson("[1,2,3,4,5]")
+		JsonPath.query("$[0][?(@>1)]", oneToFive) should findElements()
 		JsonPath.query("$[?( @>1  && @<=4)]", oneToFive) should findOrderedElements(int(2), int(3), int(4))
 		JsonPath.query("$[?( @ == 1   || @ > 4)]", oneToFive) should findOrderedElements(int(1), int(5))
 	}
@@ -221,6 +229,7 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
 	}
 
 	it should "work with getting the whole store" in {
+		JsonPath.query("$..book.*", goessnerJson) should findElements()
 		JsonPath.query("$.store.*", goessnerJson) should findOrderedElements(parseJson(allBooks), parseJson(bicycle))
 	}
 
@@ -265,8 +274,8 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
 trait JsonPathMatchers {
 
 	class OrderedElementsMatcher(expected: Traversable[Any]) extends Matcher[Either[JPError, Iterator[Any]]] {
-		override def apply(left: Either[JPError, Iterator[Any]]): MatchResult =
-			left match {
+		override def apply(input: Either[JPError, Iterator[Any]]): MatchResult =
+			input match {
 				case Right(it) =>
 					val seq = it.toVector
 					MatchResult(seq == expected,
@@ -280,8 +289,8 @@ trait JsonPathMatchers {
 	def findOrderedElements(expected: Any*) = new OrderedElementsMatcher(expected)
 
 	class ElementsMatcher(expected: Traversable[Any]) extends Matcher[Either[JPError, Iterator[Any]]] {
-		override def apply(left: Either[JPError, Iterator[Any]]): MatchResult =
-			left match {
+		override def apply(input: Either[JPError, Iterator[Any]]): MatchResult =
+			input match {
 				case Right(it) =>
 					val seq = it.toVector
 					val missing = expected.toSeq.diff(seq.toSeq)
