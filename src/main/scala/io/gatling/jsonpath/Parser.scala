@@ -45,7 +45,7 @@ object Parser extends RegexParsers {
 		}
 
 	def arrayRandomAccess: Parser[Option[ArrayRandomAccess]] =
-		rep("," ~> number).? ^^ (indices => indices.map(ArrayRandomAccess))
+		rep1("," ~> number).? ^^ (indices => indices.map(ArrayRandomAccess))
 
 	def arrayPartial: Parser[ArrayAccessor] =
 		number ~ (arraySlice | arrayRandomAccess) ^^ {
