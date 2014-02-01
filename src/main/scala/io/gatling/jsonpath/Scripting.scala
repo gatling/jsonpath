@@ -25,6 +25,10 @@ sealed trait ComparisonOperator {
 			case s2: String => compare(s1, s2)
 			case _ => false
 		}
+		case b1: Boolean => rhs match {
+			case b2: Boolean => compare(b1, b2)
+			case _ => false
+		}
 		case i1: Int => rhs match {
 			case i2: Int => compare(i1, i2)
 			case i2: Long => compare(i1, i2)

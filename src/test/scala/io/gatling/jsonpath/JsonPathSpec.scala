@@ -99,6 +99,27 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
 		// Non supported syntax "$.points[(count(@)-1)].id"
 	}
 
+	it should "work with boolean filters" in {
+		val json = parseJson("""{ "conditions":
+			[true, false, true]
+		}""")
+
+		JsonPath.query("$.conditions[?(@ == true)]", json) should findElements(bool(true), bool(true))
+		JsonPath.query("$.conditions[?(@ == false)]", json) should findElements(bool(false))
+	}
+
+	it should "work with nested boolean filters" in {
+		val json = parseJson("""{ "conditions":
+			[
+				{ "id": "i1", "condition": true },
+				{ "id": "i2", "condition": false }
+			]
+		}""")
+
+		JsonPath.query("$.conditions[?(@['condition'] == true)].id", json) should findElements(text("i1"))
+		JsonPath.query("$.conditions[?(@['condition'] == false)].id", json) should findElements(text("i2"))
+	}
+
 	"Field accessors" should "work with a simple object" in {
 		val json = parseJson("""{"foo" : "bar"}""")
 		JsonPath.query("$.*", json) should findElements(text("bar"))

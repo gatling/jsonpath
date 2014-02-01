@@ -111,6 +111,7 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
 			filter match {
 				case JPLong(l) => Some(l)
 				case JPDouble(d) => Some(d)
+				case JPBoolean(b) => Some(b)
 				case JPString(s) => Some(s)
 				case SubQuery(q) =>
 					val it = walk(node, q)

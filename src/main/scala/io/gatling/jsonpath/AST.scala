@@ -47,6 +47,7 @@ object AST {
 	sealed trait JPNumber extends FilterValue
 	case class JPLong(i: Long) extends JPNumber
 	case class JPDouble(d: Double) extends JPNumber
+	case class JPBoolean(b: Boolean) extends FilterValue
 	case class JPString(s: String) extends FilterValue
 
 	case class SubQuery(path: List[PathToken]) extends FilterValue
