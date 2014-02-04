@@ -65,6 +65,10 @@ object EqOperator extends ComparisonOperator {
 	override def compare[T: Ordering](lhs: T, rhs: T) = lhs == rhs
 }
 
+object NotEqOperator extends ComparisonOperator {
+	override def compare[T: Ordering](lhs: T, rhs: T) = lhs != rhs
+}
+
 object LessOperator extends ComparisonOperator {
 	override def compare[T: Ordering](lhs: T, rhs: T) = implicitly[Ordering[T]].lt(lhs, rhs)
 }
