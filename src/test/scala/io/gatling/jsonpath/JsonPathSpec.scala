@@ -214,12 +214,12 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
 	}
 
 	it should "work with non-alphanumeric values" in {
-		val json = parseJson("""{ "a":[{ "a":5, "@":2, "$":3 },   
+		val json = parseJson("""{ "a":[{ "a":5, "@":2, "$":5 },   
 						              { "a":6, "@":3, "$":4 },  
 						              { "a":7, "@":4, "$":5 } 
 						             ]}""")
 		JsonPath.query("""$.a[?(@['@']==3)]""", json) should findElements(parseJson("""{"a":6,"@":3,"$":4}"""))
-		JsonPath.query("""$.a[?(@['$']==5)]""", json) should findElements(parseJson("""{"a":7,"@":4,"$":5}"""))
+		JsonPath.query("""$.a[?(@['$']!=5)]""", json) should findElements(parseJson("""{"a":6,"@":3,"$":4}"""))
 	}
 
 	it should "work with some predefined comparison operators" in {

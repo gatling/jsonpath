@@ -65,15 +65,16 @@ object Parser extends RegexParsers {
 	def numberValue: Parser[JPNumber] = numberValueRegex ^^ {
 		s => if (s.indexOf('.') != -1) JPDouble(s.toDouble) else JPLong(s.toLong)
 	}
-	def booleanValue: Parser[JPBoolean] = 
+	def booleanValue: Parser[JPBoolean] =
 		"true" ^^ (_ => JPBoolean(true)) |
-		"false" ^^ (_ => JPBoolean(false))
-	
+			"false" ^^ (_ => JPBoolean(false))
+
 	def stringValue: Parser[JPString] = quotedField ^^ { JPString }
 	def value: Parser[FilterValue] = (booleanValue | numberValue | stringValue)
 
 	def comparisonOperator: Parser[ComparisonOperator] =
 		"==" ^^ (_ => EqOperator) |
+			"!=" ^^ (_ => NotEqOperator) |
 			"<=" ^^ (_ => LessOrEqOperator) |
 			"<" ^^ (_ => LessOperator) |
 			">=" ^^ (_ => GreaterOrEqOperator) |

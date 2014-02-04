@@ -203,16 +203,14 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
 			ComparisonFilter(GreaterOperator, SubQuery(List(CurrentNode)), JPLong(2)))
 		parse(subscriptFilter, "[?(@ == true)]") should beParsedAs(
 			ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), JPBoolean(true)))
-		parse(subscriptFilter, "[?(@ == false)]") should beParsedAs(
-			ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), JPBoolean(false)))
+		parse(subscriptFilter, "[?(@ != false)]") should beParsedAs(
+			ComparisonFilter(NotEqOperator, SubQuery(List(CurrentNode)), JPBoolean(false)))
 
 		// Trickier Json path expressions
 		parse(subscriptFilter, "[?(@.foo == 2)]") should beParsedAs(
 			ComparisonFilter(EqOperator, SubQuery(List(CurrentNode, Field("foo"))), JPLong(2)))
-		parse(subscriptFilter, "[?(@.foo == true)]") should beParsedAs(
-			ComparisonFilter(EqOperator, SubQuery(List(CurrentNode, Field("foo"))), JPBoolean(true)))
-		parse(subscriptFilter, "[?(@.foo == false)]") should beParsedAs(
-			ComparisonFilter(EqOperator, SubQuery(List(CurrentNode, Field("foo"))), JPBoolean(false)))
+		parse(subscriptFilter, "[?(true == @.foo)]") should beParsedAs(
+			ComparisonFilter(EqOperator, JPBoolean(true), SubQuery(List(CurrentNode, Field("foo")))))
 		parse(subscriptFilter, "[?(2 == @['foo'])]") should beParsedAs(
 			ComparisonFilter(EqOperator, JPLong(2), SubQuery(List(CurrentNode, Field("foo")))))
 
