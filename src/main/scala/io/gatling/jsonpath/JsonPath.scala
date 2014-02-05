@@ -137,7 +137,18 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
 		def evaluateFilter(filterToken: FilterToken): Any => Boolean =
 			filterToken match {
 				case HasFilter(subQuery) => {
-					(node: Any) => walk(node, subQuery.path).hasNext
+					(node: Any) =>
+						val resolvedNode = walk(node, subQuery.path)
+						resolvedNode.hasNext && (resolvedNode.next match {
+							case null => false
+							case b: Boolean => b
+							case s: String => !s.isEmpty
+							case i: Int => i != 0
+							case l: Long => l != 0
+							case f: Float => f != 0.0f
+							case d: Double => d != 0.0d
+							case _ => true
+						})
 				}
 
 				case ComparisonFilter(op, lhs, rhs) => {

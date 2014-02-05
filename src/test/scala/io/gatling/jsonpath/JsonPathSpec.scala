@@ -211,6 +211,12 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
 
 		val json = parseJson("""[{"foo":"a"},{"foo":"b"},{"bar":"c"}]""")
 		JsonPath.query("$[?(@.foo=='a' )]", json) should findOrderedElements(obj("foo" -> text("a")))
+
+		val el1 = """{ "id":"i1", "n":1,    "b":true,  "i":1, "f":1.0, "s":"a", "o":{"a":"b"} }"""
+		val el2 = """{ "id":"i2", "n":null, "b":false, "i":0, "f":0.0, "s":"",  "o":{}  }"""
+		val el3 = """{ "id":"i3", "n":3,    "b":true,  "i":3, "f":3.0, "s":"c", "o":{"a":"b"} }"""
+		val json2 = parseJson(s"""{ "foo":[$el1, $el2, $el3 ]}""")
+		JsonPath.query("$.foo[?(@.b)].id", json2) should findOrderedElements(parseJson(el1), parseJson(el3))
 	}
 
 	it should "work with non-alphanumeric values" in {
