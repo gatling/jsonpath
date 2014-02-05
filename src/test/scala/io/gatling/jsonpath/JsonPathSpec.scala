@@ -239,6 +239,17 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
 		JsonPath.query("""$.book[?(@.author==$.authors[?(@.pseudo=='Hugo')].name)].title""", library) should findElements()
 	}
 
+	"`null` elements" should "be correctly handled" in {
+		val fooNull = parseJson("""{"foo":null}""")
+		JsonPath.query("$.foo", fooNull) should findElements(null)
+		JsonPath.query("$.foo.bar", fooNull) should findElements()
+
+		val arrayWithNull = parseJson("""{"foo":[1,null,3,"woot"]}""")
+		JsonPath.query("$.foo[?(@==null)]", arrayWithNull) should findElements(null)
+		JsonPath.query("$.foo[?(@>=null)]", arrayWithNull) should findElements()
+		JsonPath.query("$.foo[?(@>=0.5)]", arrayWithNull) should findOrderedElements(1, 3)
+	}
+
 	/// Goessner reference examples ///////////////////////////////////////////
 
 	"Goessner examples" should "work with finding all the authors" in {
@@ -287,8 +298,6 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
 			text("Sword of Honour"), text("Moby Dick"))
 
 	}
-
-	//////////////
 
 }
 

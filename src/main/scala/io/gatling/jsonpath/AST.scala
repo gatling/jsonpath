@@ -49,6 +49,7 @@ object AST {
 	case class JPDouble(d: Double) extends JPNumber
 	case class JPBoolean(b: Boolean) extends FilterValue
 	case class JPString(s: String) extends FilterValue
+	case object JPNull extends FilterValue
 
 	case class SubQuery(path: List[PathToken]) extends FilterValue
 

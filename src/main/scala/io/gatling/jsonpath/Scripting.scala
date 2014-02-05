@@ -15,8 +15,12 @@
  */
 package io.gatling.jsonpath
 
-// Comparison operators
 sealed trait ComparisonOperator {
+	def apply(lhs: Any, rhs: Any): Boolean
+}
+
+// Comparison operators
+sealed trait ComparisonWithOrderingOperator extends ComparisonOperator {
 
 	def compare[T: Ordering](lhs: T, rhs: T): Boolean
 
@@ -62,26 +66,26 @@ sealed trait ComparisonOperator {
 }
 
 object EqOperator extends ComparisonOperator {
-	override def compare[T: Ordering](lhs: T, rhs: T) = lhs == rhs
+	override def apply(lhs: Any, rhs: Any): Boolean = lhs == rhs
 }
 
 object NotEqOperator extends ComparisonOperator {
-	override def compare[T: Ordering](lhs: T, rhs: T) = lhs != rhs
+	override def apply(lhs: Any, rhs: Any): Boolean = lhs != rhs
 }
 
-object LessOperator extends ComparisonOperator {
+object LessOperator extends ComparisonWithOrderingOperator {
 	override def compare[T: Ordering](lhs: T, rhs: T) = implicitly[Ordering[T]].lt(lhs, rhs)
 }
 
-object GreaterOperator extends ComparisonOperator {
+object GreaterOperator extends ComparisonWithOrderingOperator {
 	override def compare[T: Ordering](lhs: T, rhs: T) = implicitly[Ordering[T]].gt(lhs, rhs)
 }
 
-object LessOrEqOperator extends ComparisonOperator {
+object LessOrEqOperator extends ComparisonWithOrderingOperator {
 	override def compare[T: Ordering](lhs: T, rhs: T) = implicitly[Ordering[T]].lteq(lhs, rhs)
 }
 
-object GreaterOrEqOperator extends ComparisonOperator {
+object GreaterOrEqOperator extends ComparisonWithOrderingOperator {
 	override def compare[T: Ordering](lhs: T, rhs: T) = implicitly[Ordering[T]].gteq(lhs, rhs)
 }
 

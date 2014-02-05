@@ -205,6 +205,8 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
 			ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), JPBoolean(true)))
 		parse(subscriptFilter, "[?(@ != false)]") should beParsedAs(
 			ComparisonFilter(NotEqOperator, SubQuery(List(CurrentNode)), JPBoolean(false)))
+		parse(subscriptFilter, "[?(@ == null)]") should beParsedAs(
+			ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), JPNull))
 
 		// Trickier Json path expressions
 		parse(subscriptFilter, "[?(@.foo == 2)]") should beParsedAs(

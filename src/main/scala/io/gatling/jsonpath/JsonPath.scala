@@ -17,6 +17,7 @@ package io.gatling.jsonpath
 
 import java.util.{ List => JList, Map => JMap }
 
+import scala.annotation.migration
 import scala.collection.JavaConversions.{ asScalaBuffer, asScalaIterator }
 import scala.math.abs
 
@@ -109,6 +110,7 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
 
 		def resolveFilterToken(node: Any, filter: FilterValue): Option[Any] =
 			filter match {
+				case JPNull => Some(null)
 				case JPLong(l) => Some(l)
 				case JPDouble(d) => Some(d)
 				case JPBoolean(b) => Some(b)
