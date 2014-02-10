@@ -4,8 +4,8 @@ script: sbt test
 
 env:
   global:
-    - secure: "WZMkwcbrRGzIfeHqljk0A+Praowhw+6A7/3KclMk2BpYQZQrg9cEMRE7KKioJc5uPniHybP0bpVfrwEn5we37itzKOG9DLrvkiN/SxBtC6/nRumoZtWdpgxIVoYdyblksWeeFi/S0ylvQrm2uk/1KQpY6xR2+ASMLdrpMvz2CE4="
-    - secure: "lQEcCcMLy2E01rtebZGIZAkY+krhqjGr1t8TY+8a222LS+VUfOc8NXhfr2lmlseLy2WxJDJ9UDl7JtMJbgv5jwge1aXQFEFFovGnDpK60rjeF0fXjtHH74sGG2Veg3KevXV4CDoYIc+WyqHxjMdcREQg4N+gTCFUVlyTWBpRLFI="
+    - secure: "ls8xKxauQ8Jb6PGRPPdjrIeIGK5gTlL9R3wgAtD1oHtJ7MJgFzSndM6reFI47rjnRoxYvw7kGQ2QjJ+PEc7q9BF3ut1QPPIeq2cqNp7l7qS9yxzpQt26SQNnE91nZxCZ2sxnule72ggY7hkCdgH6pxQnsmHRQqXFeZzL7Q6L0Fs="
+    - secure: "S6frXN1glDWVLGacehrhiFo5AWY8rRcyhPpCNBPlYbaOOEEZZlBV1Zht6fTQiKvWAccXxbYMbvsU9KznKzhITq4PS/4fhfOfpahjaF5x/Ag9OTi09RnGNH+TDLQ+xEcyfpqeWTsSI4aTU03ijihB3TnvXMKzSpiZzmjPFSvxEQI="
 
 # Publish to Sonatype if building master
 after_success:
