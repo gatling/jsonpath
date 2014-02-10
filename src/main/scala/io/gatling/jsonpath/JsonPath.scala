@@ -17,7 +17,6 @@ package io.gatling.jsonpath
 
 import java.util.{ List => JList, Map => JMap }
 
-import scala.annotation.migration
 import scala.collection.JavaConversions.{ asScalaBuffer, asScalaIterator }
 import scala.math.abs
 
