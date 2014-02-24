@@ -171,7 +171,8 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
 	def recFieldExplorer(node: Any): Iterator[Any] =
 		node match {
 			case obj: JMap[_, _] =>
-				obj.values.iterator ++ obj.values.iterator.flatMap(recFieldExplorer)
+				val values = obj.values
+				values.iterator ++ values.iterator.flatMap(recFieldExplorer)
 			case list: JList[_] =>
 				list.iterator.flatMap(recFieldExplorer)
 			case _ => Iterator.empty
