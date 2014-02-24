@@ -43,13 +43,16 @@ object AST {
 
 	case object CurrentNode extends PathToken
 	sealed trait FilterValue extends AstToken
+	sealed trait FilterDirectValue extends FilterValue {
+		def value: Any
+	}
 
-	sealed trait JPNumber extends FilterValue
-	case class JPLong(i: Long) extends JPNumber
-	case class JPDouble(d: Double) extends JPNumber
-	case class JPBoolean(b: Boolean) extends FilterValue
-	case class JPString(s: String) extends FilterValue
-	case object JPNull extends FilterValue
+	sealed trait JPNumber extends FilterDirectValue
+	case class JPLong(value: Long) extends JPNumber
+	case class JPDouble(value: Double) extends JPNumber
+	case class JPBoolean(value: Boolean) extends FilterDirectValue
+	case class JPString(value: String) extends FilterDirectValue
+	case object JPNull extends FilterDirectValue { val value = null }
 
 	case class SubQuery(path: List[PathToken]) extends FilterValue
 

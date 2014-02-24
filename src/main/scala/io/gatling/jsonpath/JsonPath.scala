@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * 		http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -107,26 +107,22 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
 
 	private[this] def applyFilter(filterToken: FilterToken, node: Any): Iterator[Any] = {
 
-		def resolveFilterToken(node: Any, filter: FilterValue): Option[Any] =
-			filter match {
-				case JPNull => Some(null)
-				case JPLong(l) => Some(l)
-				case JPDouble(d) => Some(d)
-				case JPBoolean(b) => Some(b)
-				case JPString(s) => Some(s)
-				case SubQuery(q) =>
-					val it = walk(node, q)
-					if (it.hasNext) Some(it.next) else None
+		def resolveSubQuery(node: Any, q: List[AST.PathToken], nextOp: Any => Boolean): Boolean = {
+			val it = walk(node, q)
+			it.hasNext && nextOp(it.next)
+		}
+
+		def applyBinaryOpWithResolvedLeft(node: Any, op: ComparisonOperator, lhsNode: Any, rhs: FilterValue): Boolean =
+			rhs match {
+				case direct: FilterDirectValue => op(lhsNode, direct.value)
+				case SubQuery(q) => resolveSubQuery(node, q, op(lhsNode, _))
 			}
 
-		def applyBinaryOp(node: Any, op: ComparisonOperator, lhs: FilterValue, rhs: FilterValue): Boolean = {
-			val opEvaluation = for {
-				lhsNode <- resolveFilterToken(node, lhs)
-				rhsNode <- resolveFilterToken(node, rhs)
-			} yield op(lhsNode, rhsNode)
-
-			opEvaluation.getOrElse(false)
-		}
+		def applyBinaryOp(node: Any, op: ComparisonOperator, lhs: FilterValue, rhs: FilterValue): Boolean =
+			lhs match {
+				case direct: FilterDirectValue => applyBinaryOpWithResolvedLeft(node, op, direct.value, rhs)
+				case SubQuery(q) => resolveSubQuery(node, q, applyBinaryOpWithResolvedLeft(node, op, _, rhs))
+			}
 
 		def elementsToFilter(node: Any): Iterator[Any] =
 			node match {
@@ -187,8 +183,14 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
 		def lenRelative(x: Int) = if (x >= 0) x else size + x
 		def stepRelative(x: Int) = if (step >= 0) x else -1 - x
 		def relative = lenRelative _ compose stepRelative _
-		val absStart = start.map(relative).getOrElse(0)
-		val absEnd = stop.map(relative).getOrElse(size)
+		val absStart = start match {
+			case Some(v) => relative(v)
+			case _ => 0
+		}
+		val absEnd = stop match {
+			case Some(v) => relative(v)
+			case _ => size
+		}
 		val absStep = abs(step)
 
 		val elts: Iterator[Any] = if (step < 0) array.reverseIterator else array.iterator
