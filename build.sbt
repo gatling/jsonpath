@@ -4,14 +4,14 @@ organization := "io.gatling"
 
 version := "0.5-SNAPSHOT"                                                       
 
-scalaVersion := "2.10.3"   
+scalaVersion := "2.10.4"   
 
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
 /// ScalaTest
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.0" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "2.1.0" % "test"
 
-libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % "2.3.0" % "test"
+libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % "2.3.2" % "test"
 
 /// ScalaMeter
 libraryDependencies += "com.github.axel22" %% "scalameter" % "0.4" % "test"
