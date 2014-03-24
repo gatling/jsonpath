@@ -23,247 +23,247 @@ import org.scalatest.Matchers
 
 class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
 
-	"Field parsing" should "work with standard names" in {
-		def shouldParseField(name: String) = {
-			val field = Field(name)
-			parse(dotField, s".$name") should beParsedAs(field)
-			parse(subscriptField, s"['$name']") should beParsedAs(field)
-		}
+  "Field parsing" should "work with standard names" in {
+      def shouldParseField(name: String) = {
+        val field = Field(name)
+        parse(dotField, s".$name") should beParsedAs(field)
+        parse(subscriptField, s"['$name']") should beParsedAs(field)
+      }
 
-		shouldParseField("foo")
-		shouldParseField("$foo")
-		shouldParseField("Foo$1bar")
-		shouldParseField("_1-2-3")
-		shouldParseField("ñ1çölå$")
-	}
+    shouldParseField("foo")
+    shouldParseField("$foo")
+    shouldParseField("Foo$1bar")
+    shouldParseField("_1-2-3")
+    shouldParseField("ñ1çölå$")
+  }
 
-	it should "work with the root object" in {
-		parse(Parser.root, "$") should beParsedAs(RootNode)
-	}
+  it should "work with the root object" in {
+    parse(Parser.root, "$") should beParsedAs(RootNode)
+  }
 
-	it should "work when having multiple fields" in {
-		parse(fieldAccessors, "['foo', 'bar', 'baz']") should beParsedAs(MultiField(List("foo", "bar", "baz")))
-		parse(fieldAccessors, "['a', 'b c', 'd.e']") should beParsedAs(MultiField(List("a", "b c", "d.e")))
-	}
+  it should "work when having multiple fields" in {
+    parse(fieldAccessors, "['foo', 'bar', 'baz']") should beParsedAs(MultiField(List("foo", "bar", "baz")))
+    parse(fieldAccessors, "['a', 'b c', 'd.e']") should beParsedAs(MultiField(List("a", "b c", "d.e")))
+  }
 
-	it should "support single quoted fields" in {
-		parse(fieldAccessors, "['foo']") should beParsedAs(Field("foo"))
-	}
+  it should "support single quoted fields" in {
+    parse(fieldAccessors, "['foo']") should beParsedAs(Field("foo"))
+  }
 
-	it should "support double quoted fields" in {
-		parse(fieldAccessors, """["foo"]""") should beParsedAs(Field("foo"))
-	}
+  it should "support double quoted fields" in {
+    parse(fieldAccessors, """["foo"]""") should beParsedAs(Field("foo"))
+  }
 
-	it should "support the 'any fields' syntax" in {
-		parse(fieldAccessors, ".*") should beParsedAs(AnyField)
-		parse(fieldAccessors, "['*']") should beParsedAs(AnyField)
-		parse(fieldAccessors, """["*"]""") should beParsedAs(AnyField)
-	}
+  it should "support the 'any fields' syntax" in {
+    parse(fieldAccessors, ".*") should beParsedAs(AnyField)
+    parse(fieldAccessors, "['*']") should beParsedAs(AnyField)
+    parse(fieldAccessors, """["*"]""") should beParsedAs(AnyField)
+  }
 
-	"Array parsing" should "work with random array accessors" in {
-		parse(arrayAccessors, "[1]") should beParsedAs(ArrayRandomAccess(1 :: Nil))
-		parse(arrayAccessors, "[42]") should beParsedAs(ArrayRandomAccess(42 :: Nil))
-		parse(arrayAccessors, "[-1]") should beParsedAs(ArrayRandomAccess(-1 :: Nil))
-		parse(arrayAccessors, "[-1,42 , -9]") should beParsedAs(ArrayRandomAccess(-1 :: 42 :: -9 :: Nil))
-	}
+  "Array parsing" should "work with random array accessors" in {
+    parse(arrayAccessors, "[1]") should beParsedAs(ArrayRandomAccess(1 :: Nil))
+    parse(arrayAccessors, "[42]") should beParsedAs(ArrayRandomAccess(42 :: Nil))
+    parse(arrayAccessors, "[-1]") should beParsedAs(ArrayRandomAccess(-1 :: Nil))
+    parse(arrayAccessors, "[-1,42 , -9]") should beParsedAs(ArrayRandomAccess(-1 :: 42 :: -9 :: Nil))
+  }
 
-	it should "should parse correctly the array slice operator" in {
-		// 1 separator
-		parse(arrayAccessors, "[:]") should beParsedAs(ArraySlice(None, None, 1))
-		parse(arrayAccessors, "[2:]") should beParsedAs(ArraySlice(Some(2), None, 1))
-		parse(arrayAccessors, "[:2]") should beParsedAs(ArraySlice(None, Some(2)))
-		parse(arrayAccessors, "[2:4]") should beParsedAs(ArraySlice(Some(2), Some(4)))
+  it should "should parse correctly the array slice operator" in {
+    // 1 separator
+    parse(arrayAccessors, "[:]") should beParsedAs(ArraySlice(None, None, 1))
+    parse(arrayAccessors, "[2:]") should beParsedAs(ArraySlice(Some(2), None, 1))
+    parse(arrayAccessors, "[:2]") should beParsedAs(ArraySlice(None, Some(2)))
+    parse(arrayAccessors, "[2:4]") should beParsedAs(ArraySlice(Some(2), Some(4)))
 
-		// 2 separators
-		parse(arrayAccessors, "[::]") should beParsedAs(ArraySlice(None, None, 1))
-		parse(arrayAccessors, "[::2]") should beParsedAs(ArraySlice(None, None, 2))
-		parse(arrayAccessors, "[2::]") should beParsedAs(ArraySlice(Some(2), None, 1))
-		parse(arrayAccessors, "[4::2]") should beParsedAs(ArraySlice(Some(4), None, 2))
-		parse(arrayAccessors, "[:4:2]") should beParsedAs(ArraySlice(None, Some(4), 2))
-		parse(arrayAccessors, "[0:8:2]") should beParsedAs(ArraySlice(Some(0), Some(8), 2))
-	}
+    // 2 separators
+    parse(arrayAccessors, "[::]") should beParsedAs(ArraySlice(None, None, 1))
+    parse(arrayAccessors, "[::2]") should beParsedAs(ArraySlice(None, None, 2))
+    parse(arrayAccessors, "[2::]") should beParsedAs(ArraySlice(Some(2), None, 1))
+    parse(arrayAccessors, "[4::2]") should beParsedAs(ArraySlice(Some(4), None, 2))
+    parse(arrayAccessors, "[:4:2]") should beParsedAs(ArraySlice(None, Some(4), 2))
+    parse(arrayAccessors, "[0:8:2]") should beParsedAs(ArraySlice(Some(0), Some(8), 2))
+  }
 
-	it should "work with array access on the root object" in {
-		new Parser().compile("$[1]").get should be(RootNode :: ArrayRandomAccess(List(1)) :: Nil)
-		new Parser().compile("$[*]").get should be(RootNode :: ArraySlice(None, None) :: Nil)
-	}
+  it should "work with array access on the root object" in {
+    new Parser().compile("$[1]").get should be(RootNode :: ArrayRandomAccess(List(1)) :: Nil)
+    new Parser().compile("$[*]").get should be(RootNode :: ArraySlice(None, None) :: Nil)
+  }
 
-	it should "work with array access on fields" in {
-		parse(pathSequence, ".foo[1]").get should be(Field("foo") :: ArrayRandomAccess(List(1)) :: Nil)
-		parse(pathSequence, ".ñ1çölå$[*]").get should be(Field("ñ1çölå$") :: ArraySlice(None, None) :: Nil)
-	}
+  it should "work with array access on fields" in {
+    parse(pathSequence, ".foo[1]").get should be(Field("foo") :: ArrayRandomAccess(List(1)) :: Nil)
+    parse(pathSequence, ".ñ1çölå$[*]").get should be(Field("ñ1çölå$") :: ArraySlice(None, None) :: Nil)
+  }
 
-	it should "work with array access on subscript fields" in {
-		parse(pathSequence, "['foo'][1]").get should be(Field("foo") :: ArrayRandomAccess(List(1)) :: Nil)
-		parse(pathSequence, "['ñ1çölå$'][*]").get should be(Field("ñ1çölå$") :: ArraySlice(None, None) :: Nil)
-	}
+  it should "work with array access on subscript fields" in {
+    parse(pathSequence, "['foo'][1]").get should be(Field("foo") :: ArrayRandomAccess(List(1)) :: Nil)
+    parse(pathSequence, "['ñ1çölå$'][*]").get should be(Field("ñ1çölå$") :: ArraySlice(None, None) :: Nil)
+  }
 
-	"Dot fields" should "get parsed properly" in {
-		parse(dotField, ".foo") should beParsedAs(Field("foo"))
-		parse(dotField, ".ñ1çölå$") should beParsedAs(Field("ñ1çölå$"))
-	}
+  "Dot fields" should "get parsed properly" in {
+    parse(dotField, ".foo") should beParsedAs(Field("foo"))
+    parse(dotField, ".ñ1çölå$") should beParsedAs(Field("ñ1çölå$"))
+  }
 
-	it should "work on the root element" in {
-		new Parser().compile("$.foo").get should be(RootNode :: Field("foo") :: Nil)
-		new Parser().compile("$['foo']").get should be(RootNode :: Field("foo") :: Nil)
+  it should "work on the root element" in {
+    new Parser().compile("$.foo").get should be(RootNode :: Field("foo") :: Nil)
+    new Parser().compile("$['foo']").get should be(RootNode :: Field("foo") :: Nil)
 
-		// TODO  : how to access childs w/ ['xxx'] notation
-		new Parser().compile("$..foo").get should be(RootNode :: RecursiveField("foo") :: Nil)
-	}
+    // TODO  : how to access childs w/ ['xxx'] notation
+    new Parser().compile("$..foo").get should be(RootNode :: RecursiveField("foo") :: Nil)
+  }
 
-	// cf : http://goessner.net/articles/JsonPath
-	"Expressions from Goessner specs" should "be correctly parsed" in {
-		def shouldParse(query: String, expected: Any) = {
-			new Parser().compile(query).get should be(expected)
-		}
+  // cf : http://goessner.net/articles/JsonPath
+  "Expressions from Goessner specs" should "be correctly parsed" in {
+      def shouldParse(query: String, expected: Any) = {
+        new Parser().compile(query).get should be(expected)
+      }
 
-		shouldParse("$.store.book[0].title", List(
-			RootNode,
-			Field("store"),
-			Field("book"), ArrayRandomAccess(List(0)),
-			Field("title")))
-		shouldParse("$['store']['book'][0]['title']", List(
-			RootNode,
-			Field("store"),
-			Field("book"), ArrayRandomAccess(List(0)),
-			Field("title")))
-		shouldParse("$.store.book[*].author", List(
-			RootNode,
-			Field("store"),
-			Field("book"), ArraySlice(None, None),
-			Field("author")))
-		shouldParse("$..author", List(RootNode, RecursiveField("author")))
-		shouldParse("$.store.*", List(RootNode, Field("store"), AnyField))
-		shouldParse("$.store..price", List(RootNode, Field("store"), RecursiveField("price")))
-		shouldParse("$..*", List(RootNode, RecursiveAnyField))
-		shouldParse("$.*", List(RootNode, AnyField))
-		shouldParse("$..book[2]", List(RootNode, RecursiveField("book"), ArrayRandomAccess(List(2))))
-		shouldParse("$.book[*]", List(RootNode, Field("book"), ArraySlice(None, None)))
-		shouldParse("$..book[*]", List(RootNode, RecursiveField("book"), ArraySlice(None, None)))
-		shouldParse("$.store['store']..book['book'][0].title..title['title'].*..*.book[*]..book[*]", List(
-			RootNode,
-			Field("store"),
-			Field("store"),
-			RecursiveField("book"),
-			Field("book"), ArrayRandomAccess(List(0)),
-			Field("title"),
-			RecursiveField("title"),
-			Field("title"),
-			AnyField,
-			RecursiveAnyField,
-			Field("book"), ArraySlice(None, None),
-			RecursiveField("book"), ArraySlice(None, None)))
-	}
+    shouldParse("$.store.book[0].title", List(
+      RootNode,
+      Field("store"),
+      Field("book"), ArrayRandomAccess(List(0)),
+      Field("title")))
+    shouldParse("$['store']['book'][0]['title']", List(
+      RootNode,
+      Field("store"),
+      Field("book"), ArrayRandomAccess(List(0)),
+      Field("title")))
+    shouldParse("$.store.book[*].author", List(
+      RootNode,
+      Field("store"),
+      Field("book"), ArraySlice(None, None),
+      Field("author")))
+    shouldParse("$..author", List(RootNode, RecursiveField("author")))
+    shouldParse("$.store.*", List(RootNode, Field("store"), AnyField))
+    shouldParse("$.store..price", List(RootNode, Field("store"), RecursiveField("price")))
+    shouldParse("$..*", List(RootNode, RecursiveAnyField))
+    shouldParse("$.*", List(RootNode, AnyField))
+    shouldParse("$..book[2]", List(RootNode, RecursiveField("book"), ArrayRandomAccess(List(2))))
+    shouldParse("$.book[*]", List(RootNode, Field("book"), ArraySlice(None, None)))
+    shouldParse("$..book[*]", List(RootNode, RecursiveField("book"), ArraySlice(None, None)))
+    shouldParse("$.store['store']..book['book'][0].title..title['title'].*..*.book[*]..book[*]", List(
+      RootNode,
+      Field("store"),
+      Field("store"),
+      RecursiveField("book"),
+      Field("book"), ArrayRandomAccess(List(0)),
+      Field("title"),
+      RecursiveField("title"),
+      Field("title"),
+      AnyField,
+      RecursiveAnyField,
+      Field("book"), ArraySlice(None, None),
+      RecursiveField("book"), ArraySlice(None, None)))
+  }
 
-	"Failures" should "be handled gracefully" in {
-		def gracefulFailure(query: String) =
-			new Parser().compile(query) match {
-				case Parser.Failure(msg, _) =>
-					info(s"""that's an expected failure for "$query": $msg""")
-				case other =>
-					fail(s"""a Failure was expected but instead, for "$query" got: $other""")
-			}
+  "Failures" should "be handled gracefully" in {
+      def gracefulFailure(query: String) =
+        new Parser().compile(query) match {
+          case Parser.Failure(msg, _) =>
+            info(s"""that's an expected failure for "$query": $msg""")
+          case other =>
+            fail(s"""a Failure was expected but instead, for "$query" got: $other""")
+        }
 
-		gracefulFailure("")
-		gracefulFailure("foo")
-		gracefulFailure("$f")
-		gracefulFailure("$.42foo")
-		gracefulFailure("$.[42]")
-		gracefulFailure("$.[1:2,3]")
-		gracefulFailure("$.[?(@.foo && 2)]")
-	}
+    gracefulFailure("")
+    gracefulFailure("foo")
+    gracefulFailure("$f")
+    gracefulFailure("$.42foo")
+    gracefulFailure("$.[42]")
+    gracefulFailure("$.[1:2,3]")
+    gracefulFailure("$.[?(@.foo && 2)]")
+  }
 
-	"Filters" should "work with subqueries" in {
-		parse(subscriptFilter, "[?(@..foo)]") should beParsedAs(
-			HasFilter(SubQuery(List(CurrentNode, RecursiveField("foo")))))
-		parse(subscriptFilter, "[?(@.foo.baz)]") should beParsedAs(
-			HasFilter(SubQuery(List(CurrentNode, Field("foo"), Field("baz")))))
-		parse(subscriptFilter, "[?(@['foo'])]") should beParsedAs(
-			HasFilter(SubQuery(List(CurrentNode, Field("foo")))))
+  "Filters" should "work with subqueries" in {
+    parse(subscriptFilter, "[?(@..foo)]") should beParsedAs(
+      HasFilter(SubQuery(List(CurrentNode, RecursiveField("foo")))))
+    parse(subscriptFilter, "[?(@.foo.baz)]") should beParsedAs(
+      HasFilter(SubQuery(List(CurrentNode, Field("foo"), Field("baz")))))
+    parse(subscriptFilter, "[?(@['foo'])]") should beParsedAs(
+      HasFilter(SubQuery(List(CurrentNode, Field("foo")))))
 
-		new Parser().compile("$.things[?(@.foo.bar)]").get should be(RootNode
-			:: Field("things")
-			:: HasFilter(SubQuery(CurrentNode :: Field("foo") :: Field("bar") :: Nil))
-			:: Nil)
+    new Parser().compile("$.things[?(@.foo.bar)]").get should be(RootNode
+      :: Field("things")
+      :: HasFilter(SubQuery(CurrentNode :: Field("foo") :: Field("bar") :: Nil))
+      :: Nil)
 
-	}
+  }
 
-	it should "work with some predefined comparison operators" in {
+  it should "work with some predefined comparison operators" in {
 
-		// Check all supported ordering operators
-		parse(subscriptFilter, "[?(@ == 2)]") should beParsedAs(
-			ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), JPLong(2)))
-		parse(subscriptFilter, "[?(@ <= 2)]") should beParsedAs(
-			ComparisonFilter(LessOrEqOperator, SubQuery(List(CurrentNode)), JPLong(2)))
-		parse(subscriptFilter, "[?(@ >= 2)]") should beParsedAs(
-			ComparisonFilter(GreaterOrEqOperator, SubQuery(List(CurrentNode)), JPLong(2)))
-		parse(subscriptFilter, "[?(@ < 2)]") should beParsedAs(
-			ComparisonFilter(LessOperator, SubQuery(List(CurrentNode)), JPLong(2)))
-		parse(subscriptFilter, "[?(@ > 2)]") should beParsedAs(
-			ComparisonFilter(GreaterOperator, SubQuery(List(CurrentNode)), JPLong(2)))
-		parse(subscriptFilter, "[?(@ == true)]") should beParsedAs(
-			ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), JPBoolean(true)))
-		parse(subscriptFilter, "[?(@ != false)]") should beParsedAs(
-			ComparisonFilter(NotEqOperator, SubQuery(List(CurrentNode)), JPBoolean(false)))
-		parse(subscriptFilter, "[?(@ == null)]") should beParsedAs(
-			ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), JPNull))
+    // Check all supported ordering operators
+    parse(subscriptFilter, "[?(@ == 2)]") should beParsedAs(
+      ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), JPLong(2)))
+    parse(subscriptFilter, "[?(@ <= 2)]") should beParsedAs(
+      ComparisonFilter(LessOrEqOperator, SubQuery(List(CurrentNode)), JPLong(2)))
+    parse(subscriptFilter, "[?(@ >= 2)]") should beParsedAs(
+      ComparisonFilter(GreaterOrEqOperator, SubQuery(List(CurrentNode)), JPLong(2)))
+    parse(subscriptFilter, "[?(@ < 2)]") should beParsedAs(
+      ComparisonFilter(LessOperator, SubQuery(List(CurrentNode)), JPLong(2)))
+    parse(subscriptFilter, "[?(@ > 2)]") should beParsedAs(
+      ComparisonFilter(GreaterOperator, SubQuery(List(CurrentNode)), JPLong(2)))
+    parse(subscriptFilter, "[?(@ == true)]") should beParsedAs(
+      ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), JPBoolean(true)))
+    parse(subscriptFilter, "[?(@ != false)]") should beParsedAs(
+      ComparisonFilter(NotEqOperator, SubQuery(List(CurrentNode)), JPBoolean(false)))
+    parse(subscriptFilter, "[?(@ == null)]") should beParsedAs(
+      ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), JPNull))
 
-		// Trickier Json path expressions
-		parse(subscriptFilter, "[?(@.foo == 2)]") should beParsedAs(
-			ComparisonFilter(EqOperator, SubQuery(List(CurrentNode, Field("foo"))), JPLong(2)))
-		parse(subscriptFilter, "[?(true == @.foo)]") should beParsedAs(
-			ComparisonFilter(EqOperator, JPBoolean(true), SubQuery(List(CurrentNode, Field("foo")))))
-		parse(subscriptFilter, "[?(2 == @['foo'])]") should beParsedAs(
-			ComparisonFilter(EqOperator, JPLong(2), SubQuery(List(CurrentNode, Field("foo")))))
+    // Trickier Json path expressions
+    parse(subscriptFilter, "[?(@.foo == 2)]") should beParsedAs(
+      ComparisonFilter(EqOperator, SubQuery(List(CurrentNode, Field("foo"))), JPLong(2)))
+    parse(subscriptFilter, "[?(true == @.foo)]") should beParsedAs(
+      ComparisonFilter(EqOperator, JPBoolean(true), SubQuery(List(CurrentNode, Field("foo")))))
+    parse(subscriptFilter, "[?(2 == @['foo'])]") should beParsedAs(
+      ComparisonFilter(EqOperator, JPLong(2), SubQuery(List(CurrentNode, Field("foo")))))
 
-		// Allow reference to the root object
-		parse(subscriptFilter, "[?(@ == $['foo'])]") should beParsedAs(
-			ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), SubQuery(List(RootNode, Field("foo")))))
+    // Allow reference to the root object
+    parse(subscriptFilter, "[?(@ == $['foo'])]") should beParsedAs(
+      ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), SubQuery(List(RootNode, Field("foo")))))
 
-		new Parser().compile("$['points'][?(@['y'] >= 3)].id").get should be(RootNode
-			:: Field("points")
-			:: ComparisonFilter(GreaterOrEqOperator, SubQuery(List(CurrentNode, Field("y"))), JPLong(3))
-			:: Field("id") :: Nil)
+    new Parser().compile("$['points'][?(@['y'] >= 3)].id").get should be(RootNode
+      :: Field("points")
+      :: ComparisonFilter(GreaterOrEqOperator, SubQuery(List(CurrentNode, Field("y"))), JPLong(3))
+      :: Field("id") :: Nil)
 
-		new Parser().compile("$.points[?(@['id']=='i4')].x").get should be(RootNode
-			:: Field("points")
-			:: ComparisonFilter(EqOperator, SubQuery(List(CurrentNode, Field("id"))), JPString("i4"))
-			:: Field("x") :: Nil)
-	}
+    new Parser().compile("$.points[?(@['id']=='i4')].x").get should be(RootNode
+      :: Field("points")
+      :: ComparisonFilter(EqOperator, SubQuery(List(CurrentNode, Field("id"))), JPString("i4"))
+      :: Field("x") :: Nil)
+  }
 
-	it should "work with some predefined boolean operators" in {
-		parse(subscriptFilter, "[?(@.foo && @.bar)]") should beParsedAs(
-			BooleanFilter(AndOperator,
-				HasFilter(SubQuery(List(CurrentNode, Field("foo")))),
-				HasFilter(SubQuery(List(CurrentNode, Field("bar"))))))
+  it should "work with some predefined boolean operators" in {
+    parse(subscriptFilter, "[?(@.foo && @.bar)]") should beParsedAs(
+      BooleanFilter(AndOperator,
+        HasFilter(SubQuery(List(CurrentNode, Field("foo")))),
+        HasFilter(SubQuery(List(CurrentNode, Field("bar"))))))
 
-		parse(subscriptFilter, "[?(@.foo || @.bar)]") should beParsedAs(
-			BooleanFilter(OrOperator,
-				HasFilter(SubQuery(List(CurrentNode, Field("foo")))),
-				HasFilter(SubQuery(List(CurrentNode, Field("bar"))))))
+    parse(subscriptFilter, "[?(@.foo || @.bar)]") should beParsedAs(
+      BooleanFilter(OrOperator,
+        HasFilter(SubQuery(List(CurrentNode, Field("foo")))),
+        HasFilter(SubQuery(List(CurrentNode, Field("bar"))))))
 
-		parse(subscriptFilter, "[?(@.foo || @.bar <= 2)]") should beParsedAs(
-			BooleanFilter(OrOperator,
-				HasFilter(SubQuery(List(CurrentNode, Field("foo")))),
-				ComparisonFilter(LessOrEqOperator, SubQuery(List(CurrentNode, Field("bar"))), JPLong(2))))
-	}
+    parse(subscriptFilter, "[?(@.foo || @.bar <= 2)]") should beParsedAs(
+      BooleanFilter(OrOperator,
+        HasFilter(SubQuery(List(CurrentNode, Field("foo")))),
+        ComparisonFilter(LessOrEqOperator, SubQuery(List(CurrentNode, Field("bar"))), JPLong(2))))
+  }
 
 }
 
 trait ParsingMatchers {
 
-	class SuccessBeMatcher[+T <: AstToken](expected: T) extends Matcher[Parser.ParseResult[AstToken]] {
-		def apply(left: Parser.ParseResult[AstToken]): MatchResult = {
-			left match {
-				case Parser.Success(res, _) => MatchResult(expected == res,
-					s"$res is not equal to expected value $expected",
-					s"$res is equal to $expected but it shouldn't be")
-				case Parser.NoSuccess(msg, _) => MatchResult(false,
-					s"parsing issue, $msg",
-					s"parsing issue, $msg")
-			}
-		}
-	}
+  class SuccessBeMatcher[+T <: AstToken](expected: T) extends Matcher[Parser.ParseResult[AstToken]] {
+    def apply(left: Parser.ParseResult[AstToken]): MatchResult = {
+      left match {
+        case Parser.Success(res, _) => MatchResult(expected == res,
+          s"$res is not equal to expected value $expected",
+          s"$res is equal to $expected but it shouldn't be")
+        case Parser.NoSuccess(msg, _) => MatchResult(false,
+          s"parsing issue, $msg",
+          s"parsing issue, $msg")
+      }
+    }
+  }
 
-	def beParsedAs[T <: AstToken](expected: T) = new SuccessBeMatcher(expected)
+  def beParsedAs[T <: AstToken](expected: T) = new SuccessBeMatcher(expected)
 }

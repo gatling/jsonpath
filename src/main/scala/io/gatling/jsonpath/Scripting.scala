@@ -16,88 +16,88 @@
 package io.gatling.jsonpath
 
 sealed trait ComparisonOperator {
-	def apply(lhs: Any, rhs: Any): Boolean
+  def apply(lhs: Any, rhs: Any): Boolean
 }
 
 // Comparison operators
 sealed trait ComparisonWithOrderingOperator extends ComparisonOperator {
 
-	def compare[T: Ordering](lhs: T, rhs: T): Boolean
+  def compare[T: Ordering](lhs: T, rhs: T): Boolean
 
-	def apply(lhs: Any, rhs: Any): Boolean = lhs match {
-		case s1: String => rhs match {
-			case s2: String => compare(s1, s2)
-			case _ => false
-		}
-		case b1: Boolean => rhs match {
-			case b2: Boolean => compare(b1, b2)
-			case _ => false
-		}
-		case i1: Int => rhs match {
-			case i2: Int => compare(i1, i2)
-			case i2: Long => compare(i1, i2)
-			case i2: Double => compare(i1, i2)
-			case i2: Float => compare(i1, i2)
-			case _ => false
-		}
-		case i1: Long => rhs match {
-			case i2: Int => compare(i1, i2)
-			case i2: Long => compare(i1, i2)
-			case i2: Double => compare(i1, i2)
-			case i2: Float => compare(i1, i2)
-			case _ => false
-		}
-		case i1: Double => rhs match {
-			case i2: Int => compare(i1, i2)
-			case i2: Long => compare(i1, i2)
-			case i2: Double => compare(i1, i2)
-			case i2: Float => compare(i1, i2)
-			case _ => false
-		}
-		case i1: Float => rhs match {
-			case i2: Int => compare(i1, i2)
-			case i2: Long => compare(i1, i2)
-			case i2: Double => compare(i1, i2)
-			case i2: Float => compare(i1, i2)
-			case _ => false
-		}
-		case _ => false
-	}
+  def apply(lhs: Any, rhs: Any): Boolean = lhs match {
+    case s1: String => rhs match {
+      case s2: String => compare(s1, s2)
+      case _          => false
+    }
+    case b1: Boolean => rhs match {
+      case b2: Boolean => compare(b1, b2)
+      case _           => false
+    }
+    case i1: Int => rhs match {
+      case i2: Int    => compare(i1, i2)
+      case i2: Long   => compare(i1, i2)
+      case i2: Double => compare(i1, i2)
+      case i2: Float  => compare(i1, i2)
+      case _          => false
+    }
+    case i1: Long => rhs match {
+      case i2: Int    => compare(i1, i2)
+      case i2: Long   => compare(i1, i2)
+      case i2: Double => compare(i1, i2)
+      case i2: Float  => compare(i1, i2)
+      case _          => false
+    }
+    case i1: Double => rhs match {
+      case i2: Int    => compare(i1, i2)
+      case i2: Long   => compare(i1, i2)
+      case i2: Double => compare(i1, i2)
+      case i2: Float  => compare(i1, i2)
+      case _          => false
+    }
+    case i1: Float => rhs match {
+      case i2: Int    => compare(i1, i2)
+      case i2: Long   => compare(i1, i2)
+      case i2: Double => compare(i1, i2)
+      case i2: Float  => compare(i1, i2)
+      case _          => false
+    }
+    case _ => false
+  }
 }
 
 object EqOperator extends ComparisonOperator {
-	override def apply(lhs: Any, rhs: Any): Boolean = lhs == rhs
+  override def apply(lhs: Any, rhs: Any): Boolean = lhs == rhs
 }
 
 object NotEqOperator extends ComparisonOperator {
-	override def apply(lhs: Any, rhs: Any): Boolean = lhs != rhs
+  override def apply(lhs: Any, rhs: Any): Boolean = lhs != rhs
 }
 
 object LessOperator extends ComparisonWithOrderingOperator {
-	override def compare[T: Ordering](lhs: T, rhs: T) = implicitly[Ordering[T]].lt(lhs, rhs)
+  override def compare[T: Ordering](lhs: T, rhs: T) = implicitly[Ordering[T]].lt(lhs, rhs)
 }
 
 object GreaterOperator extends ComparisonWithOrderingOperator {
-	override def compare[T: Ordering](lhs: T, rhs: T) = implicitly[Ordering[T]].gt(lhs, rhs)
+  override def compare[T: Ordering](lhs: T, rhs: T) = implicitly[Ordering[T]].gt(lhs, rhs)
 }
 
 object LessOrEqOperator extends ComparisonWithOrderingOperator {
-	override def compare[T: Ordering](lhs: T, rhs: T) = implicitly[Ordering[T]].lteq(lhs, rhs)
+  override def compare[T: Ordering](lhs: T, rhs: T) = implicitly[Ordering[T]].lteq(lhs, rhs)
 }
 
 object GreaterOrEqOperator extends ComparisonWithOrderingOperator {
-	override def compare[T: Ordering](lhs: T, rhs: T) = implicitly[Ordering[T]].gteq(lhs, rhs)
+  override def compare[T: Ordering](lhs: T, rhs: T) = implicitly[Ordering[T]].gteq(lhs, rhs)
 }
 
 // Binary boolean operators
 sealed trait BinaryBooleanOperator {
-	def apply(lhs: Boolean, rhs: Boolean): Boolean
+  def apply(lhs: Boolean, rhs: Boolean): Boolean
 }
 
 object AndOperator extends BinaryBooleanOperator {
-	def apply(lhs: Boolean, rhs: Boolean) = lhs && rhs
+  def apply(lhs: Boolean, rhs: Boolean) = lhs && rhs
 }
 
 object OrOperator extends BinaryBooleanOperator {
-	def apply(lhs: Boolean, rhs: Boolean) = lhs || rhs
+  def apply(lhs: Boolean, rhs: Boolean) = lhs || rhs
 }
