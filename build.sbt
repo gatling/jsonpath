@@ -1,3 +1,7 @@
+
+import scalariform.formatter.preferences._
+
+
 name := "jsonpath"
 
 organization := "io.gatling"                                        
@@ -20,6 +24,16 @@ testFrameworks += new TestFramework("org.scalameter.ScalaMeterFramework")
 
 /// Scoverage plugin
 ScoverageSbtPlugin.instrumentSettings
+
+/// Scalariform
+
+scalariformSettings
+
+ScalariformKeys.preferences := ScalariformKeys.preferences.value
+      .setPreference(DoubleIndentClassDeclaration, true)
+      .setPreference(AlignParameters, true)
+      .setPreference(AlignSingleLineCaseStatements, true)
+      .setPreference(IndentLocalDefs, true)
 
 /// Publishing
 publishTo <<= version { v: String =>
@@ -60,3 +74,6 @@ pomExtra := (
     </developer>
   </developers>
 )
+
+
+
