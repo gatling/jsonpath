@@ -50,7 +50,8 @@ object AST {
   sealed trait JPNumber extends FilterDirectValue
   case class JPLong(value: Long) extends JPNumber
   case class JPDouble(value: Double) extends JPNumber
-  case class JPBoolean(value: Boolean) extends FilterDirectValue
+  case object JPTrue extends FilterDirectValue { val value = true }
+  case object JPFalse extends FilterDirectValue { val value = false }
   case class JPString(value: String) extends FilterDirectValue
   case object JPNull extends FilterDirectValue { val value = null }
 

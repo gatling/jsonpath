@@ -66,15 +66,15 @@ object Parser extends RegexParsers {
     s => if (s.indexOf('.') != -1) JPDouble(s.toDouble) else JPLong(s.toLong)
   }
 
-  def booleanValue: Parser[JPBoolean] =
-    "true" ^^ (_ => JPBoolean(true)) |
-      "false" ^^ (_ => JPBoolean(false))
+  def booleanValue: Parser[FilterDirectValue] =
+    "true" ^^ (_ => JPTrue) |
+      "false" ^^ (_ => JPFalse)
 
   def nullValue: Parser[FilterValue] =
     "null" ^^ (_ => JPNull)
 
   def stringValue: Parser[JPString] = quotedField ^^ { JPString }
-  def value: Parser[FilterValue] = (booleanValue | numberValue | nullValue | stringValue)
+  def value: Parser[FilterValue] = booleanValue | numberValue | nullValue | stringValue
 
   def comparisonOperator: Parser[ComparisonOperator] =
     "==" ^^ (_ => EqOperator) |
