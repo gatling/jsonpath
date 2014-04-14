@@ -66,9 +66,9 @@ object Parser extends RegexParsers {
 		s => if (s.indexOf('.') != -1) JPDouble(s.toDouble) else JPLong(s.toLong)
 	}
 
-	def booleanValue: Parser[JPBoolean] =
-		"true" ^^ (_ => JPBoolean(true)) |
-			"false" ^^ (_ => JPBoolean(false))
+	def booleanValue: Parser[FilterValue] =
+		"true" ^^ (_ => JPTrue) |
+			"false" ^^ (_ => JPFalse)
 
 	def nullValue: Parser[FilterValue] =
 		"null" ^^ (_ => JPNull)
