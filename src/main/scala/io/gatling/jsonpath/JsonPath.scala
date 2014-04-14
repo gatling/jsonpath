@@ -180,7 +180,8 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
 
       def lenRelative(x: Int) = if (x >= 0) x else size + x
       def stepRelative(x: Int) = if (step >= 0) x else -1 - x
-      def relative = lenRelative _ compose stepRelative _
+      def relative(x: Int) = lenRelative(stepRelative(x))
+
     val absStart = start match {
       case Some(v) => relative(v)
       case _       => 0
