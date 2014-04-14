@@ -17,3 +17,6 @@ project/plugins/project/
 .classpath
 .project
 .settings
+
+# IntelliJ IDEA specific
+.idea
