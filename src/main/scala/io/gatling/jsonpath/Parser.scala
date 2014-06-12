@@ -21,19 +21,19 @@ import io.gatling.jsonpath.AST._
 
 object Parser extends RegexParsers {
 
-  val numberRegex = """-?\d+""".r
-  val fieldRegex = """[$_\p{L}][$_\-\d\p{L}]*""".r
-  val singleQuotedFieldRegex = "[^']+".r
-  val doubleQuotedFieldRegex = """[^"]+""".r
-  val numberValueRegex = """-?\d+(\.\d*)?""".r
+  val NumberRegex = """-?\d+""".r
+  val FieldRegex = """[$_\p{L}][$_\-\d\p{L}]*""".r
+  val SingleQuotedFieldRegex = "[^']+".r
+  val DoubleQuotedFieldRegex = """[^"]+""".r
+  val NumberValueRegex = """-?\d+(\.\d*)?""".r
 
   /// general purpose parsers ///////////////////////////////////////////////
 
-  def number: Parser[Int] = numberRegex ^^ (_.toInt)
+  def number: Parser[Int] = NumberRegex ^^ (_.toInt)
 
-  def field: Parser[String] = fieldRegex
+  def field: Parser[String] = FieldRegex
 
-  def quotedField: Parser[String] = ("'" ~> singleQuotedFieldRegex <~ "'") | ("\"" ~> doubleQuotedFieldRegex <~ "\"")
+  def quotedField: Parser[String] = ("'" ~> SingleQuotedFieldRegex <~ "'") | ("\"" ~> DoubleQuotedFieldRegex <~ "\"")
 
   /// array parsers /////////////////////////////////////////////////////////
 
@@ -62,7 +62,7 @@ object Parser extends RegexParsers {
 
   /// filters parsers ///////////////////////////////////////////////////////
 
-  def numberValue: Parser[JPNumber] = numberValueRegex ^^ {
+  def numberValue: Parser[JPNumber] = NumberValueRegex ^^ {
     s => if (s.indexOf('.') != -1) JPDouble(s.toDouble) else JPLong(s.toLong)
   }
 
