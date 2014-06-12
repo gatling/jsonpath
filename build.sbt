@@ -15,7 +15,7 @@ scalacOptions ++= Seq("-unchecked", "-deprecation")
 /// ScalaTest
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.1.0" % "test"
 
-libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % "2.3.3" % "test"
+libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % "2.4.0" % "test"
 
 /// ScalaMeter
 libraryDependencies += "com.github.axel22" %% "scalameter" % "0.4" % "test"
