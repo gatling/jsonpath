@@ -1,4 +1,3 @@
-
 import scalariform.formatter.preferences._
 
 
@@ -10,20 +9,34 @@ version := "0.5-SNAPSHOT"
 
 scalaVersion := "2.10.4"   
 
+crossScalaVersions := Seq("2.10.4", "2.11.1")
+
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
+
+libraryDependencies := {
+  CrossVersion.partialVersion(scalaVersion.value) match {
+    // if scala 2.11+ is used, add dependency on scala-xml module
+    case Some((2, scalaMajor)) if scalaMajor >= 11 =>
+      libraryDependencies.value ++ Seq(
+        "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.1"
+      )
+    case _ => libraryDependencies.value
+  }
+}
+
 /// ScalaTest
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.1.0" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.0" % "test"
 
 libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % "2.4.0" % "test"
 
 /// ScalaMeter
-libraryDependencies += "com.github.axel22" %% "scalameter" % "0.4" % "test"
+libraryDependencies += "com.github.axel22" %% "scalameter" % "0.5-M2" % "test"
 
 testFrameworks += new TestFramework("org.scalameter.ScalaMeterFramework")
 
 /// Scoverage plugin
-ScoverageSbtPlugin.instrumentSettings
+instrumentSettings
 
 /// Scalariform
 
