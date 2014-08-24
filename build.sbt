@@ -28,7 +28,7 @@ libraryDependencies := {
 /// ScalaTest
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.0" % "test"
 
-libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % "2.4.0" % "test"
+libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % "2.4.2" % "test"
 
 /// ScalaMeter
 libraryDependencies += "com.github.axel22" %% "scalameter" % "0.5-M2" % "test"
