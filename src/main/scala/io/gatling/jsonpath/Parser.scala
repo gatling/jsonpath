@@ -23,8 +23,8 @@ object Parser extends RegexParsers {
 
   val NumberRegex = """-?\d+""".r
   val FieldRegex = """[$_\p{L}][$_\-\d\p{L}]*""".r
-  val SingleQuotedFieldRegex = "[^']+".r
-  val DoubleQuotedFieldRegex = """[^"]+""".r
+  val SingleQuotedFieldRegex = """(\\.|[^'])+""".r
+  val DoubleQuotedFieldRegex = """(\\.|[^"])+""".r
   val NumberValueRegex = """-?\d+(\.\d*)?""".r
 
   /// general purpose parsers ///////////////////////////////////////////////
@@ -33,7 +33,9 @@ object Parser extends RegexParsers {
 
   def field: Parser[String] = FieldRegex
 
-  def quotedField: Parser[String] = ("'" ~> SingleQuotedFieldRegex <~ "'") | ("\"" ~> DoubleQuotedFieldRegex <~ "\"")
+  def singleQuotedField = "'" ~> SingleQuotedFieldRegex <~ "'" ^^ (_.replaceAll("\\\\'", "'"))
+  def doubleQuotedField = "\"" ~> DoubleQuotedFieldRegex <~ "\"" ^^ (_.replaceAll("\\\\\"", "\""))
+  def quotedField: Parser[String] = singleQuotedField | doubleQuotedField
 
   /// array parsers /////////////////////////////////////////////////////////
 

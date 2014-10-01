@@ -48,10 +48,13 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
 
   it should "support single quoted fields" in {
     parse(fieldAccessors, "['foo']") should beParsedAs(Field("foo"))
+    parse(fieldAccessors, """['I\'m happy']""") should beParsedAs(Field("I'm happy"))
   }
 
   it should "support double quoted fields" in {
     parse(fieldAccessors, """["foo"]""") should beParsedAs(Field("foo"))
+    parse(fieldAccessors, """["say \"hello\"!"]""") should beParsedAs(Field("""say "hello"!"""))
+    parse(fieldAccessors, """["\"foo\""]""") should beParsedAs(Field("\"foo\""))
   }
 
   it should "support the 'any fields' syntax" in {
