@@ -19,6 +19,31 @@ import scala.util.parsing.combinator.RegexParsers
 
 import io.gatling.jsonpath.AST._
 
+object FastStringOps {
+  implicit class RichString(val text: String) extends AnyVal {
+    def fastReplaceAll(searchString: String, replacement: String): String = {
+      if (searchString.isEmpty || replacement.isEmpty) {
+        text
+      } else {
+        var start = 0
+        var end = text.indexOf(searchString, start)
+        if (end == -1) {
+          text
+        } else {
+          val buf = new StringBuilder(text.length)
+          while (end != -1) {
+            buf.append(text.substring(start, end)).append(replacement)
+            start = end + searchString.length
+            end = text.indexOf(searchString, start)
+          }
+          buf.append(text.substring(start))
+          buf.toString
+        }
+      }
+    }
+  }
+}
+
 object Parser extends RegexParsers {
 
   val NumberRegex = """-?\d+""".r
@@ -33,8 +58,9 @@ object Parser extends RegexParsers {
 
   def field: Parser[String] = FieldRegex
 
-  def singleQuotedField = "'" ~> SingleQuotedFieldRegex <~ "'" ^^ (_.replaceAll("\\\\'", "'"))
-  def doubleQuotedField = "\"" ~> DoubleQuotedFieldRegex <~ "\"" ^^ (_.replaceAll("\\\\\"", "\""))
+  import FastStringOps._
+  def singleQuotedField = "'" ~> SingleQuotedFieldRegex <~ "'" ^^ (_.fastReplaceAll("\\'", "'"))
+  def doubleQuotedField = "\"" ~> DoubleQuotedFieldRegex <~ "\"" ^^ (_.fastReplaceAll("\\\"", "\""))
   def quotedField: Parser[String] = singleQuotedField | doubleQuotedField
 
   /// array parsers /////////////////////////////////////////////////////////
