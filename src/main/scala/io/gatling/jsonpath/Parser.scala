@@ -32,7 +32,7 @@ object FastStringOps {
         if (end == -1) {
           text
         } else {
-          val buf = new JStringBuilder(text.length + 10)
+          val buf = new JStringBuilder(text.length)
           while (end != -1) {
             buf.append(text, start, end).append(replacement)
             start = end + searchString.length
