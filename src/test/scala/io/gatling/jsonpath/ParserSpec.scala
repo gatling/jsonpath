@@ -21,7 +21,6 @@ import io.gatling.jsonpath.Parser._
 import io.gatling.jsonpath.AST._
 import org.scalatest.Matchers
 
-
 class StringSpec extends FlatSpec with Matchers {
   import FastStringOps._
   "Fast string replacement" should "work as expected" in {
@@ -29,7 +28,6 @@ class StringSpec extends FlatSpec with Matchers {
     "foo-foo-foo-bar-foo".fastReplaceAll("foo", "f") should be("f-f-f-bar-f")
   }
 }
-
 
 class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
 
