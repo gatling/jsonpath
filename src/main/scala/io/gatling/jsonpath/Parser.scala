@@ -15,6 +15,8 @@
  */
 package io.gatling.jsonpath
 
+import java.lang.{ StringBuilder => JStringBuilder }
+
 import scala.util.parsing.combinator.RegexParsers
 
 import io.gatling.jsonpath.AST._
@@ -30,13 +32,13 @@ object FastStringOps {
         if (end == -1) {
           text
         } else {
-          val buf = new StringBuilder(text.length)
+          val buf = new JStringBuilder(text.length + 10)
           while (end != -1) {
-            buf.append(text.substring(start, end)).append(replacement)
+            buf.append(text, start, end).append(replacement)
             start = end + searchString.length
             end = text.indexOf(searchString, start)
           }
-          buf.append(text.substring(start))
+          buf.append(text, start, text.length)
           buf.toString
         }
       }
