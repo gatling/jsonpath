@@ -63,6 +63,8 @@ publishArtifact in Test := false
 
 pomIncludeRepository := { _ => false }
 
+credentials += Credentials(Path.userHome / ".sbt" / ".credentials")
+
 pomExtra := (
   <url>http://github.com/gatling/jsonpath</url>
   <licenses>
