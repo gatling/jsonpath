@@ -47,7 +47,6 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
 
   def walk(): Iterator[Any] = walk(rootNode, fullPath)
 
-  // use @tailrec in Scala 2.11, cf: https://github.com/scala/scala/pull/2865
   private[this] def walk(node: Any, path: List[PathToken]): Iterator[Any] =
     path match {
       case head :: tail => walk1(node, head).flatMap(walk(_, tail))
