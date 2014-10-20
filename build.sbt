@@ -1,11 +1,10 @@
 import scalariform.formatter.preferences._
 
-
 name := "jsonpath"
 
 organization := "io.gatling"                                        
 
-version := "0.6.1"
+version := "0.6.2-SNAPSHOT"
 
 scalaVersion := "2.10.4"   
 
@@ -49,13 +48,7 @@ ScalariformKeys.preferences := ScalariformKeys.preferences.value
       .setPreference(IndentLocalDefs, true)
 
 /// Publishing
-publishTo <<= version { v: String =>
-  val nexus = "https://oss.sonatype.org/"
-  if (v.trim.endsWith("SNAPSHOT"))
-    Some("snapshots" at nexus + "content/repositories/snapshots")
-  else
-    Some("releases" at nexus + "service/local/staging/deploy/maven2")
-}
+publishTo := Some(if(isSnapshot.value) Opts.resolver.sonatypeSnapshots else Opts.resolver.sonatypeStaging)
 
 publishMavenStyle := true
 
