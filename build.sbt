@@ -74,11 +74,11 @@ pomExtra := (
   <developers>
     <developer>
       <id>nremond</id>
-      <name>Nicolas Rémond</name>
+      <name>Nicolas Remond</name>
     </developer>
     <developer>
       <id>slandelle</id>
-      <name>Stéphane Landelle</name>
+      <name>Stephane Landelle</name>
     </developer>
   </developers>
 )
