@@ -1,7 +1,7 @@
 language: scala
 before_script: ./make_credentials.sh
-script: sbt test
+script: sbt "+ test"
 
 # Publish to Sonatype if building master
 after_success:
-  - "[[ $TRAVIS_BRANCH == \"master\" ]] && [[ $TRAVIS_PULL_REQUEST == \"false\" ]] && sbt publish"
+  - "[[ $TRAVIS_BRANCH == \"master\" ]] && [[ $TRAVIS_PULL_REQUEST == \"false\" ]] && sbt \"+ publish \""
