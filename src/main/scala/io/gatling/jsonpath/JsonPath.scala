@@ -100,7 +100,7 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
 
       case filterToken: FilterToken => applyFilter(filterToken, node)
 
-      case RecursiveAnyField        => recFieldExplorer(node)
+      case RecursiveAnyField        => Iterator.single(node) ++ recFieldExplorer(node)
     }
   }
 

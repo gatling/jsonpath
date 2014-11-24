@@ -51,6 +51,40 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
   val allStore = s"""{"book":$allBooks, "bicycle":$bicycle}"""
   val goessnerData = s"""{"store":$allStore}"""
   val goessnerJson = parseJson(goessnerData)
+  val json = """[
+               |    {
+               |        "id":19434,
+               |        "foo":1,
+               |        "company":
+               |        {
+               |            "id":18971
+               |        },
+               |        "owner":
+               |        {
+               |            "id":18957
+               |        },
+               |        "process":
+               |        {
+               |            "id":18972
+               |        }
+               |    },
+               |    {
+               |        "id":19435,
+               |        "foo":2,
+               |        "company":
+               |        {
+               |            "id":18972
+               |        },
+               |        "owner":
+               |        {
+               |            "id":18957
+               |        },
+               |        "process":
+               |        {
+               |            "id":18974
+               |        }
+               |    }
+               |]""".stripMargin
 
   //////////////
 
@@ -278,7 +312,7 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
   }
 
   it should "allow to get everything" in {
-    JsonPath.query("$..*", goessnerJson) should findElements(parseJson(allStore),
+    JsonPath.query("$..*", goessnerJson) should findElements(goessnerJson, parseJson(allStore),
       parseJson(bicycle), text("red"), double(19.95),
       parseJson(allBooks),
       text("Nigel Rees"), text("Sayings of the Century"), text("reference"), double(8.95),
@@ -299,6 +333,13 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
 
   }
 
+  "Recursive" should "honor filters directly on root" in {
+    JsonPath.query("$[?(@.id==19434 && @.foo==1)].foo", parseJson(json)) should findOrderedElements(int(1))
+  }
+
+  it should "honor recursive filters from root" in {
+    JsonPath.query("$..*[?(@.id==19434 && @.foo==1)].foo", parseJson(json)) should findOrderedElements(int(1))
+  }
 }
 
 trait JsonPathMatchers {
@@ -310,7 +351,7 @@ trait JsonPathMatchers {
           val seq = it.toVector
           MatchResult(seq == expected,
             s"$seq does not contains the same elements as $expected",
-            s"$seq is equal to $expected but it shouldn't be")
+            s"$seq is equal to $expected but it shouldn't")
         case Left(e) => MatchResult(false,
           s"parsing issue, $e",
           s"parsing issue, $e")
@@ -322,12 +363,14 @@ trait JsonPathMatchers {
     override def apply(input: Either[JPError, Iterator[Any]]): MatchResult =
       input match {
         case Right(it) =>
-          val seq = it.toVector
-          val missing = expected.toSeq.diff(seq.toSeq)
-          val added = seq.toSeq.diff(expected.toSeq)
+          val actualSeq = it.toVector
+          val expectedSeq = expected.toVector
+
+          val missing = expectedSeq.diff(actualSeq)
+          val added = actualSeq.diff(expectedSeq)
           MatchResult(missing.isEmpty && added.isEmpty,
-            s"$seq is missing $missing and should not contains $added",
-            s"$seq is equal to $expected but it shouldn't be")
+            s"$actualSeq is missing $missing and should not contains $added",
+            s"$actualSeq is equal to $expectedSeq but it shouldn't")
         case Left(e) => MatchResult(false,
           s"parsing issue, $e",
           s"parsing issue, $e")
