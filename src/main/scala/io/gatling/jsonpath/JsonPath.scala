@@ -69,7 +69,8 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
 
       case MultiField(fieldNames) => node match {
         case obj: JMap[_, _] =>
-          fieldNames.iterator.collect { case fieldName if obj.containsKey(fieldName) => obj.get(fieldName) }
+          // don't use collect on iterator with filter causes (executed twice)
+          fieldNames.iterator.filter(obj.containsKey).map(obj.get)
         case _ => Iterator.empty
       }
 
