@@ -8,7 +8,7 @@ version := "0.6.3-SNAPSHOT"
 
 scalaVersion := "2.10.4"   
 
-crossScalaVersions := Seq("2.10.4", "2.11.4")
+crossScalaVersions := Seq("2.10.4", "2.11.5")
 
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
@@ -18,7 +18,7 @@ libraryDependencies := {
     // if scala 2.11+ is used, add dependency on scala-parser-combinators module
     case Some((2, scalaMajor)) if scalaMajor >= 11 =>
       libraryDependencies.value ++ Seq(
-        "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.2"
+        "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.3"
       )
     case _ => libraryDependencies.value
   }
@@ -27,7 +27,7 @@ libraryDependencies := {
 /// ScalaTest
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.0" % "test"
 
-libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % "2.4.2" % "test"
+libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % "2.5.0" % "test"
 
 /// ScalaMeter
 libraryDependencies += "com.github.axel22" %% "scalameter" % "0.5-M2" % "test"
