@@ -86,6 +86,25 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
                |    }
                |]""".stripMargin
 
+  val json2 = """[
+                |  {
+                |    "unit": "flow.flow-server.aaa.gatlinguser202project.gatlinguser202.service",
+                |    "machine": "f374e9a176b341d4a8ee8db3cdfb2958/10.11.12.124",
+                |    "active": "active",
+                |    "sub": "running",
+                |    "space": "aaa.gatlinguser202project.gatlinguser202",
+                |    "@timestamp": 1418285656070
+                |  },
+                |  {
+                |    "unit": "XXXXXXXflow.flow-server.aaa.gatlinguser202project.gatlinguser202.service",
+                |    "machine": "f374e9a176b341d4a8ee8db3cdfb2958/10.11.12.124",
+                |    "active": "active",
+                |    "sub": "running",
+                |    "space": "aaa.gatlinguser202project.gatlinguser202",
+                |    "@timestamp": 1418285656070
+                |  }
+                |]""".stripMargin
+
   //////////////
 
   "Incorrect JsonPath expressions" should "be handled properly" in {
@@ -339,6 +358,10 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
 
   it should "honor recursive filters from root" in {
     JsonPath.query("$..*[?(@.id==19434 && @.foo==1)].foo", parseJson(json)) should findOrderedElements(int(1))
+  }
+
+  "Foo" should "bar" in {
+    JsonPath.query("$[0].unit", parseJson(json2)) should findOrderedElements(text("flow.flow-server.aaa.gatlinguser202project.gatlinguser202.service"))
   }
 }
 
