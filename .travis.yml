@@ -1,12 +1,13 @@
 language: scala
 before_script: ./make_credentials.sh
-script: sbt "+ test"
+script: 
+  - sbt "+ test"
+  - find $HOME/.sbt -name "*.lock" | xargs rm
+  - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
 
 # Publish to Sonatype if building master
 after_success:
   - "[[ $TRAVIS_BRANCH == \"master\" ]] && [[ $TRAVIS_PULL_REQUEST == \"false\" ]] && sbt \"+ publish \""
-  - find $HOME/.sbt -name "*.lock" | xargs rm
-  - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
 
 sudo: false
 
@@ -14,3 +15,4 @@ sudo: false
 cache:
   directories:
     - $HOME/.ivy2/cache
+    - $HOME/.sbt/launchers
