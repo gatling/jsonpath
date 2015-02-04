@@ -48,6 +48,9 @@ ScalariformKeys.preferences := ScalariformKeys.preferences.value
       .setPreference(IndentLocalDefs, true)
 
 /// Publishing
+
+aetherPublishSettings
+
 publishTo := Some(if(isSnapshot.value) Opts.resolver.sonatypeSnapshots else Opts.resolver.sonatypeStaging)
 
 publishMavenStyle := true
