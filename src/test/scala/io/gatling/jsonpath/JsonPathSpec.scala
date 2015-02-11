@@ -359,10 +359,6 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
   it should "honor recursive filters from root" in {
     JsonPath.query("$..*[?(@.id==19434 && @.foo==1)].foo", parseJson(json)) should findOrderedElements(int(1))
   }
-
-  "Foo" should "bar" in {
-    JsonPath.query("$[0].unit", parseJson(json2)) should findOrderedElements(text("flow.flow-server.aaa.gatlinguser202project.gatlinguser202.service"))
-  }
 }
 
 trait JsonPathMatchers {
