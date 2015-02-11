@@ -149,7 +149,6 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
     elementsToFilter(node).filter(filterFunction)
   }
 
-  // use @tailrec in Scala 2.11, cf: https://github.com/scala/scala/pull/2865
   def recFieldFilter(node: Any, name: String): Iterator[Any] = {
       def _recFieldFilter(node: Any): Iterator[Any] =
         node match {
