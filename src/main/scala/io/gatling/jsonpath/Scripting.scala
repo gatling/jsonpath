@@ -65,27 +65,27 @@ sealed trait ComparisonWithOrderingOperator extends ComparisonOperator {
   }
 }
 
-object EqOperator extends ComparisonOperator {
+case object EqOperator extends ComparisonOperator {
   override def apply(lhs: Any, rhs: Any): Boolean = lhs == rhs
 }
 
-object NotEqOperator extends ComparisonOperator {
+case object NotEqOperator extends ComparisonOperator {
   override def apply(lhs: Any, rhs: Any): Boolean = lhs != rhs
 }
 
-object LessOperator extends ComparisonWithOrderingOperator {
+case object LessOperator extends ComparisonWithOrderingOperator {
   override def compare[T: Ordering](lhs: T, rhs: T) = implicitly[Ordering[T]].lt(lhs, rhs)
 }
 
-object GreaterOperator extends ComparisonWithOrderingOperator {
+case object GreaterOperator extends ComparisonWithOrderingOperator {
   override def compare[T: Ordering](lhs: T, rhs: T) = implicitly[Ordering[T]].gt(lhs, rhs)
 }
 
-object LessOrEqOperator extends ComparisonWithOrderingOperator {
+case object LessOrEqOperator extends ComparisonWithOrderingOperator {
   override def compare[T: Ordering](lhs: T, rhs: T) = implicitly[Ordering[T]].lteq(lhs, rhs)
 }
 
-object GreaterOrEqOperator extends ComparisonWithOrderingOperator {
+case object GreaterOrEqOperator extends ComparisonWithOrderingOperator {
   override def compare[T: Ordering](lhs: T, rhs: T) = implicitly[Ordering[T]].gteq(lhs, rhs)
 }
 
@@ -94,10 +94,10 @@ sealed trait BinaryBooleanOperator {
   def apply(lhs: Boolean, rhs: Boolean): Boolean
 }
 
-object AndOperator extends BinaryBooleanOperator {
+case object AndOperator extends BinaryBooleanOperator {
   def apply(lhs: Boolean, rhs: Boolean) = lhs && rhs
 }
 
-object OrOperator extends BinaryBooleanOperator {
+case object OrOperator extends BinaryBooleanOperator {
   def apply(lhs: Boolean, rhs: Boolean) = lhs || rhs
 }
