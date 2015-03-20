@@ -127,7 +127,7 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
       def elementsToFilter(node: Any): Iterator[Any] =
         node match {
           case array: JList[_] => array.iterator
-          case obj: JMap[_, _] => obj.values.iterator
+          case obj: JMap[_, _] => Iterator.single(obj) ++ obj.values.iterator
           case _               => Iterator.empty
         }
 
