@@ -4,7 +4,7 @@ name := "jsonpath"
 
 organization := "io.gatling"                                        
 
-version := "0.6.3"
+version := "0.6.4"
 
 scalaVersion := "2.10.4"   
 
@@ -27,7 +27,7 @@ libraryDependencies := {
 /// ScalaTest
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.0" % "test"
 
-libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % "2.5.0" % "test"
+libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % "2.5.2" % "test"
 
 /// ScalaMeter
 libraryDependencies += "com.github.axel22" %% "scalameter" % "0.5-M2" % "test"
