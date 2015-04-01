@@ -52,6 +52,8 @@ object Parser extends RegexParsers {
   val FieldRegex = """[$_\p{L}][$_\-\d\p{L}]*""".r
   val SingleQuotedFieldRegex = """(\\.|[^'])+""".r
   val DoubleQuotedFieldRegex = """(\\.|[^"])+""".r
+  val SingleQuotedValueRegex = """(\\.|[^'])*""".r
+  val DoubleQuotedValueRegex = """(\\.|[^"])*""".r
   val NumberValueRegex = """-?\d+(\.\d*)?""".r
 
   /// general purpose parsers ///////////////////////////////////////////////
@@ -63,7 +65,10 @@ object Parser extends RegexParsers {
   import FastStringOps._
   def singleQuotedField = "'" ~> SingleQuotedFieldRegex <~ "'" ^^ (_.fastReplaceAll("\\'", "'"))
   def doubleQuotedField = "\"" ~> DoubleQuotedFieldRegex <~ "\"" ^^ (_.fastReplaceAll("\\\"", "\""))
+  def singleQuotedValue = "'" ~> SingleQuotedValueRegex <~ "'" ^^ (_.fastReplaceAll("\\'", "'"))
+  def doubleQuotedValue = "\"" ~> DoubleQuotedValueRegex <~ "\"" ^^ (_.fastReplaceAll("\\\"", "\""))
   def quotedField: Parser[String] = singleQuotedField | doubleQuotedField
+  def quotedValue: Parser[String] = singleQuotedValue | doubleQuotedValue
 
   /// array parsers /////////////////////////////////////////////////////////
 
@@ -103,7 +108,7 @@ object Parser extends RegexParsers {
   def nullValue: Parser[FilterValue] =
     "null" ^^ (_ => JPNull)
 
-  def stringValue: Parser[JPString] = quotedField ^^ { JPString }
+  def stringValue: Parser[JPString] = quotedValue ^^ { JPString }
   def value: Parser[FilterValue] = booleanValue | numberValue | nullValue | stringValue
 
   def comparisonOperator: Parser[ComparisonOperator] =

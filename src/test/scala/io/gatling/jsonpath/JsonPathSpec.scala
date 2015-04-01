@@ -327,6 +327,11 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
     JsonPath.query("$.foo[?(@>=0.5)]", arrayWithNull) should findOrderedElements(1, 3)
   }
 
+  "empty String value" should "be correctly handled" in {
+    val emptyStringValue = parseJson("""[{"foo": "bar", "baz": ""}]""")
+    JsonPath.query("$[?(@.baz == '')].foo", emptyStringValue) should findElements(text("bar"))
+  }
+
   /// Goessner reference examples ///////////////////////////////////////////
 
   "Goessner examples" should "work with finding all the authors" in {
