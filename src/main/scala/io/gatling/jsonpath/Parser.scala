@@ -140,7 +140,7 @@ object Parser extends RegexParsers {
   def booleanOperator: Parser[BinaryBooleanOperator] = "&&" ^^ (_ => AndOperator) | "||" ^^ (_ => OrOperator)
 
   def booleanExpression: Parser[FilterToken] =
-    expression ~ (booleanOperator ~ expression).? ^^ {
+    expression ~ (booleanOperator ~ booleanExpression).? ^^ {
       case lhs ~ None           => lhs
       case lhs ~ Some(op ~ rhs) => BooleanFilter(op, lhs, rhs)
     }

@@ -253,6 +253,13 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
         HasFilter(SubQuery(List(CurrentNode, Field("foo")))),
         HasFilter(SubQuery(List(CurrentNode, Field("bar"))))))
 
+    parse(subscriptFilter, "[?(@.foo || @.bar && @.quix)]") should beParsedAs(
+      BooleanFilter(OrOperator,
+        HasFilter(SubQuery(CurrentNode :: Field("foo") :: Nil)),
+        BooleanFilter(AndOperator,
+          HasFilter(SubQuery(CurrentNode :: Field("bar") :: Nil)),
+          HasFilter(SubQuery(CurrentNode :: Field("quix") :: Nil)))))
+
     parse(subscriptFilter, "[?(@.foo || @.bar <= 2)]") should beParsedAs(
       BooleanFilter(OrOperator,
         HasFilter(SubQuery(List(CurrentNode, Field("foo")))),

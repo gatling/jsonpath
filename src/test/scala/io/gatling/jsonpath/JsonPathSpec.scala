@@ -300,10 +300,12 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
   }
 
   it should "work with some predefined comparison operators" in {
-    val oneToFive = parseJson("[1,2,3,4,5]")
-    JsonPath.query("$[0][?(@>1)]", oneToFive) should findElements()
-    JsonPath.query("$[?( @>1  && @<=4)]", oneToFive) should findOrderedElements(int(2), int(3), int(4))
-    JsonPath.query("$[?( @ == 1   || @ > 4)]", oneToFive) should findOrderedElements(int(1), int(5))
+    val oneToNine = parseJson("[1,2,3,4,5,6,7,8,9]")
+    JsonPath.query("$[0][?(@>1)]", oneToNine) should findElements()
+    JsonPath.query("$[?( @>1 && @<=4 )]", oneToNine) should findOrderedElements(int(2), int(3), int(4))
+    JsonPath.query("$[?( @>1 && @<=4 || @==9 )]", oneToNine) should findOrderedElements(int(2), int(3), int(4), int(9))
+    JsonPath.query("$[?( @==7 || @>1  && @<=4 )]", oneToNine) should findOrderedElements(int(2), int(3), int(4), int(7))
+    JsonPath.query("$[?( @==1 || @>4 )]", oneToNine) should findOrderedElements(int(1), int(5), int(6), int(7), int(8), int(9))
   }
 
   it should "support reference to the root-node" in {
