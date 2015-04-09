@@ -140,8 +140,12 @@ object Parser extends RegexParsers {
   def booleanOperator: Parser[BinaryBooleanOperator] = "&&" ^^ (_ => AndOperator) | "||" ^^ (_ => OrOperator)
 
   def booleanExpression: Parser[FilterToken] =
-    expression ~ (booleanOperator ~ expression).? ^^ {
-      case lhs ~ None           => lhs
+    expression ~ (booleanOperator ~ booleanExpression).? ^^ {
+      case lhs ~ None => lhs
+      // Balance the AST tree so that all "Or" operations are always on top of any "And" operation. 
+      // Indeed, the "And" operations have a higher priority and must be executed first.
+      case lhs1 ~ Some(AndOperator ~ BooleanFilter(OrOperator, lhs2, rhs2)) =>
+        BooleanFilter(OrOperator, BooleanFilter(AndOperator, lhs1, lhs2), rhs2)
       case lhs ~ Some(op ~ rhs) => BooleanFilter(op, lhs, rhs)
     }
 
