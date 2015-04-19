@@ -1,11 +1,11 @@
 /**
- * Copyright 2011-2013 Gatling (gatling.io)
+ * Copyright 2011-2015 eBusiness Information, Groupe Excilys (www.ebusinessinformation.fr)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *  http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -40,7 +40,7 @@ object JsonPath {
 }
 
 class JsonPath(path: List[PathToken]) {
-  def query(jsonObject: Any) = new JsonPathWalker(jsonObject, path).walk
+  def query(jsonObject: Any) = new JsonPathWalker(jsonObject, path).walk()
 }
 
 class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
@@ -109,7 +109,7 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
 
       def resolveSubQuery(node: Any, q: List[AST.PathToken], nextOp: Any => Boolean): Boolean = {
         val it = walk(node, q)
-        it.hasNext && nextOp(it.next)
+        it.hasNext && nextOp(it.next())
       }
 
       def applyBinaryOpWithResolvedLeft(node: Any, op: ComparisonOperator, lhsNode: Any, rhs: FilterValue): Boolean =
