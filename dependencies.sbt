@@ -7,6 +7,7 @@ libraryDependencies ++= {
   }
 }
 
-libraryDependencies += "org.scalatest"              %% "scalatest"        % "2.2.0"  % "test"
+libraryDependencies += "org.scalatest"              %% "scalatest"        % "2.2.4"  % "test"
 libraryDependencies += "com.fasterxml.jackson.core"  % "jackson-databind" % "2.5.2"  % "test"
 libraryDependencies += "com.github.axel22"          %% "scalameter"       % "0.5-M2" % "test"
+libraryDependencies += "org.scalacheck"             %% "scalacheck"       % "1.12.2" % "test"

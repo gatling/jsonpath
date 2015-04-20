@@ -24,8 +24,10 @@ import org.scalatest.Matchers
 class StringSpec extends FlatSpec with Matchers {
   import FastStringOps._
   "Fast string replacement" should "work as expected" in {
-    "foobarqix".fastReplaceAll("bar", "B") should be("fooBqix")
-    "foo-foo-foo-bar-foo".fastReplaceAll("foo", "f") should be("f-f-f-bar-f")
+    "foo".fastReplaceAll("", "bar") shouldBe "foo"
+    "foo".fastReplaceAll("bar", "") shouldBe "foo"
+    "foobarqix".fastReplaceAll("bar", "B") shouldBe "fooBqix"
+    "foo-foo-foo-bar-foo".fastReplaceAll("foo", "f") shouldBe "f-f-f-bar-f"
   }
 }
 
@@ -36,6 +38,7 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
         val field = Field(name)
         parse(dotField, s".$name") should beParsedAs(field)
         parse(subscriptField, s"['$name']") should beParsedAs(field)
+        parse(subscriptField, s"""["$name"]""") should beParsedAs(field)
       }
 
     shouldParseField("foo")
@@ -237,6 +240,11 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
       :: Field("id") :: Nil)
 
     new Parser().compile("$.points[?(@['id']=='i4')].x").get should be(RootNode
+      :: Field("points")
+      :: ComparisonFilter(EqOperator, SubQuery(List(CurrentNode, Field("id"))), JPString("i4"))
+      :: Field("x") :: Nil)
+
+    new Parser().compile("""$.points[?(@['id']=="i4")].x""").get should be(RootNode
       :: Field("points")
       :: ComparisonFilter(EqOperator, SubQuery(List(CurrentNode, Field("id"))), JPString("i4"))
       :: Field("x") :: Nil)

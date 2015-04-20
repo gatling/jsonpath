@@ -74,19 +74,19 @@ case object NotEqOperator extends ComparisonOperator {
 }
 
 case object LessOperator extends ComparisonWithOrderingOperator {
-  override def compare[T: Ordering](lhs: T, rhs: T) = implicitly[Ordering[T]].lt(lhs, rhs)
+  override def compare[T: Ordering](lhs: T, rhs: T) = Ordering[T].lt(lhs, rhs)
 }
 
 case object GreaterOperator extends ComparisonWithOrderingOperator {
-  override def compare[T: Ordering](lhs: T, rhs: T) = implicitly[Ordering[T]].gt(lhs, rhs)
+  override def compare[T: Ordering](lhs: T, rhs: T) = Ordering[T].gt(lhs, rhs)
 }
 
 case object LessOrEqOperator extends ComparisonWithOrderingOperator {
-  override def compare[T: Ordering](lhs: T, rhs: T) = implicitly[Ordering[T]].lteq(lhs, rhs)
+  override def compare[T: Ordering](lhs: T, rhs: T) = Ordering[T].lteq(lhs, rhs)
 }
 
 case object GreaterOrEqOperator extends ComparisonWithOrderingOperator {
-  override def compare[T: Ordering](lhs: T, rhs: T) = implicitly[Ordering[T]].gteq(lhs, rhs)
+  override def compare[T: Ordering](lhs: T, rhs: T) = Ordering[T].gteq(lhs, rhs)
 }
 
 // Binary boolean operators

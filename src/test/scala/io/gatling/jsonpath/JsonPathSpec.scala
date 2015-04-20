@@ -183,6 +183,7 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
 
     JsonPath.query("$.conditions[?(@ == true)]", json) should findElements(bool(true), bool(true))
     JsonPath.query("$.conditions[?(@ == false)]", json) should findElements(bool(false))
+    JsonPath.query("$.conditions[?(false == @)]", json) should findElements(bool(false))
   }
 
   it should "work with nested boolean filters" in {
