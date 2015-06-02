@@ -100,34 +100,7 @@ This implementation is JSON provider agnostic, but it requires to have JSON repr
 eg :  
 ``JsonPath.query("$.a", jsonSample).right.map(_.toVector)`` gives you ``Right(Vector("A"))``
 
-Benchmark vs Jayway's implementation
-====================================
-
-+-----------------------------------------------------------+---------+--------+
-| twitterQueries                                            | Gatling | Jayway |
-+===========================================================+=========+========+
-| $.results[:3].from_user                                   | 0.15    | 0.05   |
-+-----------------------------------------------------------+---------+--------+
-| $.completed_in                                            | 0.057   | 0.022  |
-+-----------------------------------------------------------+---------+--------+
-| $.results[?(@.from_user == 'origichara_bot')]             | 0.238   | 0.185  |
-+-----------------------------------------------------------+---------+--------+
-
-+-----------------------------------------------------------+---------+--------+
-| precompiled twitterQueries                                | Gatling | Jayway |
-+===========================================================+=========+========+
-| $.results[:3].from_user                                   | 0.019   | 0.019  |
-+-----------------------------------------------------------+---------+--------+
-| $.completed_in                                            | 0.006   | 0.006  |
-+-----------------------------------------------------------+---------+--------+
-| $.results[?(@.from_user == 'origichara_bot')]             | 0.075   | 0.159  |
-+-----------------------------------------------------------+---------+--------+
-
-Conclusion: not as fast as Jayway on compilation (to be expected due to Parser Combinators).
-However, that doesn't matter once compiled and cached (like in Gatling). Graph traversal can be even better on some complex use cases (like the last one).
-
 Licence
 =======
 
 This library is licensed under the `Apache License, Version 2.0 <http://www.apache.org/licenses/LICENSE-2.0>`_
-
