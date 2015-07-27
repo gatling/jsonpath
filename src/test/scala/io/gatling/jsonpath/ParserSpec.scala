@@ -135,17 +135,20 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
       RootNode,
       Field("store"),
       Field("book"), ArrayRandomAccess(List(0)),
-      Field("title")))
+      Field("title")
+    ))
     shouldParse("$['store']['book'][0]['title']", List(
       RootNode,
       Field("store"),
       Field("book"), ArrayRandomAccess(List(0)),
-      Field("title")))
+      Field("title")
+    ))
     shouldParse("$.store.book[*].author", List(
       RootNode,
       Field("store"),
       Field("book"), ArraySlice(None, None),
-      Field("author")))
+      Field("author")
+    ))
     shouldParse("$..author", List(RootNode, RecursiveField("author")))
     shouldParse("$.store.*", List(RootNode, Field("store"), AnyField))
     shouldParse("$.store..price", List(RootNode, Field("store"), RecursiveField("price")))
@@ -166,7 +169,8 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
       AnyField,
       RecursiveAnyField,
       Field("book"), ArraySlice(None, None),
-      RecursiveField("book"), ArraySlice(None, None)))
+      RecursiveField("book"), ArraySlice(None, None)
+    ))
   }
 
   "Failures" should "be handled gracefully" in {
@@ -189,11 +193,14 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
 
   "Filters" should "work with subqueries" in {
     parse(subscriptFilter, "[?(@..foo)]") should beParsedAs(
-      HasFilter(SubQuery(List(CurrentNode, RecursiveField("foo")))))
+      HasFilter(SubQuery(List(CurrentNode, RecursiveField("foo"))))
+    )
     parse(subscriptFilter, "[?(@.foo.baz)]") should beParsedAs(
-      HasFilter(SubQuery(List(CurrentNode, Field("foo"), Field("baz")))))
+      HasFilter(SubQuery(List(CurrentNode, Field("foo"), Field("baz"))))
+    )
     parse(subscriptFilter, "[?(@['foo'])]") should beParsedAs(
-      HasFilter(SubQuery(List(CurrentNode, Field("foo")))))
+      HasFilter(SubQuery(List(CurrentNode, Field("foo"))))
+    )
 
     new Parser().compile("$.things[?(@.foo.bar)]").get should be(RootNode
       :: Field("things")
@@ -206,33 +213,45 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
 
     // Check all supported ordering operators
     parse(subscriptFilter, "[?(@ == 2)]") should beParsedAs(
-      ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), JPLong(2)))
+      ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), JPLong(2))
+    )
     parse(subscriptFilter, "[?(@ <= 2)]") should beParsedAs(
-      ComparisonFilter(LessOrEqOperator, SubQuery(List(CurrentNode)), JPLong(2)))
+      ComparisonFilter(LessOrEqOperator, SubQuery(List(CurrentNode)), JPLong(2))
+    )
     parse(subscriptFilter, "[?(@ >= 2)]") should beParsedAs(
-      ComparisonFilter(GreaterOrEqOperator, SubQuery(List(CurrentNode)), JPLong(2)))
+      ComparisonFilter(GreaterOrEqOperator, SubQuery(List(CurrentNode)), JPLong(2))
+    )
     parse(subscriptFilter, "[?(@ < 2)]") should beParsedAs(
-      ComparisonFilter(LessOperator, SubQuery(List(CurrentNode)), JPLong(2)))
+      ComparisonFilter(LessOperator, SubQuery(List(CurrentNode)), JPLong(2))
+    )
     parse(subscriptFilter, "[?(@ > 2)]") should beParsedAs(
-      ComparisonFilter(GreaterOperator, SubQuery(List(CurrentNode)), JPLong(2)))
+      ComparisonFilter(GreaterOperator, SubQuery(List(CurrentNode)), JPLong(2))
+    )
     parse(subscriptFilter, "[?(@ == true)]") should beParsedAs(
-      ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), JPTrue))
+      ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), JPTrue)
+    )
     parse(subscriptFilter, "[?(@ != false)]") should beParsedAs(
-      ComparisonFilter(NotEqOperator, SubQuery(List(CurrentNode)), JPFalse))
+      ComparisonFilter(NotEqOperator, SubQuery(List(CurrentNode)), JPFalse)
+    )
     parse(subscriptFilter, "[?(@ == null)]") should beParsedAs(
-      ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), JPNull))
+      ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), JPNull)
+    )
 
     // Trickier Json path expressions
     parse(subscriptFilter, "[?(@.foo == 2)]") should beParsedAs(
-      ComparisonFilter(EqOperator, SubQuery(List(CurrentNode, Field("foo"))), JPLong(2)))
+      ComparisonFilter(EqOperator, SubQuery(List(CurrentNode, Field("foo"))), JPLong(2))
+    )
     parse(subscriptFilter, "[?(true == @.foo)]") should beParsedAs(
-      ComparisonFilter(EqOperator, JPTrue, SubQuery(List(CurrentNode, Field("foo")))))
+      ComparisonFilter(EqOperator, JPTrue, SubQuery(List(CurrentNode, Field("foo"))))
+    )
     parse(subscriptFilter, "[?(2 == @['foo'])]") should beParsedAs(
-      ComparisonFilter(EqOperator, JPLong(2), SubQuery(List(CurrentNode, Field("foo")))))
+      ComparisonFilter(EqOperator, JPLong(2), SubQuery(List(CurrentNode, Field("foo"))))
+    )
 
     // Allow reference to the root object
     parse(subscriptFilter, "[?(@ == $['foo'])]") should beParsedAs(
-      ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), SubQuery(List(RootNode, Field("foo")))))
+      ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), SubQuery(List(RootNode, Field("foo"))))
+    )
 
     new Parser().compile("$['points'][?(@['y'] >= 3)].id").get should be(RootNode
       :: Field("points")
@@ -252,33 +271,52 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
 
   it should "work with some predefined boolean operators" in {
     parse(subscriptFilter, "[?(@.foo && @.bar)]") should beParsedAs(
-      BooleanFilter(AndOperator,
+      BooleanFilter(
+        AndOperator,
         HasFilter(SubQuery(List(CurrentNode, Field("foo")))),
-        HasFilter(SubQuery(List(CurrentNode, Field("bar"))))))
+        HasFilter(SubQuery(List(CurrentNode, Field("bar"))))
+      )
+    )
 
     parse(subscriptFilter, "[?(@.foo || @.bar)]") should beParsedAs(
-      BooleanFilter(OrOperator,
+      BooleanFilter(
+        OrOperator,
         HasFilter(SubQuery(List(CurrentNode, Field("foo")))),
-        HasFilter(SubQuery(List(CurrentNode, Field("bar"))))))
+        HasFilter(SubQuery(List(CurrentNode, Field("bar"))))
+      )
+    )
 
     parse(subscriptFilter, "[?(@.foo || @.bar && @.quix)]") should beParsedAs(
-      BooleanFilter(OrOperator,
+      BooleanFilter(
+        OrOperator,
         HasFilter(SubQuery(CurrentNode :: Field("foo") :: Nil)),
-        BooleanFilter(AndOperator,
+        BooleanFilter(
+          AndOperator,
           HasFilter(SubQuery(CurrentNode :: Field("bar") :: Nil)),
-          HasFilter(SubQuery(CurrentNode :: Field("quix") :: Nil)))))
+          HasFilter(SubQuery(CurrentNode :: Field("quix") :: Nil))
+        )
+      )
+    )
 
     parse(subscriptFilter, "[?(@.foo && @.bar || @.quix)]") should beParsedAs(
-      BooleanFilter(OrOperator,
-        BooleanFilter(AndOperator,
+      BooleanFilter(
+        OrOperator,
+        BooleanFilter(
+          AndOperator,
           HasFilter(SubQuery(CurrentNode :: Field("foo") :: Nil)),
-          HasFilter(SubQuery(CurrentNode :: Field("bar") :: Nil))),
-        HasFilter(SubQuery(CurrentNode :: Field("quix") :: Nil))))
+          HasFilter(SubQuery(CurrentNode :: Field("bar") :: Nil))
+        ),
+        HasFilter(SubQuery(CurrentNode :: Field("quix") :: Nil))
+      )
+    )
 
     parse(subscriptFilter, "[?(@.foo || @.bar <= 2)]") should beParsedAs(
-      BooleanFilter(OrOperator,
+      BooleanFilter(
+        OrOperator,
         HasFilter(SubQuery(List(CurrentNode, Field("foo")))),
-        ComparisonFilter(LessOrEqOperator, SubQuery(List(CurrentNode, Field("bar"))), JPLong(2))))
+        ComparisonFilter(LessOrEqOperator, SubQuery(List(CurrentNode, Field("bar"))), JPLong(2))
+      )
+    )
   }
 
 }
@@ -288,12 +326,16 @@ trait ParsingMatchers {
   class SuccessBeMatcher[+T <: AstToken](expected: T) extends Matcher[Parser.ParseResult[AstToken]] {
     def apply(left: Parser.ParseResult[AstToken]): MatchResult = {
       left match {
-        case Parser.Success(res, _) => MatchResult(expected == res,
+        case Parser.Success(res, _) => MatchResult(
+          expected == res,
           s"$res is not equal to expected value $expected",
-          s"$res is equal to $expected but it shouldn't be")
-        case Parser.NoSuccess(msg, _) => MatchResult(false,
+          s"$res is equal to $expected but it shouldn't be"
+        )
+        case Parser.NoSuccess(msg, _) => MatchResult(
+          false,
           s"parsing issue, $msg",
-          s"parsing issue, $msg")
+          s"parsing issue, $msg"
+        )
       }
     }
   }

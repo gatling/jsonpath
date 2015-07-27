@@ -176,7 +176,8 @@ object Parser extends RegexParsers {
     | anyRecursive
     | anyChild
     | recursiveField
-    | subscriptField)
+    | subscriptField
+  )
 
   /// Main parsers //////////////////////////////////////////////////////////
 

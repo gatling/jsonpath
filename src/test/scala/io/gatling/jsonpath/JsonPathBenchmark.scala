@@ -32,7 +32,8 @@ object JsonPathBenchmark extends PerformanceTest.Quickbenchmark {
     "$.results[*].to_user_name",
     "$.results[5].metadata.result_type",
     "$.results[?(@.from_user == 'anna_gatling')]",
-    "$.results[?(@.from_user_id >= 1126180920)]")
+    "$.results[?(@.from_user_id >= 1126180920)]"
+  )
 
   val goessnerJson = mapper.readValue("""
 		{ "store": {
@@ -81,7 +82,8 @@ object JsonPathBenchmark extends PerformanceTest.Quickbenchmark {
     "$.store['book'][:2].title",
     "$.store.book[?(@.isbn)].title",
     "$.store.book[?(@.category == 'fiction')].title",
-    "$.store.book[?(@.price < 10 && @.price >4)].title")
+    "$.store.book[?(@.price < 10 && @.price >4)].title"
+  )
 
   performance of "Gatling JsonPath" in {
 

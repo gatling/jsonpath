@@ -151,7 +151,8 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
     JsonPath.query("$[0]", json) should findOrderedElements(int(1))
     JsonPath.query("$[4]", json) should findOrderedElements(nullNode)
     JsonPath.query("$[*]", json) should findOrderedElements(
-      int(1), text("2"), double(3.14), bool(true), nullNode)
+      int(1), text("2"), double(3.14), bool(true), nullNode
+    )
     JsonPath.query("$[-1:]", json) should findOrderedElements(nullNode)
   }
 
@@ -253,7 +254,8 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
   it should "work when the slice operator has one separator" in {
     JsonPath.query("$[:-1]", goessnerJson) should findElements()
     JsonPath.query("$[:]", ten) should findOrderedElements(
-      int(1), int(2), int(3), int(4), int(5), int(6), int(7), int(8), int(9), int(10))
+      int(1), int(2), int(3), int(4), int(5), int(6), int(7), int(8), int(9), int(10)
+    )
     JsonPath.query("$[7:]", ten) should findOrderedElements(int(8), int(9), int(10))
     JsonPath.query("$[-2:]", ten) should findOrderedElements(int(9), int(10))
     JsonPath.query("$[:3]", ten) should findOrderedElements(int(1), int(2), int(3))
@@ -340,9 +342,11 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
   "Goessner examples" should "work with finding all the authors" in {
 
     JsonPath.query("$.store.book[*].author", goessnerJson) should findOrderedElements(
-      text("Nigel Rees"), text("Evelyn Waugh"), text("Herman Melville"), text("J. R. R. Tolkien"))
+      text("Nigel Rees"), text("Evelyn Waugh"), text("Herman Melville"), text("J. R. R. Tolkien")
+    )
     JsonPath.query("$..author", goessnerJson) should findOrderedElements(
-      text("Nigel Rees"), text("Evelyn Waugh"), text("Herman Melville"), text("J. R. R. Tolkien"))
+      text("Nigel Rees"), text("Evelyn Waugh"), text("Herman Melville"), text("J. R. R. Tolkien")
+    )
   }
 
   it should "work with getting the whole store" in {
@@ -352,7 +356,8 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
 
   it should "work with getting all prices" in {
     JsonPath.query("$.store..price", goessnerJson) should findOrderedElements(
-      double(8.95), double(12.99), double(8.99), double(22.99), double(19.95))
+      double(8.95), double(12.99), double(8.99), double(22.99), double(19.95)
+    )
   }
 
   it should "work with getting books by indices" in {
@@ -374,13 +379,17 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
 
   it should "work with subscript filters" in {
     JsonPath.query("$..book[?(@.isbn)]", goessnerJson) should findOrderedElements(
-      parseJson(book3), parseJson(book4))
+      parseJson(book3), parseJson(book4)
+    )
     JsonPath.query("$..book[?(@.isbn)].title", goessnerJson) should findOrderedElements(
-      text("Moby Dick"), text("The Lord of the Rings"))
+      text("Moby Dick"), text("The Lord of the Rings")
+    )
     JsonPath.query("$.store.book[?(@.category == 'fiction')].title", goessnerJson) should findOrderedElements(
-      text("Sword of Honour"), text("Moby Dick"), text("The Lord of the Rings"))
+      text("Sword of Honour"), text("Moby Dick"), text("The Lord of the Rings")
+    )
     JsonPath.query("$.store.book[?(@.price < 20 && @.price > 8.96)].title", goessnerJson) should findOrderedElements(
-      text("Sword of Honour"), text("Moby Dick"))
+      text("Sword of Honour"), text("Moby Dick")
+    )
 
   }
 
@@ -404,12 +413,16 @@ trait JsonPathMatchers {
       input match {
         case Right(it) =>
           val seq = it.toVector
-          MatchResult(seq == expected,
+          MatchResult(
+            seq == expected,
             s"$seq does not contains the same elements as $expected",
-            s"$seq is equal to $expected but it shouldn't")
-        case Left(e) => MatchResult(false,
+            s"$seq is equal to $expected but it shouldn't"
+          )
+        case Left(e) => MatchResult(
+          false,
           s"parsing issue, $e",
-          s"parsing issue, $e")
+          s"parsing issue, $e"
+        )
       }
   }
   def findOrderedElements(expected: Any*) = new OrderedElementsMatcher(expected)
@@ -423,12 +436,16 @@ trait JsonPathMatchers {
 
           val missing = expectedSeq.diff(actualSeq)
           val added = actualSeq.diff(expectedSeq)
-          MatchResult(missing.isEmpty && added.isEmpty,
+          MatchResult(
+            missing.isEmpty && added.isEmpty,
             s"$actualSeq is missing $missing and should not contains $added",
-            s"$actualSeq is equal to $expectedSeq but it shouldn't")
-        case Left(e) => MatchResult(false,
+            s"$actualSeq is equal to $expectedSeq but it shouldn't"
+          )
+        case Left(e) => MatchResult(
+          false,
           s"parsing issue, $e",
-          s"parsing issue, $e")
+          s"parsing issue, $e"
+        )
       }
   }
   def findElements(expected: Any*) = new ElementsMatcher(expected)
