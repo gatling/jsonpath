@@ -61,4 +61,6 @@ object AST {
   case class HasFilter(query: SubQuery) extends FilterToken
   case class ComparisonFilter(operator: ComparisonOperator, lhs: FilterValue, rhs: FilterValue) extends FilterToken
   case class BooleanFilter(fun: BinaryBooleanOperator, lhs: FilterToken, rhs: FilterToken) extends FilterToken
+
+  case class RecursiveFilterToken(filter: FilterToken) extends PathToken
 }

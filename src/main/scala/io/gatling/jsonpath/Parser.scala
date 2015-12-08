@@ -149,8 +149,13 @@ object Parser extends RegexParsers {
       case lhs ~ Some(op ~ rhs) => BooleanFilter(op, lhs, rhs)
     }
 
-  def subscriptFilter: Parser[PathToken] =
-    "[?(" ~> booleanExpression <~ ")]"
+  def recursiveSubscriptFilter: Parser[RecursiveFilterToken] =
+    (("..*" | "..") ~> subscriptFilter) ^^ {
+      case filterToken => RecursiveFilterToken(filterToken)
+    }
+
+  def subscriptFilter: Parser[FilterToken] =
+    (".[?(" | "[?(") ~> booleanExpression <~ ")]"
 
   /// child accessors parsers ///////////////////////////////////////////////
 
@@ -169,13 +174,14 @@ object Parser extends RegexParsers {
 
   def anyChild: Parser[FieldAccessor] = (".*" | "['*']" | """["*"]""") ^^ (_ => AnyField)
 
-  def anyRecursive: Parser[FieldAccessor] = "..*" ^^ (_ => RecursiveAnyField)
+  def recursiveAny: Parser[FieldAccessor] = "..*" ^^ (_ => RecursiveAnyField)
 
   def fieldAccessors = (
     dotField
-    | anyRecursive
-    | anyChild
+    | recursiveSubscriptFilter
+    | recursiveAny
     | recursiveField
+    | anyChild
     | subscriptField
   )
 

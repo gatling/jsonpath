@@ -99,13 +99,26 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
         case _ => Iterator.empty
       }
 
-      case filterToken: FilterToken => applyFilter(filterToken, node)
+      case RecursiveFilterToken(filterToken) => recFilter(node, filterToken)
 
-      case RecursiveAnyField        => Iterator.single(node) ++ recFieldExplorer(node)
+      case filterToken: FilterToken          => filter(node, filterToken)
+
+      case RecursiveAnyField                 => Iterator.single(node) ++ recFieldExplorer(node)
     }
   }
 
-  private[this] def applyFilter(filterToken: FilterToken, node: Any): Iterator[Any] = {
+  private[this] def recFilter(node: Any, filterToken: FilterToken): Iterator[Any] = {
+
+      def allNodes(curr: Any): Iterator[Any] = curr match {
+        case array: JList[_] => array.iterator.flatMap(allNodes)
+        case obj: JMap[_, _] => Iterator.single(obj) ++ obj.values.iterator.flatMap(allNodes)
+        case _               => Iterator.empty
+      }
+
+    allNodes(node).flatMap(filter(_, filterToken))
+  }
+
+  private[this] def filter(node: Any, filterToken: FilterToken): Iterator[Any] = {
 
       def resolveSubQuery(node: Any, q: List[AST.PathToken], nextOp: Any => Boolean): Boolean = {
         val it = walk(node, q)
