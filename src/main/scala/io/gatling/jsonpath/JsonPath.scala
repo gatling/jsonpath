@@ -90,18 +90,16 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
       }
 
       case ArrayRandomAccess(indices) => node match {
-        case array: JList[_] =>
-          indices.iterator
-            .collect {
-              case i if i >= 0 && i < array.size  => array.get(i)
-              case i if i < 0 && i >= -array.size => array.get(i + array.size)
-            }
+        case array: JList[_] => indices.iterator.collect {
+          case i if i >= 0 && i < array.size  => array.get(i)
+          case i if i < 0 && i >= -array.size => array.get(i + array.size)
+        }
         case _ => Iterator.empty
       }
 
       case RecursiveFilterToken(filterToken) => recFilter(node, filterToken)
 
-      case filterToken: FilterToken          => filter(node, filterToken)
+      case filterToken: FilterToken          => applyFilter(node, filterToken)
 
       case RecursiveAnyField                 => Iterator.single(node) ++ recFieldExplorer(node)
     }
@@ -110,15 +108,15 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
   private[this] def recFilter(node: Any, filterToken: FilterToken): Iterator[Any] = {
 
       def allNodes(curr: Any): Iterator[Any] = curr match {
-        case array: JList[_] => array.iterator.flatMap(allNodes)
-        case obj: JMap[_, _] => Iterator.single(obj) ++ obj.values.iterator.flatMap(allNodes)
-        case _               => Iterator.empty
+        case array: JList[_]                 => array.iterator.flatMap(allNodes)
+        case obj: JMap[_, _] if !obj.isEmpty => Iterator.single(obj) ++ obj.values.iterator.flatMap(allNodes)
+        case _                               => Iterator.empty
       }
 
-    allNodes(node).flatMap(filter(_, filterToken))
+    allNodes(node).flatMap(applyFilter(_, filterToken))
   }
 
-  private[this] def filter(node: Any, filterToken: FilterToken): Iterator[Any] = {
+  private[this] def applyFilter(currentNode: Any, filterToken: FilterToken): Iterator[Any] = {
 
       def resolveSubQuery(node: Any, q: List[AST.PathToken], nextOp: Any => Boolean): Boolean = {
         val it = walk(node, q)
@@ -159,7 +157,7 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
         }
 
     val filterFunction = evaluateFilter(filterToken)
-    elementsToFilter(node).filter(filterFunction)
+    elementsToFilter(currentNode).filter(filterFunction)
   }
 
   def recFieldFilter(node: Any, name: String): Iterator[Any] = {
