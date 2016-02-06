@@ -976,6 +976,10 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
     JsonPath.query("""$.book[?(@.author==$.authors[?(@.pseudo=='Hugo')].name)].title""", library) should findElements()
   }
 
+  it should "honor current object" in {
+    JsonPath.query("""$..vegetable[?(@.color=='green')].name""", parseJson(veggies)) should findOrderedElements(text("peas"))
+  }
+
   "`null` elements" should "be correctly handled" in {
     val fooNull = parseJson("""{"foo":null}""")
     JsonPath.query("$.foo", fooNull) should findElements(null)
@@ -1054,10 +1058,6 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
 
   it should "honor recursive filters from root" in {
     JsonPath.query("$..*[?(@.id==19434 && @.foo==1)].foo", parseJson(json)) should findOrderedElements(int(1))
-  }
-
-  "veggies" should "foo" in {
-    JsonPath.query("""$..vegetable[?(@.color=='green')].name""", parseJson(veggies)) should findOrderedElements(text("peas"))
   }
 
   "Searches" should "honor recursive field + recursive filter + recursive field" in {
