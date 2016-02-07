@@ -992,6 +992,11 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
     JsonPath.query("""$..vegetable[?(@.color=='green')].name""", parseJson(veggies)) should findOrderedElements(text("peas"))
   }
 
+  it should "not mess up with node with the same name at different depths in the hierarchy" in {
+    val json = """{"foo":{"nico":{"nico":42}}}"""
+    JsonPath.query("""$..foo[?(@.nico)]""", parseJson(json)) should findElements(parseJson("""{"nico":{"nico":42}}}"""))
+  }
+
   "`null` elements" should "be correctly handled" in {
     val fooNull = parseJson("""{"foo":null}""")
     JsonPath.query("$.foo", fooNull) should findElements(null)
