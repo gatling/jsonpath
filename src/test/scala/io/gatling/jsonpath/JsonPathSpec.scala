@@ -813,14 +813,14 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
 
   it should "work with test set 3" in {
     val json = parseJson("""{ "points": [
-      				             { "id":"i1", "x": 4, "y":-5 },
-      				             { "id":"i2", "x":-2, "y": 2, "z":1 },
-      				             { "id":"i3", "x": 8, "y": 3 },
-      				             { "id":"i4", "x":-6, "y":-1 },
-      				             { "id":"i5", "x": 0, "y": 2, "z":1 },
-      				             { "id":"i6", "x": 1, "y": 4 }
-      				           ]
-      				         }""")
+          				             { "id":"i1", "x": 4, "y":-5 },
+          				             { "id":"i2", "x":-2, "y": 2, "z":1 },
+          				             { "id":"i3", "x": 8, "y": 3 },
+          				             { "id":"i4", "x":-6, "y":-1 },
+          				             { "id":"i5", "x": 0, "y": 2, "z":1 },
+          				             { "id":"i6", "x": 1, "y": 4 }
+          				           ]
+          				         }""")
 
     JsonPath.query("$.points[1]", json) should findOrderedElements(parseJson("""{ "id":"i2", "x":-2, "y": 2, "z":1 }"""))
     JsonPath.query("$.points[4].x", json) should findOrderedElements(int(0))
@@ -834,8 +834,8 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
 
   it should "work with boolean filters" in {
     val json = parseJson("""{ "conditions":
-      			[true, false, true]
-      		}""")
+          			[true, false, true]
+          		}""")
 
     JsonPath.query("$.conditions[?(@ == true)]", json) should findElements(bool(true), bool(true))
     JsonPath.query("$.conditions[?(@ == false)]", json) should findElements(bool(false))
@@ -844,11 +844,11 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
 
   it should "work with nested boolean filters" in {
     val json = parseJson("""{ "conditions":
-      			[
-      				{ "id": "i1", "condition": true },
-      				{ "id": "i2", "condition": false }
-      			]
-      		}""")
+          			[
+          				{ "id": "i1", "condition": true },
+          				{ "id": "i2", "condition": false }
+          			]
+          		}""")
 
     JsonPath.query("$.conditions[?(@['condition'] == true)].id", json) should findElements(text("i1"))
     JsonPath.query("$.conditions[?(@['condition'] == false)].id", json) should findElements(text("i2"))
@@ -928,15 +928,27 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
     JsonPath.query("$[-8::-1]", ten) should findOrderedElements(int(3), int(2), int(1))
   }
 
-  "Filters" should "work with subqueries" in {
+  "Filters" should "be applied on array children and pick all matching ones" in {
     val json = parseJson("""[{"foo":1},{"foo":2},{"bar":3}]""")
     JsonPath.query("$[?(@.foo)]", json) should findOrderedElements(obj("foo" -> int(1)), obj("foo" -> int(2)))
+  }
 
+  it should "work with a deep subquery" in {
     val json2 = parseJson("""{"all":[{"foo":{"bar":1,"baz":2}},{"foo":3}]}""")
     JsonPath.query("$.all[?(@.foo.bar)]", json2) should findElements(parseJson("""{"foo":{"bar":1,"baz":2}}"""))
+  }
 
-    val json3 = parseJson(""" { "foo":{"bar":1, "baz":2}, "second":{"bar":3} }  """)
-    JsonPath.query("$[?(@.baz)]", json3) should findElements(parseJson("""{"bar":1,"baz":2}"""))
+  it should "pick only proper node" in {
+    val json3 = parseJson("""{ "foo":{"bar":1, "baz":2}, "second":{"bar":3} }""")
+    JsonPath.query("$..[?(@.baz)]", json3) should findElements(parseJson("""{"bar":1,"baz":2}"""))
+  }
+
+  it should "return only one result with object nested in object 1" in {
+    JsonPath.query("""$..state..[?(@.text == "(20)")].text""", parseJson(searches)) should findOrderedElements(text("(20)"))
+  }
+
+  it should "return only one result with object nested in object 2" in {
+    JsonPath.query("""$..[?(@.text == "(20)")].text""", parseJson(searches)) should findOrderedElements(text("(20)"))
   }
 
   it should "work with some boolean operators" in {
@@ -950,9 +962,9 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
 
   it should "work with non-alphanumeric values" in {
     val json = parseJson("""{ "a":[{ "a":5, "@":2, "$":5 },
-      						              { "a":6, "@":3, "$":4 },
-      						              { "a":7, "@":4, "$":5 }
-      						             ]}""")
+            						              { "a":6, "@":3, "$":4 },
+            						              { "a":7, "@":4, "$":5 }
+            						             ]}""")
     JsonPath.query("""$.a[?(@['@']==3)]""", json) should findElements(parseJson("""{"a":6,"@":3,"$":4}"""))
     JsonPath.query("""$.a[?(@['$']!=5)]""", json) should findElements(parseJson("""{"a":6,"@":3,"$":4}"""))
   }
@@ -1079,6 +1091,7 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
   it should "honor recursive filter with wildcard from root + recursive field" in {
     JsonPath.query("""$..*[?(@.selectmode)]..id""", parseJson(searches)) should findOrderedElements(text("1012"))
   }
+
   it should "honor deep array access filter" in {
     JsonPath.query("""$..changes[?(@[2][1].selectmode)][2][1].id""", parseJson(searches)) should findOrderedElements(text("1012"))
   }
