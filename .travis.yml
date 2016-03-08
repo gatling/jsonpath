@@ -4,10 +4,7 @@ script:
   - sbt "+ test"
   - find $HOME/.sbt -name "*.lock" | xargs rm
   - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
-
-# Publish to Sonatype if building master
-after_success:
-  - "[[ $TRAVIS_BRANCH == \"master\" ]] && [[ $TRAVIS_PULL_REQUEST == \"false\" ]] && sbt \"+ publish \""
+  - "[[ $TRAVIS_PULL_REQUEST == \"false\" ]] && sbt publish || true"
 
 sudo: false
 
