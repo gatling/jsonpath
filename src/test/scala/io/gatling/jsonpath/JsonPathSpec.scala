@@ -875,7 +875,12 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
     JsonPath.query("$.foo[*].lang", json) should findOrderedElements(text("en"), text("fr"))
   }
 
-  it should "work with null elements" in {
+  it should "work with null elements when fetching node" in {
+    val json = parseJson("""{"foo":null}""")
+    JsonPath.query("$.foo", json) should findElements(nullNode)
+  }
+
+  it should "work with null elements when fetching children" in {
     val json = parseJson("""{"foo":null}""")
     JsonPath.query("$.foo[*]", json) should findElements()
   }
