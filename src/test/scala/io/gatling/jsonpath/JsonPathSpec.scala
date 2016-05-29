@@ -135,6 +135,12 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
     JsonPath.query("€.$", goessnerJson) should be('left)
   }
 
+  "Keys starting with number" should "be handled properly" in {
+    val json = parseJson(""" {"a": "b", "2": 2, "51a": "t"} """)
+    JsonPath.query("$.2", json) should findOrderedElements(int(2))
+    JsonPath.query("$.51a", json) should findOrderedElements(text("t"))
+  }
+
   "Support of Goessner test cases" should "work with test set 1" in {
     val json = parseJson("""{"a":"a","b":"b","c d":"e"}""")
     JsonPath.query("$.a", json) should findElements(text("a"))

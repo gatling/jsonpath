@@ -185,7 +185,6 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
     gracefulFailure("")
     gracefulFailure("foo")
     gracefulFailure("$f")
-    gracefulFailure("$.42foo")
     gracefulFailure("$.[42]")
     gracefulFailure("$.[1:2,3]")
     gracefulFailure("$.[?(@.foo && 2)]")
