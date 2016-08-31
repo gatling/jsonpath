@@ -155,7 +155,7 @@ trait ParserBase extends RegexParsers {
     }
 
   def subscriptFilter: Parser[FilterToken] =
-    (".[?(" | "[?(") ~> booleanExpression <~ ")]"
+    "[?(" ~> booleanExpression <~ ")]"
 
   /// child accessors parsers ///////////////////////////////////////////////
 
