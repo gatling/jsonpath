@@ -17,7 +17,7 @@ package io.gatling.jsonpath
 
 import java.util.{ List => JList, Map => JMap }
 
-import scala.collection.JavaConversions.{ asScalaBuffer, asScalaIterator }
+import scala.collection.JavaConverters._
 import scala.math.abs
 
 import io.gatling.jsonpath.AST._
@@ -75,12 +75,12 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
       }
 
       case AnyField => node match {
-        case obj: JMap[_, _] => obj.values.iterator
+        case obj: JMap[_, _] => obj.values.iterator.asScala
         case _               => Iterator.empty
       }
 
       case ArraySlice(None, None, 1) => node match {
-        case array: JList[_] => array.iterator
+        case array: JList[_] => array.iterator.asScala
         case _               => Iterator.empty
       }
 
@@ -108,8 +108,8 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
   private[this] def recFilter(node: Any, filterToken: FilterToken): Iterator[Any] = {
 
       def allNodes(curr: Any): Iterator[Any] = curr match {
-        case array: JList[_]                 => array.iterator.flatMap(allNodes)
-        case obj: JMap[_, _] if !obj.isEmpty => Iterator.single(obj) ++ obj.values.iterator.flatMap(allNodes)
+        case array: JList[_]                 => array.iterator.asScala.flatMap(allNodes)
+        case obj: JMap[_, _] if !obj.isEmpty => Iterator.single(obj) ++ obj.values.iterator.asScala.flatMap(allNodes)
         case _                               => Iterator.empty
       }
 
@@ -137,7 +137,7 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
 
       def elementsToFilter(node: Any): Iterator[Any] =
         node match {
-          case array: JList[_] => array.iterator
+          case array: JList[_] => array.asScala.iterator
           case obj: JMap[_, _] => Iterator.single(obj)
           case _               => Iterator.empty
         }
@@ -164,11 +164,11 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
       def _recFieldFilter(node: Any): Iterator[Any] =
         node match {
           case obj: JMap[_, _] =>
-            obj.entrySet.iterator.flatMap(e => e.getKey match {
+            obj.entrySet.iterator.asScala.flatMap(e => e.getKey match {
               case `name` => Iterator.single(e.getValue)
               case key    => _recFieldFilter(e.getValue)
             })
-          case list: JList[_] => list.iterator.flatMap(_recFieldFilter)
+          case list: JList[_] => list.iterator.asScala.flatMap(_recFieldFilter)
           case _              => Iterator.empty
         }
 
@@ -179,9 +179,9 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
     node match {
       case obj: JMap[_, _] =>
         val values = obj.values
-        values.iterator ++ values.iterator.flatMap(recFieldExplorer)
+        values.iterator.asScala ++ values.iterator.asScala.flatMap(recFieldExplorer)
       case list: JList[_] =>
-        list.iterator.flatMap(recFieldExplorer)
+        list.iterator.asScala.flatMap(recFieldExplorer)
       case _ => Iterator.empty
     }
 
@@ -202,7 +202,7 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
     }
     val absStep = abs(step)
 
-    val elts: Iterator[Any] = if (step < 0) array.reverseIterator else array.iterator
+    val elts: Iterator[Any] = if (step < 0) array.asScala.reverseIterator else array.iterator.asScala
     val fromStartToEnd = elts.slice(absStart, absEnd)
 
     if (absStep != 1)
