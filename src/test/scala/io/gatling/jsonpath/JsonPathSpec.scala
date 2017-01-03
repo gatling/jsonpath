@@ -17,7 +17,7 @@ package io.gatling.jsonpath
 
 import java.util.{ HashMap => JHashMap, List => JList }
 
-import scala.collection.JavaConversions.seqAsJavaList
+import scala.collection.JavaConverters._
 
 import org.scalatest.{ FlatSpec, Matchers }
 import org.scalatest.matchers.{ MatchResult, Matcher }
@@ -34,7 +34,7 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
   def double(f: Double) = f
   def text(s: String) = s
   def nullNode: Any = null
-  def array(elts: Any*): JList[Any] = elts
+  def array(elts: Any*): JList[Any] = elts.asJava
   def obj(elts: (String, Any)*) = elts.foldLeft(new JHashMap[String, Any]())((o: JHashMap[String, Any], e) => {
     o.put(e._1, e._2)
     o
