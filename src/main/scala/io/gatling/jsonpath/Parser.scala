@@ -22,8 +22,19 @@ import scala.util.parsing.combinator.RegexParsers
 import io.gatling.jsonpath.AST._
 
 object FastStringOps {
+
+  private val StringBuilderPool = new ThreadLocal[JStringBuilder] {
+    override def initialValue(): JStringBuilder = new JStringBuilder
+  }
+
+  private def pooledStringBuilder = {
+    val sb = StringBuilderPool.get()
+    sb.setLength(0)
+    sb
+  }
+
   implicit class RichString(val text: String) extends AnyVal {
-    def fastReplaceAll(searchString: String, replacement: String): String = {
+    def fastReplaceAll(searchString: String, replacement: String): String =
       if (searchString.isEmpty || replacement.isEmpty) {
         text
       } else {
@@ -32,7 +43,7 @@ object FastStringOps {
         if (end == -1) {
           text
         } else {
-          val buf = new JStringBuilder(text.length)
+          val buf = pooledStringBuilder
           while (end != -1) {
             buf.append(text, start, end).append(replacement)
             start = end + searchString.length
@@ -42,7 +53,6 @@ object FastStringOps {
           buf.toString
         }
       }
-    }
   }
 }
 
