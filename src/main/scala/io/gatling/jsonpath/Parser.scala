@@ -80,7 +80,7 @@ trait ParserBase extends RegexParsers {
     }
 
   def arrayRandomAccess: Parser[Option[ArrayRandomAccess]] =
-    rep1("," ~> number).? ^^ (indices => indices.map(ArrayRandomAccess))
+    rep1("," ~> number).? ^^ (_.map(ArrayRandomAccess))
 
   def arraySlicePartial: Parser[ArrayAccessor] =
     number ~ arraySlice ^^ {
@@ -97,7 +97,7 @@ trait ParserBase extends RegexParsers {
     arraySlicePartial | arrayRandomAccessPartial
 
   def arrayAll: Parser[ArraySlice] =
-    "*" ^^ (_ => ArraySlice(None, None))
+    "*" ^^^ ArraySlice(None, None)
 
   def arrayAccessors: Parser[ArrayAccessor] =
     "[" ~> (arrayAll | arrayPartial | arraySlice) <~ "]"
@@ -109,24 +109,24 @@ trait ParserBase extends RegexParsers {
   }
 
   def booleanValue: Parser[FilterDirectValue] =
-    "true" ^^ (_ => JPTrue) |
-      "false" ^^ (_ => JPFalse)
+    "true" ^^^ JPTrue |
+      "false" ^^^ JPFalse
 
   def nullValue: Parser[FilterValue] =
-    "null" ^^ (_ => JPNull)
+    "null" ^^^ JPNull
 
   def stringValue: Parser[JPString] = quotedValue ^^ { JPString }
   def value: Parser[FilterValue] = booleanValue | numberValue | nullValue | stringValue
 
   def comparisonOperator: Parser[ComparisonOperator] =
-    "==" ^^ (_ => EqOperator) |
-      "!=" ^^ (_ => NotEqOperator) |
-      "<=" ^^ (_ => LessOrEqOperator) |
-      "<" ^^ (_ => LessOperator) |
-      ">=" ^^ (_ => GreaterOrEqOperator) |
-      ">" ^^ (_ => GreaterOperator)
+    "==" ^^^ EqOperator |
+      "!=" ^^^ NotEqOperator |
+      "<=" ^^^ LessOrEqOperator |
+      "<" ^^^ LessOperator |
+      ">=" ^^^ GreaterOrEqOperator |
+      ">" ^^^ GreaterOperator
 
-  def current: Parser[PathToken] = "@" ^^ (_ => CurrentNode)
+  def current: Parser[PathToken] = "@" ^^^ CurrentNode
 
   def subQuery: Parser[SubQuery] =
     (current | root) ~ pathSequence ^^ { case c ~ ps => SubQuery(c :: ps) }
@@ -144,7 +144,7 @@ trait ParserBase extends RegexParsers {
 
   def expression: Parser[FilterToken] = expression1 | expression2
 
-  def booleanOperator: Parser[BinaryBooleanOperator] = "&&" ^^ (_ => AndOperator) | "||" ^^ (_ => OrOperator)
+  def booleanOperator: Parser[BinaryBooleanOperator] = "&&" ^^^ AndOperator | "||" ^^^ OrOperator
 
   def booleanExpression: Parser[FilterToken] =
     expression ~ (booleanOperator ~ booleanExpression).? ^^ {
@@ -177,9 +177,9 @@ trait ParserBase extends RegexParsers {
   def recursiveField: Parser[FieldAccessor] =
     ".." ~> field ^^ RecursiveField
 
-  def anyChild: Parser[FieldAccessor] = (".*" | "['*']" | """["*"]""") ^^ (_ => AnyField)
+  def anyChild: Parser[FieldAccessor] = (".*" | "['*']" | """["*"]""") ^^^ AnyField
 
-  def recursiveAny: Parser[FieldAccessor] = "..*" ^^ (_ => RecursiveAnyField)
+  def recursiveAny: Parser[FieldAccessor] = "..*" ^^^ RecursiveAnyField
 
   def fieldAccessors = (
     dotField
@@ -196,7 +196,7 @@ trait ParserBase extends RegexParsers {
 
   def pathSequence: Parser[List[PathToken]] = rep(childAccess | subscriptFilter)
 
-  def root: Parser[PathToken] = "$" ^^ (_ => RootNode)
+  def root: Parser[PathToken] = "$" ^^^ RootNode
 
   def query: Parser[List[PathToken]] =
     phrase(root ~ pathSequence) ^^ { case r ~ ps => r :: ps }
