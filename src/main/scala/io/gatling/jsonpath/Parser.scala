@@ -82,12 +82,19 @@ trait ParserBase extends RegexParsers {
   def arrayRandomAccess: Parser[Option[ArrayRandomAccess]] =
     rep1("," ~> number).? ^^ (indices => indices.map(ArrayRandomAccess))
 
-  def arrayPartial: Parser[ArrayAccessor] =
-    number ~ (arraySlice | arrayRandomAccess) ^^ {
+  def arraySlicePartial: Parser[ArrayAccessor] =
+    number ~ arraySlice ^^ {
+      case i ~ as => as.copy(start = Some(i))
+    }
+
+  def arrayRandomAccessPartial: Parser[ArrayAccessor] =
+    number ~ arrayRandomAccess ^^ {
       case i ~ None                             => ArrayRandomAccess(i :: Nil)
       case i ~ Some(ArrayRandomAccess(indices)) => ArrayRandomAccess(i :: indices)
-      case i ~ (as @ ArraySlice(_, _, _))       => as.copy(start = Some(i))
     }
+
+  def arrayPartial: Parser[ArrayAccessor] =
+    arraySlicePartial | arrayRandomAccessPartial
 
   def arrayAll: Parser[ArraySlice] =
     "*" ^^ (_ => ArraySlice(None, None))
