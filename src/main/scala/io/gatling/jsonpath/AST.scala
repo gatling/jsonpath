@@ -37,6 +37,9 @@ object AST {
    * @param step, being positive or negative, defines whether you are moving
    */
   case class ArraySlice(start: Option[Int], stop: Option[Int], step: Int = 1) extends ArrayAccessor
+  object ArraySlice {
+    val All = ArraySlice(None, None)
+  }
   case class ArrayRandomAccess(indices: List[Int]) extends ArrayAccessor
 
   // JsonPath Filter AST //////////////////////////////////////////////

@@ -97,7 +97,7 @@ object Parser extends RegexParsers {
     arraySlicePartial | arrayRandomAccessPartial
 
   def arrayAll: Parser[ArraySlice] =
-    "*" ^^^ ArraySlice(None, None)
+    "*" ^^^ ArraySlice.All
 
   def arrayAccessors: Parser[ArrayAccessor] =
     "[" ~> (arrayAll | arrayPartial | arraySlice) <~ "]"
