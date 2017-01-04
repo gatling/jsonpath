@@ -46,7 +46,7 @@ object FastStringOps {
   }
 }
 
-trait ParserBase extends RegexParsers {
+object Parser extends RegexParsers {
 
   val NumberRegex = """-?\d+""".r
   val FieldRegex = """[$_\d\p{L}][$_\-\d\p{L}]*""".r
@@ -206,5 +206,3 @@ class Parser {
   val query = Parser.query
   def compile(jsonpath: String): Parser.ParseResult[List[PathToken]] = Parser.parse(query, jsonpath)
 }
-
-object Parser extends ParserBase
