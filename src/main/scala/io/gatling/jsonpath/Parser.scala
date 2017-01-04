@@ -150,9 +150,7 @@ trait ParserBase extends RegexParsers {
     }
 
   def recursiveSubscriptFilter: Parser[RecursiveFilterToken] =
-    (("..*" | "..") ~> subscriptFilter) ^^ {
-      case filterToken => RecursiveFilterToken(filterToken)
-    }
+    (("..*" | "..") ~> subscriptFilter) ^^ RecursiveFilterToken
 
   def subscriptFilter: Parser[FilterToken] =
     "[?(" ~> booleanExpression <~ ")]"
