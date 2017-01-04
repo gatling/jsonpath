@@ -784,6 +784,15 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
                    |  }
                    |]""".stripMargin
 
+  val valuesWithParensAndBraces =
+    """{
+    |  "error": {
+    |     "id": 1,
+    |    "message1": "bar(baz)",
+    |    "message2": "bar[baz]"
+    |  }
+    |}""".stripMargin
+
   //////////////
 
   "Incorrect JsonPath expressions" should "be handled properly" in {
@@ -1111,6 +1120,14 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
   it should "honor deep array access filter" in {
     JsonPath.query("""$..changes[?(@[2][1].selectmode)][2][1].id""", parseJson(searches)) should findOrderedElements(text("1012"))
   }
+
+  it should "work fine when filter contains parens" in {
+    JsonPath.query("""$..*[?(@.message1=='bar(baz)')].id""", parseJson(valuesWithParensAndBraces)) should findOrderedElements(int(1))
+  }
+
+  it should "work fine when filter contains square braces" in {
+    JsonPath.query("""$..*[?(@.message2=='bar[baz]')].id""", parseJson(valuesWithParensAndBraces)) should findOrderedElements(int(1))
+  }
 }
 
 trait JsonPathMatchers {
@@ -1126,7 +1143,7 @@ trait JsonPathMatchers {
             s"$seq is equal to $expected but it shouldn't"
           )
         case Left(e) => MatchResult(
-          false,
+          matches = false,
           s"parsing issue, $e",
           s"parsing issue, $e"
         )
@@ -1149,7 +1166,7 @@ trait JsonPathMatchers {
             s"$actualSeq is equal to $expectedSeq but it shouldn't"
           )
         case Left(e) => MatchResult(
-          false,
+          matches = false,
           s"parsing issue, $e",
           s"parsing issue, $e"
         )
