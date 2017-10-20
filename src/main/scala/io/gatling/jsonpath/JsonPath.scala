@@ -107,70 +107,70 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
 
   private[this] def recFilter(node: Any, filterToken: FilterToken): Iterator[Any] = {
 
-      def allNodes(curr: Any): Iterator[Any] = curr match {
-        case array: JList[_]                 => array.iterator.asScala.flatMap(allNodes)
-        case obj: JMap[_, _] if !obj.isEmpty => Iterator.single(obj) ++ obj.values.iterator.asScala.flatMap(allNodes)
-        case _                               => Iterator.empty
-      }
+    def allNodes(curr: Any): Iterator[Any] = curr match {
+      case array: JList[_]                 => array.iterator.asScala.flatMap(allNodes)
+      case obj: JMap[_, _] if !obj.isEmpty => Iterator.single(obj) ++ obj.values.iterator.asScala.flatMap(allNodes)
+      case _                               => Iterator.empty
+    }
 
     allNodes(node).flatMap(applyFilter(_, filterToken))
   }
 
   private[this] def applyFilter(currentNode: Any, filterToken: FilterToken): Iterator[Any] = {
 
-      def resolveSubQuery(node: Any, q: List[AST.PathToken], nextOp: Any => Boolean): Boolean = {
-        val it = walk(node, q)
-        it.hasNext && nextOp(it.next())
+    def resolveSubQuery(node: Any, q: List[AST.PathToken], nextOp: Any => Boolean): Boolean = {
+      val it = walk(node, q)
+      it.hasNext && nextOp(it.next())
+    }
+
+    def applyBinaryOpWithResolvedLeft(node: Any, op: ComparisonOperator, lhsNode: Any, rhs: FilterValue): Boolean =
+      rhs match {
+        case direct: FilterDirectValue => op(lhsNode, direct.value)
+        case SubQuery(q)               => resolveSubQuery(node, q, op(lhsNode, _))
       }
 
-      def applyBinaryOpWithResolvedLeft(node: Any, op: ComparisonOperator, lhsNode: Any, rhs: FilterValue): Boolean =
-        rhs match {
-          case direct: FilterDirectValue => op(lhsNode, direct.value)
-          case SubQuery(q)               => resolveSubQuery(node, q, op(lhsNode, _))
-        }
+    def applyBinaryOp(node: Any, op: ComparisonOperator, lhs: FilterValue, rhs: FilterValue): Boolean =
+      lhs match {
+        case direct: FilterDirectValue => applyBinaryOpWithResolvedLeft(node, op, direct.value, rhs)
+        case SubQuery(q)               => resolveSubQuery(node, q, applyBinaryOpWithResolvedLeft(node, op, _, rhs))
+      }
 
-      def applyBinaryOp(node: Any, op: ComparisonOperator, lhs: FilterValue, rhs: FilterValue): Boolean =
-        lhs match {
-          case direct: FilterDirectValue => applyBinaryOpWithResolvedLeft(node, op, direct.value, rhs)
-          case SubQuery(q)               => resolveSubQuery(node, q, applyBinaryOpWithResolvedLeft(node, op, _, rhs))
-        }
+    def elementsToFilter(node: Any): Iterator[Any] =
+      node match {
+        case array: JList[_] => array.asScala.iterator
+        case obj: JMap[_, _] => Iterator.single(obj)
+        case _               => Iterator.empty
+      }
 
-      def elementsToFilter(node: Any): Iterator[Any] =
-        node match {
-          case array: JList[_] => array.asScala.iterator
-          case obj: JMap[_, _] => Iterator.single(obj)
-          case _               => Iterator.empty
-        }
+    def evaluateFilter(filterToken: FilterToken): Any => Boolean =
+      filterToken match {
+        case HasFilter(subQuery) =>
+          (node: Any) => walk(node, subQuery.path).hasNext
 
-      def evaluateFilter(filterToken: FilterToken): Any => Boolean =
-        filterToken match {
-          case HasFilter(subQuery) =>
-            (node: Any) => walk(node, subQuery.path).hasNext
+        case ComparisonFilter(op, lhs, rhs) =>
+          (node: Any) => applyBinaryOp(node, op, lhs, rhs)
 
-          case ComparisonFilter(op, lhs, rhs) =>
-            (node: Any) => applyBinaryOp(node, op, lhs, rhs)
-
-          case BooleanFilter(op, filter1, filter2) =>
-            val f1 = evaluateFilter(filter1)
-            val f2 = evaluateFilter(filter2)
-            (node: Any) => op(f1(node), f2(node))
-        }
+        case BooleanFilter(op, filter1, filter2) =>
+          val f1 = evaluateFilter(filter1)
+          val f2 = evaluateFilter(filter2)
+          (node: Any) => op(f1(node), f2(node))
+      }
 
     val filterFunction = evaluateFilter(filterToken)
     elementsToFilter(currentNode).filter(filterFunction)
   }
 
   def recFieldFilter(node: Any, name: String): Iterator[Any] = {
-      def _recFieldFilter(node: Any): Iterator[Any] =
-        node match {
-          case obj: JMap[_, _] =>
-            obj.entrySet.iterator.asScala.flatMap(e => e.getKey match {
-              case `name` => Iterator.single(e.getValue)
-              case key    => _recFieldFilter(e.getValue)
-            })
-          case list: JList[_] => list.iterator.asScala.flatMap(_recFieldFilter)
-          case _              => Iterator.empty
-        }
+    def _recFieldFilter(node: Any): Iterator[Any] =
+      node match {
+        case obj: JMap[_, _] =>
+          obj.entrySet.iterator.asScala.flatMap(e => e.getKey match {
+            case `name` => Iterator.single(e.getValue)
+            case key    => _recFieldFilter(e.getValue)
+          })
+        case list: JList[_] => list.iterator.asScala.flatMap(_recFieldFilter)
+        case _              => Iterator.empty
+      }
 
     _recFieldFilter(node)
   }
@@ -188,9 +188,9 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
   private[this] def sliceArray(array: JList[_], start: Option[Int], stop: Option[Int], step: Int): Iterator[Any] = {
     val size = array.size
 
-      def lenRelative(x: Int) = if (x >= 0) x else size + x
-      def stepRelative(x: Int) = if (step >= 0) x else -1 - x
-      def relative(x: Int) = lenRelative(stepRelative(x))
+    def lenRelative(x: Int) = if (x >= 0) x else size + x
+    def stepRelative(x: Int) = if (step >= 0) x else -1 - x
+    def relative(x: Int) = lenRelative(stepRelative(x))
 
     val absStart = start match {
       case Some(v) => relative(v)

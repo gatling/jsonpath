@@ -34,12 +34,12 @@ class StringSpec extends FlatSpec with Matchers {
 class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
 
   "Field parsing" should "work with standard names" in {
-      def shouldParseField(name: String) = {
-        val field = Field(name)
-        parse(dotField, s".$name") should beParsedAs(field)
-        parse(subscriptField, s"['$name']") should beParsedAs(field)
-        parse(subscriptField, s"""["$name"]""") should beParsedAs(field)
-      }
+    def shouldParseField(name: String) = {
+      val field = Field(name)
+      parse(dotField, s".$name") should beParsedAs(field)
+      parse(subscriptField, s"['$name']") should beParsedAs(field)
+      parse(subscriptField, s"""["$name"]""") should beParsedAs(field)
+    }
 
     shouldParseField("foo")
     shouldParseField("$foo")
@@ -127,9 +127,9 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
 
   // cf : http://goessner.net/articles/JsonPath
   "Expressions from Goessner specs" should "be correctly parsed" in {
-      def shouldParse(query: String, expected: Any) = {
-        new Parser().compile(query).get should be(expected)
-      }
+    def shouldParse(query: String, expected: Any) = {
+      new Parser().compile(query).get should be(expected)
+    }
 
     shouldParse("$.store.book[0].title", List(
       RootNode,
@@ -174,13 +174,13 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
   }
 
   "Failures" should "be handled gracefully" in {
-      def gracefulFailure(query: String) =
-        new Parser().compile(query) match {
-          case Parser.Failure(msg, _) =>
-            info(s"""that's an expected failure for "$query": $msg""")
-          case other =>
-            fail(s"""a Failure was expected but instead, for "$query" got: $other""")
-        }
+    def gracefulFailure(query: String) =
+      new Parser().compile(query) match {
+        case Parser.Failure(msg, _) =>
+          info(s"""that's an expected failure for "$query": $msg""")
+        case other =>
+          fail(s"""a Failure was expected but instead, for "$query" got: $other""")
+      }
 
     gracefulFailure("")
     gracefulFailure("foo")

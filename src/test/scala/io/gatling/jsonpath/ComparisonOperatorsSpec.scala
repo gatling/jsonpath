@@ -21,9 +21,9 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{ Matchers, FlatSpec }
 
 class ComparisonOperatorsSpec
-    extends FlatSpec
-    with Matchers
-    with GeneratorDrivenPropertyChecks {
+  extends FlatSpec
+  with Matchers
+  with GeneratorDrivenPropertyChecks {
 
   "comparison operators" should "return false if types aren't compatible" in {
     forAll(arbitrary[String], arbitrary[AnyVal]) { (s, anyVal) =>
