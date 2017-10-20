@@ -25,7 +25,7 @@ import io.gatling.jsonpath.AST._
 case class JPError(reason: String)
 
 object JsonPath {
-  val JsonPathParser = new ThreadLocal[Parser]() {
+  private val JsonPathParser = new ThreadLocal[Parser]() {
     override def initialValue() = new Parser
   }
 
@@ -40,7 +40,7 @@ object JsonPath {
 }
 
 class JsonPath(path: List[PathToken]) {
-  def query(jsonObject: Any) = new JsonPathWalker(jsonObject, path).walk()
+  def query(jsonObject: Any): Iterator[Any] = new JsonPathWalker(jsonObject, path).walk()
 }
 
 class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
@@ -166,7 +166,7 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
         case obj: JMap[_, _] =>
           obj.entrySet.iterator.asScala.flatMap(e => e.getKey match {
             case `name` => Iterator.single(e.getValue)
-            case key    => _recFieldFilter(e.getValue)
+            case _      => _recFieldFilter(e.getValue)
           })
         case list: JList[_] => list.iterator.asScala.flatMap(_recFieldFilter)
         case _              => Iterator.empty

@@ -21,36 +21,39 @@ import scala.util.parsing.combinator.RegexParsers
 
 import io.gatling.jsonpath.AST._
 
-object FastStringOps {
+class StringBuilderPool extends ThreadLocal[JStringBuilder] {
 
-  private val StringBuilderPool = new ThreadLocal[JStringBuilder] {
-    override def initialValue(): JStringBuilder = new JStringBuilder
-  }
+  override def initialValue() = new JStringBuilder(512)
 
-  private def pooledStringBuilder = {
-    val sb = StringBuilderPool.get()
+  override def get(): JStringBuilder = {
+    val sb = super.get()
     sb.setLength(0)
     sb
   }
+}
+
+object FastStringOps {
+
+  private val stringBuilderPool = new StringBuilderPool
 
   implicit class RichString(val text: String) extends AnyVal {
-    def fastReplaceAll(searchString: String, replacement: String): String =
-      if (searchString.isEmpty || replacement.isEmpty) {
+    def fastReplaceAll(replaced: String, replacement: String): String =
+      if (replaced.isEmpty || replacement.isEmpty) {
         text
       } else {
-        var start = 0
-        var end = text.indexOf(searchString, start)
+        var end = text.indexOf(replaced)
         if (end == -1) {
           text
         } else {
-          val buf = pooledStringBuilder
+          var start = 0
+          val replacedLength = replaced.length
+          val buf = stringBuilderPool.get()
           while (end != -1) {
             buf.append(text, start, end).append(replacement)
-            start = end + searchString.length
-            end = text.indexOf(searchString, start)
+            start = end + replacedLength
+            end = text.indexOf(replaced, start)
           }
-          buf.append(text, start, text.length)
-          buf.toString
+          buf.append(text, start, text.length).toString
         }
       }
   }
