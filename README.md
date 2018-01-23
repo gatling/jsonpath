@@ -1,4 +1,4 @@
-# JSONPath [![Build Status](https://travis-ci.org/gatling/jsonpath.svg?branch=master)](https://travis-ci.org/gatling/jsonpath) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.gatling/jsonpath_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.gatling/jsonpath_2.11/)
+# JSONPath [![Build Status](https://travis-ci.org/gatling/jsonpath.svg?branch=master)](https://travis-ci.org/gatling/jsonpath) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.gatling/jsonpath_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.gatling/jsonpath_2.12/)
 
 This is an implementation of JSONPath in Scala. The library follows the semantics describted by Stefan Goessner on his [blog](http://goessner.net/articles/JSONPath).
 Although, due to the lack of standardization, it is worth reading the following documentation. 
