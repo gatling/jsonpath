@@ -58,9 +58,8 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
       case CurrentNode => Iterator.single(node)
 
       case Field(name) => node match {
-        case obj: JMap[_, _] if obj.containsKey(name) =>
-          Iterator.single(obj.get(name))
-        case _ => Iterator.empty
+        case obj: JMap[_, _] if obj.containsKey(name) => Iterator.single(obj.get(name))
+        case _                                        => Iterator.empty
       }
 
       case RecursiveField(name) => recFieldFilter(node, name)
