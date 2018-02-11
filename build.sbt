@@ -17,6 +17,4 @@ githubPath := "gatling/jsonpath"
 
 scalaVersion := "2.12.4"
 
-crossScalaVersions := Seq("2.12.4", "2.11.11")
-
 crossPaths := true
