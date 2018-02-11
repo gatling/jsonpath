@@ -161,18 +161,18 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
   }
 
   def recFieldFilter(node: Any, name: String): Iterator[Any] = {
-    def _recFieldFilter(node: Any): Iterator[Any] =
+    def recFieldFilter0(node: Any): Iterator[Any] =
       node match {
         case obj: JMap[_, _] =>
           obj.entrySet.iterator.asScala.flatMap(e => e.getKey match {
             case `name` => Iterator.single(e.getValue)
-            case _      => _recFieldFilter(e.getValue)
+            case _      => recFieldFilter0(e.getValue)
           })
-        case list: JList[_] => list.iterator.asScala.flatMap(_recFieldFilter)
+        case list: JList[_] => list.iterator.asScala.flatMap(recFieldFilter0)
         case _              => Iterator.empty
       }
 
-    _recFieldFilter(node)
+    recFieldFilter0(node)
   }
 
   def recFieldExplorer(node: Any): Iterator[Any] =
