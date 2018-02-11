@@ -50,7 +50,7 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
   private[this] def walk(node: Any, path: List[PathToken]): Iterator[Any] =
     path match {
       case head :: tail => walk1(node, head).flatMap(walk(_, tail))
-      case Nil          => Iterator.single(node)
+      case _            => Iterator.single(node)
     }
 
   private[this] def walk1(node: Any, query: PathToken): Iterator[Any] = {
