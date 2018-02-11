@@ -25,9 +25,7 @@ import io.gatling.jsonpath.AST._
 case class JPError(reason: String)
 
 object JsonPath {
-  private val JsonPathParser = new ThreadLocal[Parser]() {
-    override def initialValue() = new Parser
-  }
+  private val JsonPathParser = ThreadLocal.withInitial[Parser](() => new Parser)
 
   def compile(query: String): Either[JPError, JsonPath] =
     JsonPathParser.get.compile(query) match {
