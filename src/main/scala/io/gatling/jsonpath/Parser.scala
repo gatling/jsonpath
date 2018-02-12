@@ -61,77 +61,77 @@ object FastStringOps {
 
 object Parser extends RegexParsers {
 
-  val NumberRegex = """-?\d+""".r
-  val FieldRegex = """[$_\d\p{L}][$_\-\d\p{L}]*""".r
-  val SingleQuotedFieldRegex = """(\\.|[^'])+""".r
-  val DoubleQuotedFieldRegex = """(\\.|[^"])+""".r
-  val SingleQuotedValueRegex = """(\\.|[^'])*""".r
-  val DoubleQuotedValueRegex = """(\\.|[^"])*""".r
-  val NumberValueRegex = """-?\d+(\.\d*)?""".r
+  private val NumberRegex = """-?\d+""".r
+  private val FieldRegex = """[$_\d\p{L}][$_\-\d\p{L}]*""".r
+  private val SingleQuotedFieldRegex = """(\\.|[^'])+""".r
+  private val DoubleQuotedFieldRegex = """(\\.|[^"])+""".r
+  private val SingleQuotedValueRegex = """(\\.|[^'])*""".r
+  private val DoubleQuotedValueRegex = """(\\.|[^"])*""".r
+  private val NumberValueRegex = """-?\d+(\.\d*)?""".r
 
   /// general purpose parsers ///////////////////////////////////////////////
 
-  def number: Parser[Int] = NumberRegex ^^ (_.toInt)
+  private def number: Parser[Int] = NumberRegex ^^ (_.toInt)
 
-  def field: Parser[String] = FieldRegex
+  private def field: Parser[String] = FieldRegex
 
   import FastStringOps._
-  def singleQuotedField = "'" ~> SingleQuotedFieldRegex <~ "'" ^^ (_.fastReplaceAll("\\'", "'"))
-  def doubleQuotedField = "\"" ~> DoubleQuotedFieldRegex <~ "\"" ^^ (_.fastReplaceAll("\\\"", "\""))
-  def singleQuotedValue = "'" ~> SingleQuotedValueRegex <~ "'" ^^ (_.fastReplaceAll("\\'", "'"))
-  def doubleQuotedValue = "\"" ~> DoubleQuotedValueRegex <~ "\"" ^^ (_.fastReplaceAll("\\\"", "\""))
-  def quotedField: Parser[String] = singleQuotedField | doubleQuotedField
-  def quotedValue: Parser[String] = singleQuotedValue | doubleQuotedValue
+  private def singleQuotedField = "'" ~> SingleQuotedFieldRegex <~ "'" ^^ (_.fastReplaceAll("\\'", "'"))
+  private def doubleQuotedField = "\"" ~> DoubleQuotedFieldRegex <~ "\"" ^^ (_.fastReplaceAll("\\\"", "\""))
+  private def singleQuotedValue = "'" ~> SingleQuotedValueRegex <~ "'" ^^ (_.fastReplaceAll("\\'", "'"))
+  private def doubleQuotedValue = "\"" ~> DoubleQuotedValueRegex <~ "\"" ^^ (_.fastReplaceAll("\\\"", "\""))
+  private def quotedField: Parser[String] = singleQuotedField | doubleQuotedField
+  private def quotedValue: Parser[String] = singleQuotedValue | doubleQuotedValue
 
   /// array parsers /////////////////////////////////////////////////////////
 
-  def arraySliceStep: Parser[Option[Int]] = ":" ~> number.?
+  private def arraySliceStep: Parser[Option[Int]] = ":" ~> number.?
 
-  def arraySlice: Parser[ArraySlice] =
+  private def arraySlice: Parser[ArraySlice] =
     (":" ~> number.?) ~ arraySliceStep.? ^^ {
       case end ~ step => ArraySlice(None, end, step.flatten.getOrElse(1))
     }
 
-  def arrayRandomAccess: Parser[Option[ArrayRandomAccess]] =
+  private def arrayRandomAccess: Parser[Option[ArrayRandomAccess]] =
     rep1("," ~> number).? ^^ (_.map(ArrayRandomAccess))
 
-  def arraySlicePartial: Parser[ArrayAccessor] =
+  private def arraySlicePartial: Parser[ArrayAccessor] =
     number ~ arraySlice ^^ {
       case i ~ as => as.copy(start = Some(i))
     }
 
-  def arrayRandomAccessPartial: Parser[ArrayAccessor] =
+  private def arrayRandomAccessPartial: Parser[ArrayAccessor] =
     number ~ arrayRandomAccess ^^ {
       case i ~ None                             => ArrayRandomAccess(i :: Nil)
       case i ~ Some(ArrayRandomAccess(indices)) => ArrayRandomAccess(i :: indices)
     }
 
-  def arrayPartial: Parser[ArrayAccessor] =
+  private def arrayPartial: Parser[ArrayAccessor] =
     arraySlicePartial | arrayRandomAccessPartial
 
-  def arrayAll: Parser[ArraySlice] =
+  private def arrayAll: Parser[ArraySlice] =
     "*" ^^^ ArraySlice.All
 
-  def arrayAccessors: Parser[ArrayAccessor] =
+  private[jsonpath] def arrayAccessors: Parser[ArrayAccessor] =
     "[" ~> (arrayAll | arrayPartial | arraySlice) <~ "]"
 
   /// filters parsers ///////////////////////////////////////////////////////
 
-  def numberValue: Parser[JPNumber] = NumberValueRegex ^^ {
+  private def numberValue: Parser[JPNumber] = NumberValueRegex ^^ {
     s => if (s.indexOf('.') != -1) JPDouble(s.toDouble) else JPLong(s.toLong)
   }
 
-  def booleanValue: Parser[FilterDirectValue] =
+  private def booleanValue: Parser[FilterDirectValue] =
     "true" ^^^ JPTrue |
       "false" ^^^ JPFalse
 
-  def nullValue: Parser[FilterValue] =
+  private def nullValue: Parser[FilterValue] =
     "null" ^^^ JPNull
 
-  def stringValue: Parser[JPString] = quotedValue ^^ { JPString }
-  def value: Parser[FilterValue] = booleanValue | numberValue | nullValue | stringValue
+  private def stringValue: Parser[JPString] = quotedValue ^^ { JPString }
+  private def value: Parser[FilterValue] = booleanValue | numberValue | nullValue | stringValue
 
-  def comparisonOperator: Parser[ComparisonOperator] =
+  private def comparisonOperator: Parser[ComparisonOperator] =
     "==" ^^^ EqOperator |
       "!=" ^^^ NotEqOperator |
       "<=" ^^^ LessOrEqOperator |
@@ -139,27 +139,27 @@ object Parser extends RegexParsers {
       ">=" ^^^ GreaterOrEqOperator |
       ">" ^^^ GreaterOperator
 
-  def current: Parser[PathToken] = "@" ^^^ CurrentNode
+  private def current: Parser[PathToken] = "@" ^^^ CurrentNode
 
-  def subQuery: Parser[SubQuery] =
+  private def subQuery: Parser[SubQuery] =
     (current | root) ~ pathSequence ^^ { case c ~ ps => SubQuery(c :: ps) }
 
-  def expression1: Parser[FilterToken] =
+  private def expression1: Parser[FilterToken] =
     subQuery ~ (comparisonOperator ~ (subQuery | value)).? ^^ {
       case subq1 ~ None         => HasFilter(subq1)
       case lhs ~ Some(op ~ rhs) => ComparisonFilter(op, lhs, rhs)
     }
 
-  def expression2: Parser[FilterToken] =
+  private def expression2: Parser[FilterToken] =
     value ~ comparisonOperator ~ subQuery ^^ {
       case lhs ~ op ~ rhs => ComparisonFilter(op, lhs, rhs)
     }
 
-  def expression: Parser[FilterToken] = expression1 | expression2
+  private def expression: Parser[FilterToken] = expression1 | expression2
 
-  def booleanOperator: Parser[BinaryBooleanOperator] = "&&" ^^^ AndOperator | "||" ^^^ OrOperator
+  private def booleanOperator: Parser[BinaryBooleanOperator] = "&&" ^^^ AndOperator | "||" ^^^ OrOperator
 
-  def booleanExpression: Parser[FilterToken] =
+  private def booleanExpression: Parser[FilterToken] =
     expression ~ (booleanOperator ~ booleanExpression).? ^^ {
       case lhs ~ None => lhs
       // Balance the AST tree so that all "Or" operations are always on top of any "And" operation.
@@ -169,32 +169,32 @@ object Parser extends RegexParsers {
       case lhs ~ Some(op ~ rhs) => BooleanFilter(op, lhs, rhs)
     }
 
-  def recursiveSubscriptFilter: Parser[RecursiveFilterToken] =
+  private def recursiveSubscriptFilter: Parser[RecursiveFilterToken] =
     (("..*" | "..") ~> subscriptFilter) ^^ RecursiveFilterToken
 
-  def subscriptFilter: Parser[FilterToken] =
+  private[jsonpath] def subscriptFilter: Parser[FilterToken] =
     "[?(" ~> booleanExpression <~ ")]"
 
   /// child accessors parsers ///////////////////////////////////////////////
 
-  def subscriptField: Parser[FieldAccessor] =
+  private[jsonpath] def subscriptField: Parser[FieldAccessor] =
     "[" ~> repsep(quotedField, ",") <~ "]" ^^ {
       case f1 :: Nil => Field(f1)
       case fields    => MultiField(fields)
     }
 
-  def dotField: Parser[FieldAccessor] =
+  private[jsonpath] def dotField: Parser[FieldAccessor] =
     "." ~> field ^^ Field
 
   // TODO recursive with `subscriptField`
-  def recursiveField: Parser[FieldAccessor] =
+  private def recursiveField: Parser[FieldAccessor] =
     ".." ~> field ^^ RecursiveField
 
-  def anyChild: Parser[FieldAccessor] = (".*" | "['*']" | """["*"]""") ^^^ AnyField
+  private def anyChild: Parser[FieldAccessor] = (".*" | "['*']" | """["*"]""") ^^^ AnyField
 
-  def recursiveAny: Parser[FieldAccessor] = "..*" ^^^ RecursiveAnyField
+  private def recursiveAny: Parser[FieldAccessor] = "..*" ^^^ RecursiveAnyField
 
-  def fieldAccessors = (
+  private[jsonpath] def fieldAccessors = (
     dotField
     | recursiveSubscriptFilter
     | recursiveAny
@@ -205,17 +205,17 @@ object Parser extends RegexParsers {
 
   /// Main parsers //////////////////////////////////////////////////////////
 
-  def childAccess = fieldAccessors | arrayAccessors
+  private def childAccess = fieldAccessors | arrayAccessors
 
-  def pathSequence: Parser[List[PathToken]] = rep(childAccess | subscriptFilter)
+  private[jsonpath] def pathSequence: Parser[List[PathToken]] = rep(childAccess | subscriptFilter)
 
-  def root: Parser[PathToken] = "$" ^^^ RootNode
+  private[jsonpath] def root: Parser[PathToken] = "$" ^^^ RootNode
 
-  def query: Parser[List[PathToken]] =
+  private def query: Parser[List[PathToken]] =
     phrase(root ~ pathSequence) ^^ { case r ~ ps => r :: ps }
 }
 
 class Parser {
-  val query = Parser.query
+  private val query = Parser.query
   def compile(jsonpath: String): Parser.ParseResult[List[PathToken]] = Parser.parse(query, jsonpath)
 }

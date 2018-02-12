@@ -174,7 +174,7 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
   }
 
   "Failures" should "be handled gracefully" in {
-    def gracefulFailure(query: String) =
+    def gracefulFailure(query: String): Unit =
       new Parser().compile(query) match {
         case Parser.Failure(msg, _) =>
           info(s"""that's an expected failure for "$query": $msg""")
@@ -331,7 +331,7 @@ trait ParsingMatchers {
           s"$res is equal to $expected but it shouldn't be"
         )
         case Parser.NoSuccess(msg, _) => MatchResult(
-          false,
+          matches = false,
           s"parsing issue, $msg",
           s"parsing issue, $msg"
         )

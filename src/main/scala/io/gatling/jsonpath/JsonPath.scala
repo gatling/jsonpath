@@ -77,7 +77,7 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
       }
 
       case ArraySlice(None, None, 1) => node match {
-        case array: JList[_] => array.iterator.asScala
+        case array: JList[_] => array.asScala.iterator
         case _               => Iterator.empty
       }
 
@@ -105,7 +105,7 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
   private[this] def recFilter(node: Any, filterToken: FilterToken): Iterator[Any] = {
 
     def allNodes(curr: Any): Iterator[Any] = curr match {
-      case array: JList[_]                 => array.iterator.asScala.flatMap(allNodes)
+      case array: JList[_]                 => array.asScala.iterator.flatMap(allNodes)
       case obj: JMap[_, _] if !obj.isEmpty => Iterator.single(obj) ++ obj.values.iterator.asScala.flatMap(allNodes)
       case _                               => Iterator.empty
     }
@@ -165,7 +165,7 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
             case `name` => Iterator.single(e.getValue)
             case _      => recFieldFilter0(e.getValue)
           })
-        case list: JList[_] => list.iterator.asScala.flatMap(recFieldFilter0)
+        case list: JList[_] => list.asScala.iterator.flatMap(recFieldFilter0)
         case _              => Iterator.empty
       }
 
@@ -178,7 +178,7 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
         val values = obj.values
         values.iterator.asScala ++ values.iterator.asScala.flatMap(recFieldExplorer)
       case list: JList[_] =>
-        list.iterator.asScala.flatMap(recFieldExplorer)
+        list.asScala.iterator.flatMap(recFieldExplorer)
       case _ => Iterator.empty
     }
 
@@ -199,12 +199,12 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
     }
     val absStep = abs(step)
 
-    val elts: Iterator[Any] = if (step < 0) array.asScala.reverseIterator else array.iterator.asScala
-    val fromStartToEnd = elts.slice(absStart, absEnd)
+    val elements: Iterator[Any] = if (step < 0) array.asScala.reverseIterator else array.asScala.iterator
+    val fromStartToEnd = elements.slice(absStart, absEnd)
 
-    if (absStep != 1)
-      fromStartToEnd.grouped(absStep).map(_.head)
-    else
+    if (absStep == 1)
       fromStartToEnd
+    else
+      fromStartToEnd.grouped(absStep).map(_.head)
   }
 }
