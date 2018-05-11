@@ -51,7 +51,7 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
       case _            => Iterator.single(node)
     }
 
-  private[this] def walk1(node: Any, query: PathToken): Iterator[Any] = {
+  private[this] def walk1(node: Any, query: PathToken): Iterator[Any] =
     query match {
       case RootNode    => Iterator.single(rootNode)
 
@@ -100,7 +100,6 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
 
       case RecursiveAnyField                 => Iterator.single(node) ++ recFieldExplorer(node)
     }
-  }
 
   private[this] def recFilter(node: Any, filterToken: FilterToken): Iterator[Any] = {
 
