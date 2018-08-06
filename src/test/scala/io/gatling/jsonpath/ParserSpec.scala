@@ -46,6 +46,7 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
     shouldParseField("Foo$1bar")
     shouldParseField("_1-2-3")
     shouldParseField("ñ1çölå$")
+    shouldParseField("#token")
   }
 
   it should "work with the root object" in {
