@@ -164,7 +164,7 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
             case `name` => Iterator.single(e.getValue)
             case _      => recFieldFilter0(e.getValue)
           })
-        case list: JList[_] => list.asScala.iterator.flatMap(recFieldFilter0)
+        case list: JList[_] => list.iterator.asScala.flatMap(recFieldFilter0)
         case _              => Iterator.empty
       }
 
@@ -177,7 +177,7 @@ class JsonPathWalker(rootNode: Any, fullPath: List[PathToken]) {
         val values = obj.values
         values.iterator.asScala ++ values.iterator.asScala.flatMap(recFieldExplorer)
       case list: JList[_] =>
-        list.asScala.iterator.flatMap(recFieldExplorer)
+        list.iterator.asScala.flatMap(recFieldExplorer)
       case _ => Iterator.empty
     }
 
