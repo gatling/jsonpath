@@ -63,7 +63,7 @@ object FastStringOps {
 object Parser extends RegexParsers {
 
   private val NumberRegex = """-?\d+""".r
-  private val FieldRegex = """[^\*\.\[\]\(\)=<>\s]+""".r
+  private val FieldRegex = """[^\*\.\[\]\(\)=!<>\s]+""".r
   private val SingleQuotedFieldRegex = """(\\.|[^'])+""".r
   private val DoubleQuotedFieldRegex = """(\\.|[^"])+""".r
   private val SingleQuotedValueRegex = """(\\.|[^'])*""".r
