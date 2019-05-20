@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 GatlingCorp (https://gatling.io)
+ * Copyright 2011-2019 GatlingCorp (https://gatling.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
  */
 
 package io.gatling.jsonpath
+
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.{ BooleanNode, DoubleNode, LongNode, NullNode, TextNode }
 
 object AST {
   sealed trait AstToken
@@ -47,24 +50,24 @@ object AST {
 
   case object CurrentNode extends PathToken
   sealed trait FilterValue extends AstToken
-  sealed trait FilterDirectValue extends FilterValue {
-    def value: Any
+
+  object FilterDirectValue {
+    def long(value: Long) = FilterDirectValue(new LongNode(value))
+    def double(value: Double) = FilterDirectValue(new DoubleNode(value))
+    val True = FilterDirectValue(BooleanNode.TRUE)
+    val False = FilterDirectValue(BooleanNode.FALSE)
+    def string(value: String) = FilterDirectValue(new TextNode(value))
+    val Null = FilterDirectValue(NullNode.instance)
   }
 
-  sealed trait JPNumber extends FilterDirectValue
-  case class JPLong(value: Long) extends JPNumber
-  case class JPDouble(value: Double) extends JPNumber
-  case object JPTrue extends FilterDirectValue { val value = true }
-  case object JPFalse extends FilterDirectValue { val value = false }
-  case class JPString(value: String) extends FilterDirectValue
-  case object JPNull extends FilterDirectValue { val value = null }
+  case class FilterDirectValue(node: JsonNode) extends FilterValue
 
   case class SubQuery(path: List[PathToken]) extends FilterValue
 
   sealed trait FilterToken extends PathToken
   case class HasFilter(query: SubQuery) extends FilterToken
   case class ComparisonFilter(operator: ComparisonOperator, lhs: FilterValue, rhs: FilterValue) extends FilterToken
-  case class BooleanFilter(fun: BinaryBooleanOperator, lhs: FilterToken, rhs: FilterToken) extends FilterToken
+  case class BooleanFilter(operator: BinaryBooleanOperator, lhs: FilterToken, rhs: FilterToken) extends FilterToken
 
   case class RecursiveFilterToken(filter: FilterToken) extends PathToken
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 GatlingCorp (https://gatling.io)
+ * Copyright 2011-2019 GatlingCorp (https://gatling.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -214,63 +214,63 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
 
     // Check all supported ordering operators
     parse(subscriptFilter, "[?(@ == 2)]") should beParsedAs(
-      ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), JPLong(2))
+      ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), FilterDirectValue.long(2))
     )
     parse(subscriptFilter, "[?(@==2)]") should beParsedAs(
-      ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), JPLong(2))
+      ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), FilterDirectValue.long(2))
     )
     parse(subscriptFilter, "[?(@ <= 2)]") should beParsedAs(
-      ComparisonFilter(LessOrEqOperator, SubQuery(List(CurrentNode)), JPLong(2))
+      ComparisonFilter(LessOrEqOperator, SubQuery(List(CurrentNode)), FilterDirectValue.long(2))
     )
     parse(subscriptFilter, "[?(@<=2)]") should beParsedAs(
-      ComparisonFilter(LessOrEqOperator, SubQuery(List(CurrentNode)), JPLong(2))
+      ComparisonFilter(LessOrEqOperator, SubQuery(List(CurrentNode)), FilterDirectValue.long(2))
     )
     parse(subscriptFilter, "[?(@ >= 2)]") should beParsedAs(
-      ComparisonFilter(GreaterOrEqOperator, SubQuery(List(CurrentNode)), JPLong(2))
+      ComparisonFilter(GreaterOrEqOperator, SubQuery(List(CurrentNode)), FilterDirectValue.long(2))
     )
     parse(subscriptFilter, "[?(@>=2)]") should beParsedAs(
-      ComparisonFilter(GreaterOrEqOperator, SubQuery(List(CurrentNode)), JPLong(2))
+      ComparisonFilter(GreaterOrEqOperator, SubQuery(List(CurrentNode)), FilterDirectValue.long(2))
     )
     parse(subscriptFilter, "[?(@ < 2)]") should beParsedAs(
-      ComparisonFilter(LessOperator, SubQuery(List(CurrentNode)), JPLong(2))
+      ComparisonFilter(LessOperator, SubQuery(List(CurrentNode)), FilterDirectValue.long(2))
     )
     parse(subscriptFilter, "[?(@<2)]") should beParsedAs(
-      ComparisonFilter(LessOperator, SubQuery(List(CurrentNode)), JPLong(2))
+      ComparisonFilter(LessOperator, SubQuery(List(CurrentNode)), FilterDirectValue.long(2))
     )
     parse(subscriptFilter, "[?(@ > 2)]") should beParsedAs(
-      ComparisonFilter(GreaterOperator, SubQuery(List(CurrentNode)), JPLong(2))
+      ComparisonFilter(GreaterOperator, SubQuery(List(CurrentNode)), FilterDirectValue.long(2))
     )
     parse(subscriptFilter, "[?(@>2)]") should beParsedAs(
-      ComparisonFilter(GreaterOperator, SubQuery(List(CurrentNode)), JPLong(2))
+      ComparisonFilter(GreaterOperator, SubQuery(List(CurrentNode)), FilterDirectValue.long(2))
     )
     parse(subscriptFilter, "[?(@ == true)]") should beParsedAs(
-      ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), JPTrue)
+      ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), FilterDirectValue.True)
     )
     parse(subscriptFilter, "[?(@==true)]") should beParsedAs(
-      ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), JPTrue)
+      ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), FilterDirectValue.True)
     )
     parse(subscriptFilter, "[?(@ != false)]") should beParsedAs(
-      ComparisonFilter(NotEqOperator, SubQuery(List(CurrentNode)), JPFalse)
+      ComparisonFilter(NotEqOperator, SubQuery(List(CurrentNode)), FilterDirectValue.False)
     )
     parse(subscriptFilter, "[?(@!=false)]") should beParsedAs(
-      ComparisonFilter(NotEqOperator, SubQuery(List(CurrentNode)), JPFalse)
+      ComparisonFilter(NotEqOperator, SubQuery(List(CurrentNode)), FilterDirectValue.False)
     )
     parse(subscriptFilter, "[?(@ == null)]") should beParsedAs(
-      ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), JPNull)
+      ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), FilterDirectValue.Null)
     )
     parse(subscriptFilter, "[?(@==null)]") should beParsedAs(
-      ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), JPNull)
+      ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), FilterDirectValue.Null)
     )
 
     // Trickier Json path expressions
     parse(subscriptFilter, "[?(@.foo == 2)]") should beParsedAs(
-      ComparisonFilter(EqOperator, SubQuery(List(CurrentNode, Field("foo"))), JPLong(2))
+      ComparisonFilter(EqOperator, SubQuery(List(CurrentNode, Field("foo"))), FilterDirectValue.long(2))
     )
     parse(subscriptFilter, "[?(true == @.foo)]") should beParsedAs(
-      ComparisonFilter(EqOperator, JPTrue, SubQuery(List(CurrentNode, Field("foo"))))
+      ComparisonFilter(EqOperator, FilterDirectValue.True, SubQuery(List(CurrentNode, Field("foo"))))
     )
     parse(subscriptFilter, "[?(2 == @['foo'])]") should beParsedAs(
-      ComparisonFilter(EqOperator, JPLong(2), SubQuery(List(CurrentNode, Field("foo"))))
+      ComparisonFilter(EqOperator, FilterDirectValue.long(2), SubQuery(List(CurrentNode, Field("foo"))))
     )
 
     // Allow reference to the root object
@@ -280,17 +280,17 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
 
     new Parser().compile("$['points'][?(@['y'] >= 3)].id").get should be(RootNode
       :: Field("points")
-      :: ComparisonFilter(GreaterOrEqOperator, SubQuery(List(CurrentNode, Field("y"))), JPLong(3))
+      :: ComparisonFilter(GreaterOrEqOperator, SubQuery(List(CurrentNode, Field("y"))), FilterDirectValue.long(3))
       :: Field("id") :: Nil)
 
     new Parser().compile("$.points[?(@['id']=='i4')].x").get should be(RootNode
       :: Field("points")
-      :: ComparisonFilter(EqOperator, SubQuery(List(CurrentNode, Field("id"))), JPString("i4"))
+      :: ComparisonFilter(EqOperator, SubQuery(List(CurrentNode, Field("id"))), FilterDirectValue.string("i4"))
       :: Field("x") :: Nil)
 
     new Parser().compile("""$.points[?(@['id']=="i4")].x""").get should be(RootNode
       :: Field("points")
-      :: ComparisonFilter(EqOperator, SubQuery(List(CurrentNode, Field("id"))), JPString("i4"))
+      :: ComparisonFilter(EqOperator, SubQuery(List(CurrentNode, Field("id"))), FilterDirectValue.string("i4"))
       :: Field("x") :: Nil)
   }
 
@@ -339,7 +339,7 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
       BooleanFilter(
         OrOperator,
         HasFilter(SubQuery(List(CurrentNode, Field("foo")))),
-        ComparisonFilter(LessOrEqOperator, SubQuery(List(CurrentNode, Field("bar"))), JPLong(2))
+        ComparisonFilter(LessOrEqOperator, SubQuery(List(CurrentNode, Field("bar"))), FilterDirectValue.long(2))
       )
     )
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 GatlingCorp (https://gatling.io)
+ * Copyright 2011-2019 GatlingCorp (https://gatling.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,18 +118,18 @@ object Parser extends RegexParsers {
 
   /// filters parsers ///////////////////////////////////////////////////////
 
-  private def numberValue: Parser[JPNumber] = NumberValueRegex ^^ {
-    s => if (s.indexOf('.') != -1) JPDouble(s.toDouble) else JPLong(s.toLong)
+  private def numberValue: Parser[FilterDirectValue] = NumberValueRegex ^^ {
+    s => if (s.indexOf('.') != -1) FilterDirectValue.double(s.toDouble) else FilterDirectValue.long(s.toLong)
   }
 
   private def booleanValue: Parser[FilterDirectValue] =
-    "true" ^^^ JPTrue |
-      "false" ^^^ JPFalse
+    "true" ^^^ FilterDirectValue.True |
+      "false" ^^^ FilterDirectValue.False
 
   private def nullValue: Parser[FilterValue] =
-    "null" ^^^ JPNull
+    "null" ^^^ FilterDirectValue.Null
 
-  private def stringValue: Parser[JPString] = quotedValue ^^ { JPString }
+  private def stringValue: Parser[FilterDirectValue] = quotedValue ^^ { FilterDirectValue.string }
   private def value: Parser[FilterValue] = booleanValue | numberValue | nullValue | stringValue
 
   private def comparisonOperator: Parser[ComparisonOperator] =
