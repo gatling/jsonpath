@@ -1087,6 +1087,10 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
       text("red"),
       double(19.95),
       parseJson(allBooks),
+      parseJson(book1),
+      parseJson(book2),
+      parseJson(book3),
+      parseJson(book4),
       text("Nigel Rees"),
       text("Sayings of the Century"),
       text("reference"),
@@ -1197,7 +1201,13 @@ trait JsonPathMatchers {
           val added = actualSeq.diff(expectedSeq)
           MatchResult(
             missing.isEmpty && added.isEmpty,
-            s"$actualSeq is missing $missing and should not contains $added",
+            if (missing.isEmpty) {
+              s"$actualSeq should not contains $added"
+            } else if (added.isEmpty) {
+              s"$actualSeq is missing $missing",
+            } else {
+              s"$actualSeq is missing $missing and should not contains $added"
+            },
             s"$actualSeq is equal to $expectedSeq but it shouldn't"
           )
         case Left(e) => MatchResult(

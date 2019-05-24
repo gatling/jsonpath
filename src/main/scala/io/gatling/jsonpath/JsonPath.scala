@@ -69,7 +69,7 @@ class JsonPathWalker(rootNode: JsonNode, fullPath: List[PathToken]) {
           Iterator.empty
         }
 
-      case RecursiveField(name) => recFieldFilter(node, name)
+      case RecursiveField(name) => new RecursiveFieldIterator(node, name)
 
       case MultiField(fieldNames) =>
         if (node.getNodeType == OBJECT) {
@@ -110,27 +110,12 @@ class JsonPathWalker(rootNode: JsonNode, fullPath: List[PathToken]) {
           Iterator.empty
         }
 
-      case RecursiveFilterToken(filterToken) => recFilter(node, filterToken)
+      case RecursiveFilterToken(filterToken) => new RecursiveDataIterator(node).flatMap(applyFilter(_, filterToken))
 
       case filterToken: FilterToken          => applyFilter(node, filterToken)
 
-      case RecursiveAnyField                 => Iterator.single(node) ++ recFieldExplorer(node)
+      case RecursiveAnyField                 => new RecursiveNodeIterator(node)
     }
-
-  private[this] def recFilter(node: JsonNode, filterToken: FilterToken): Iterator[JsonNode] = {
-
-    def allNodes(curr: JsonNode): Iterator[JsonNode] =
-      curr.getNodeType match {
-        case ARRAY =>
-          curr.elements.asScala.flatMap(allNodes)
-        case OBJECT if curr.size > 0 =>
-          Iterator.single(curr) ++ curr.elements.asScala.flatMap(allNodes)
-        case _ =>
-          Iterator.empty
-      }
-
-    allNodes(node).flatMap(applyFilter(_, filterToken))
-  }
 
   private[this] def applyFilter(currentNode: JsonNode, filterToken: FilterToken): Iterator[JsonNode] = {
 
@@ -175,29 +160,6 @@ class JsonPathWalker(rootNode: JsonNode, fullPath: List[PathToken]) {
     val filterFunction = evaluateFilter(filterToken)
     elementsToFilter(currentNode).filter(filterFunction)
   }
-
-  // FIXME optimize, slow
-  def recFieldFilter(node: JsonNode, name: String): Iterator[JsonNode] =
-    node.getNodeType match {
-      case OBJECT =>
-        node.fields.asScala.flatMap(e => e.getKey match {
-          case `name` => Iterator.single(e.getValue)
-          case _      => recFieldFilter(e.getValue, name)
-        })
-
-      case ARRAY =>
-        node.iterator.asScala.flatMap(recFieldFilter(_, name))
-
-      case _ =>
-        Iterator.empty
-    }
-
-  def recFieldExplorer(node: JsonNode): Iterator[JsonNode] =
-    node.getNodeType match {
-      case OBJECT => node.elements.asScala ++ node.elements.asScala.flatMap(recFieldExplorer)
-      case ARRAY  => node.elements.asScala.flatMap(recFieldExplorer)
-      case _      => Iterator.empty
-    }
 
   private[this] def sliceArray(array: JsonNode, start: Option[Int], stop: Option[Int], step: Int): Iterator[JsonNode] = {
     val size = array.size
