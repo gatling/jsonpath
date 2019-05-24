@@ -27,7 +27,6 @@ abstract class RecursiveIterator[T](root: JsonNode) extends AbstractIterator[Jso
   protected var pause: Boolean = _
   protected var stack: List[T] = _
 
-
   protected def visitNode(node: JsonNode): Unit
 
   protected def visit(t: T): Unit

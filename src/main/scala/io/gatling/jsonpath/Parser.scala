@@ -179,7 +179,7 @@ object Parser extends RegexParsers {
   /// child accessors parsers ///////////////////////////////////////////////
 
   private[jsonpath] def subscriptField: Parser[FieldAccessor] =
-    "[" ~> repsep(quotedField, ",") <~ "]" ^^ {
+    "[" ~> rep1sep(quotedField, ",") <~ "]" ^^ {
       case f1 :: Nil => Field(f1)
       case fields    => MultiField(fields)
     }
