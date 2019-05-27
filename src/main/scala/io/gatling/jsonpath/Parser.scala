@@ -33,34 +33,26 @@ class StringBuilderPool extends ThreadLocal[JStringBuilder] {
   }
 }
 
-object FastStringOps {
+object Parser extends RegexParsers {
 
   private val stringBuilderPool = new StringBuilderPool
 
-  implicit class RichString(val text: String) extends AnyVal {
-    def fastReplaceAll(replaced: String, replacement: String): String =
-      if (replaced.isEmpty || replacement.isEmpty) {
-        text
-      } else {
-        var end = text.indexOf(replaced)
-        if (end == -1) {
-          text
-        } else {
-          var start = 0
-          val replacedLength = replaced.length
-          val buf = stringBuilderPool.get()
-          while (end != -1) {
-            buf.append(text, start, end).append(replacement)
-            start = end + replacedLength
-            end = text.indexOf(replaced, start)
-          }
-          buf.append(text, start, text.length).toString
-        }
+  private[jsonpath] def fastReplaceAll(text: String, replaced: String, replacement: String): String = {
+    var end = text.indexOf(replaced)
+    if (end == -1) {
+      text
+    } else {
+      var start = 0
+      val replacedLength = replaced.length
+      val buf = stringBuilderPool.get()
+      while (end != -1) {
+        buf.append(text, start, end).append(replacement)
+        start = end + replacedLength
+        end = text.indexOf(replaced, start)
       }
+      buf.append(text, start, text.length).toString
+    }
   }
-}
-
-object Parser extends RegexParsers {
 
   private val NumberRegex = """-?\d+""".r
   private val FieldRegex = """[^\*\.\[\]\(\)=!<>\s]+""".r
@@ -76,11 +68,10 @@ object Parser extends RegexParsers {
 
   private def field: Parser[String] = FieldRegex
 
-  import FastStringOps._
-  private def singleQuotedField = "'" ~> SingleQuotedFieldRegex <~ "'" ^^ (_.fastReplaceAll("\\'", "'"))
-  private def doubleQuotedField = "\"" ~> DoubleQuotedFieldRegex <~ "\"" ^^ (_.fastReplaceAll("\\\"", "\""))
-  private def singleQuotedValue = "'" ~> SingleQuotedValueRegex <~ "'" ^^ (_.fastReplaceAll("\\'", "'"))
-  private def doubleQuotedValue = "\"" ~> DoubleQuotedValueRegex <~ "\"" ^^ (_.fastReplaceAll("\\\"", "\""))
+  private def singleQuotedField = "'" ~> SingleQuotedFieldRegex <~ "'" ^^ (fastReplaceAll(_, "\\'", "'"))
+  private def doubleQuotedField = "\"" ~> DoubleQuotedFieldRegex <~ "\"" ^^ (fastReplaceAll(_, "\\\"", "\""))
+  private def singleQuotedValue = "'" ~> SingleQuotedValueRegex <~ "'" ^^ (fastReplaceAll(_, "\\'", "'"))
+  private def doubleQuotedValue = "\"" ~> DoubleQuotedValueRegex <~ "\"" ^^ (fastReplaceAll(_, "\\\"", "\""))
   private def quotedField: Parser[String] = singleQuotedField | doubleQuotedField
   private def quotedValue: Parser[String] = singleQuotedValue | doubleQuotedValue
 
@@ -103,8 +94,8 @@ object Parser extends RegexParsers {
 
   private def arrayRandomAccessPartial: Parser[ArrayAccessor] =
     number ~ arrayRandomAccess ^^ {
-      case i ~ None                             => ArrayRandomAccess(i :: Nil)
       case i ~ Some(ArrayRandomAccess(indices)) => ArrayRandomAccess(i :: indices)
+      case i ~ _                                => ArrayRandomAccess(i :: Nil)
     }
 
   private def arrayPartial: Parser[ArrayAccessor] =
