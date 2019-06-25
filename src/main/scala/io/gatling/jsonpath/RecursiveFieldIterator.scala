@@ -16,41 +16,40 @@
 
 package io.gatling.jsonpath
 
-import java.util.{ Iterator => JIterator, Map => JMap }
-
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.JsonNodeType.{ ARRAY, OBJECT }
+import play.api.libs.json.{ JsArray, JsObject, JsValue }
 
 sealed trait VisitedIterator {
-  def hasNext(): Boolean
+  def hasNext: Boolean
 }
-case class VisitedObject(it: JIterator[JMap.Entry[String, JsonNode]]) extends VisitedIterator {
-  override def hasNext(): Boolean = it.hasNext
+
+case class VisitedObject(it: Iterator[(String, JsValue)]) extends VisitedIterator {
+  override def hasNext: Boolean = it.hasNext
 }
-case class VisitedArray(it: JIterator[JsonNode]) extends VisitedIterator {
-  override def hasNext(): Boolean = it.hasNext
+
+case class VisitedArray(it: Iterator[JsValue]) extends VisitedIterator {
+  override def hasNext: Boolean = it.hasNext
 }
 
 /**
  * Collect all first nodes in a branch with a given name
+ *
  * @param root the tree root
  * @param name the searched name
  */
-class RecursiveFieldIterator(root: JsonNode, name: String) extends RecursiveIterator[VisitedIterator](root) {
+class RecursiveFieldIterator(root: JsValue, name: String) extends RecursiveIterator[VisitedIterator](root) {
 
   override def visit(t: VisitedIterator): Unit = t match {
     case VisitedObject(it) => visitObject(it)
     case VisitedArray(it)  => visitArray(it)
   }
 
-  private def visitObject(it: JIterator[JMap.Entry[String, JsonNode]]): Unit = {
+  private def visitObject(it: Iterator[(String, JsValue)]): Unit = {
     while (it.hasNext && !pause) {
-      val e = it.next()
-      if (e.getKey == name) {
-        nextNode = e.getValue
-        pause = true
-      } else {
-        visitNode(e.getValue)
+      it.next() match {
+        case (key, value) if key == name =>
+          nextNode = value
+          pause = true
+        case (_, value) => visitNode(value)
       }
     }
     if (!pause) {
@@ -58,7 +57,7 @@ class RecursiveFieldIterator(root: JsonNode, name: String) extends RecursiveIter
     }
   }
 
-  private def visitArray(it: JIterator[JsonNode]): Unit = {
+  private def visitArray(it: Iterator[JsValue]): Unit = {
     while (it.hasNext && !pause) {
       visitNode(it.next())
     }
@@ -67,14 +66,14 @@ class RecursiveFieldIterator(root: JsonNode, name: String) extends RecursiveIter
     }
   }
 
-  protected def visitNode(node: JsonNode): Unit =
-    node.getNodeType match {
-      case OBJECT =>
-        val it = node.fields
+  protected def visitNode(node: JsValue): Unit =
+    node match {
+      case obj: JsObject =>
+        val it = obj.value.iterator
         stack = VisitedObject(it) :: stack
         visitObject(it)
-      case ARRAY =>
-        val it = node.elements
+      case array: JsArray =>
+        val it = array.value.iterator
         stack = VisitedArray(it) :: stack
         visitArray(it)
       case _ =>

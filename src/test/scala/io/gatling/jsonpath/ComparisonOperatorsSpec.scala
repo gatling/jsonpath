@@ -16,11 +16,11 @@
 
 package io.gatling.jsonpath
 
-import com.fasterxml.jackson.databind.node.{ BooleanNode, DoubleNode, FloatNode, IntNode, LongNode, TextNode }
 import org.scalacheck.Arbitrary
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{ FlatSpec, Matchers }
+import play.api.libs.json.{ JsBoolean, JsNumber, JsString }
 
 class ComparisonOperatorsSpec
   extends FlatSpec
@@ -29,8 +29,8 @@ class ComparisonOperatorsSpec
 
   "comparison operators" should "return false if types aren't compatible" in {
     forAll(arbitrary[String], arbitrary[Int]) { (string, int) =>
-      val lhn = new TextNode(string)
-      val rhn = new IntNode(int)
+      val lhn = JsString(string)
+      val rhn = JsNumber(BigDecimal(int))
       LessOperator(lhn, rhn) shouldBe false
       GreaterOperator(lhn, rhn) shouldBe false
       LessOrEqOperator(lhn, rhn) shouldBe false
@@ -38,8 +38,8 @@ class ComparisonOperatorsSpec
     }
 
     forAll(arbitrary[Boolean], arbitrary[String]) { (bool, string) =>
-      val lhn = BooleanNode.valueOf(bool)
-      val rhn = new TextNode(string)
+      val lhn = JsBoolean(bool)
+      val rhn = JsString(string)
       LessOperator(lhn, rhn) shouldBe false
       GreaterOperator(lhn, rhn) shouldBe false
       LessOrEqOperator(lhn, rhn) shouldBe false
@@ -47,8 +47,8 @@ class ComparisonOperatorsSpec
     }
 
     forAll(arbitrary[Int], arbitrary[String]) { (int, string) =>
-      val lhn = new IntNode(int)
-      val rhn = new TextNode(string)
+      val lhn = JsNumber(BigDecimal(int))
+      val rhn = JsString(string)
       LessOperator(lhn, rhn) shouldBe false
       GreaterOperator(lhn, rhn) shouldBe false
       LessOrEqOperator(lhn, rhn) shouldBe false
@@ -58,8 +58,8 @@ class ComparisonOperatorsSpec
 
   it should "properly compare Strings" in {
     forAll(arbitrary[String], arbitrary[String]) { (val1, val2) =>
-      val lhn = new TextNode(val1)
-      val rhn = new TextNode(val2)
+      val lhn = JsString(val1)
+      val rhn = JsString(val2)
       LessOperator(lhn, rhn) shouldBe (val1 < val2)
       GreaterOperator(lhn, rhn) shouldBe (val1 > val2)
       LessOrEqOperator(lhn, rhn) shouldBe (val1 <= val2)
@@ -69,8 +69,8 @@ class ComparisonOperatorsSpec
 
   it should "properly compare Booleans" in {
     forAll(arbitrary[Boolean], arbitrary[Boolean]) { (val1, val2) =>
-      val lhn = BooleanNode.valueOf(val1)
-      val rhn = BooleanNode.valueOf(val2)
+      val lhn = JsBoolean(val1)
+      val rhn = JsBoolean(val2)
       LessOperator(lhn, rhn) shouldBe (val1 < val2)
       GreaterOperator(lhn, rhn) shouldBe (val1 > val2)
       LessOrEqOperator(lhn, rhn) shouldBe (val1 <= val2)
@@ -80,8 +80,8 @@ class ComparisonOperatorsSpec
 
   it should "properly compare Int with other numeric types" in {
     forAll(arbitrary[Int], arbitrary[Int]) { (val1, val2) =>
-      val lhn = new IntNode(val1)
-      val rhn = new IntNode(val2)
+      val lhn = JsNumber(BigDecimal(val1))
+      val rhn = JsNumber(BigDecimal(val2))
       LessOperator(lhn, rhn) shouldBe (val1 < val2)
       GreaterOperator(lhn, rhn) shouldBe (val1 > val2)
       LessOrEqOperator(lhn, rhn) shouldBe (val1 <= val2)
@@ -89,8 +89,8 @@ class ComparisonOperatorsSpec
     }
 
     forAll(arbitrary[Int], arbitrary[Long]) { (val1, val2) =>
-      val lhn = new IntNode(val1)
-      val rhn = new LongNode(val2)
+      val lhn = JsNumber(BigDecimal(val1))
+      val rhn = JsNumber(BigDecimal(val2))
       LessOperator(lhn, rhn) shouldBe (val1 < val2)
       GreaterOperator(lhn, rhn) shouldBe (val1 > val2)
       LessOrEqOperator(lhn, rhn) shouldBe (val1 <= val2)
@@ -98,8 +98,8 @@ class ComparisonOperatorsSpec
     }
 
     forAll(arbitrary[Int], arbitrary[Double]) { (val1, val2) =>
-      val lhn = new IntNode(val1)
-      val rhn = new DoubleNode(val2)
+      val lhn = JsNumber(BigDecimal(val1))
+      val rhn = JsNumber(BigDecimal(val2))
       LessOperator(lhn, rhn) shouldBe (val1 < val2)
       GreaterOperator(lhn, rhn) shouldBe (val1 > val2)
       LessOrEqOperator(lhn, rhn) shouldBe (val1 <= val2)
@@ -107,8 +107,8 @@ class ComparisonOperatorsSpec
     }
 
     forAll(arbitrary[Int], arbitrary[Float]) { (val1, val2) =>
-      val lhn = new IntNode(val1)
-      val rhn = new FloatNode(val2)
+      val lhn = JsNumber(BigDecimal(val1))
+      val rhn = JsNumber(BigDecimal(val2))
       LessOperator(lhn, rhn) shouldBe (val1 < val2)
       GreaterOperator(lhn, rhn) shouldBe (val1 > val2)
       LessOrEqOperator(lhn, rhn) shouldBe (val1 <= val2)
@@ -118,8 +118,8 @@ class ComparisonOperatorsSpec
 
   it should "properly compare Long with other numeric types" in {
     forAll(arbitrary[Long], arbitrary[Int]) { (val1, val2) =>
-      val lhn = new LongNode(val1)
-      val rhn = new IntNode(val2)
+      val lhn = JsNumber(BigDecimal(val1))
+      val rhn = JsNumber(BigDecimal(val2))
       LessOperator(lhn, rhn) shouldBe (val1 < val2)
       GreaterOperator(lhn, rhn) shouldBe (val1 > val2)
       LessOrEqOperator(lhn, rhn) shouldBe (val1 <= val2)
@@ -127,8 +127,8 @@ class ComparisonOperatorsSpec
     }
 
     forAll(arbitrary[Long], arbitrary[Long]) { (val1, val2) =>
-      val lhn = new LongNode(val1)
-      val rhn = new LongNode(val2)
+      val lhn = JsNumber(BigDecimal(val1))
+      val rhn = JsNumber(BigDecimal(val2))
       LessOperator(lhn, rhn) shouldBe (val1 < val2)
       GreaterOperator(lhn, rhn) shouldBe (val1 > val2)
       LessOrEqOperator(lhn, rhn) shouldBe (val1 <= val2)
@@ -136,8 +136,8 @@ class ComparisonOperatorsSpec
     }
 
     forAll(arbitrary[Long], arbitrary[Double]) { (val1, val2) =>
-      val lhn = new LongNode(val1)
-      val rhn = new DoubleNode(val2)
+      val lhn = JsNumber(BigDecimal(val1))
+      val rhn = JsNumber(BigDecimal(val2))
       LessOperator(lhn, rhn) shouldBe (val1 < val2)
       GreaterOperator(lhn, rhn) shouldBe (val1 > val2)
       LessOrEqOperator(lhn, rhn) shouldBe (val1 <= val2)
@@ -145,8 +145,8 @@ class ComparisonOperatorsSpec
     }
 
     forAll(arbitrary[Long], arbitrary[Float]) { (val1, val2) =>
-      val lhn = new LongNode(val1)
-      val rhn = new FloatNode(val2)
+      val lhn = JsNumber(BigDecimal(val1))
+      val rhn = JsNumber(BigDecimal(val2))
       LessOperator(lhn, rhn) shouldBe (val1 < val2)
       GreaterOperator(lhn, rhn) shouldBe (val1 > val2)
       LessOrEqOperator(lhn, rhn) shouldBe (val1 <= val2)
@@ -156,8 +156,8 @@ class ComparisonOperatorsSpec
 
   it should "properly compare Double with other numeric types" in {
     forAll(arbitrary[Double], arbitrary[Int]) { (val1, val2) =>
-      val lhn = new DoubleNode(val1)
-      val rhn = new IntNode(val2)
+      val lhn = JsNumber(BigDecimal(val1))
+      val rhn = JsNumber(BigDecimal(val2))
       LessOperator(lhn, rhn) shouldBe (val1 < val2)
       GreaterOperator(lhn, rhn) shouldBe (val1 > val2)
       LessOrEqOperator(lhn, rhn) shouldBe (val1 <= val2)
@@ -165,8 +165,8 @@ class ComparisonOperatorsSpec
     }
 
     forAll(arbitrary[Double], arbitrary[Long]) { (val1, val2) =>
-      val lhn = new DoubleNode(val1)
-      val rhn = new LongNode(val2)
+      val lhn = JsNumber(BigDecimal(val1))
+      val rhn = JsNumber(BigDecimal(val2))
       LessOperator(lhn, rhn) shouldBe (val1 < val2)
       GreaterOperator(lhn, rhn) shouldBe (val1 > val2)
       LessOrEqOperator(lhn, rhn) shouldBe (val1 <= val2)
@@ -174,8 +174,8 @@ class ComparisonOperatorsSpec
     }
 
     forAll(arbitrary[Double], arbitrary[Double]) { (val1, val2) =>
-      val lhn = new DoubleNode(val1)
-      val rhn = new DoubleNode(val2)
+      val lhn = JsNumber(BigDecimal(val1))
+      val rhn = JsNumber(BigDecimal(val2))
       LessOperator(lhn, rhn) shouldBe (val1 < val2)
       GreaterOperator(lhn, rhn) shouldBe (val1 > val2)
       LessOrEqOperator(lhn, rhn) shouldBe (val1 <= val2)
@@ -183,8 +183,8 @@ class ComparisonOperatorsSpec
     }
 
     forAll(arbitrary[Double], arbitrary[Float]) { (val1, val2) =>
-      val lhn = new DoubleNode(val1)
-      val rhn = new FloatNode(val2)
+      val lhn = JsNumber(BigDecimal(val1))
+      val rhn = JsNumber(BigDecimal(val2))
       LessOperator(lhn, rhn) shouldBe (val1 < val2)
       GreaterOperator(lhn, rhn) shouldBe (val1 > val2)
       LessOrEqOperator(lhn, rhn) shouldBe (val1 <= val2)
@@ -194,8 +194,8 @@ class ComparisonOperatorsSpec
 
   it should "properly compare Float with other numeric types" in {
     forAll(arbitrary[Float], arbitrary[Int]) { (val1, val2) =>
-      val lhn = new FloatNode(val1)
-      val rhn = new IntNode(val2)
+      val lhn = JsNumber(BigDecimal(val1))
+      val rhn = JsNumber(BigDecimal(val2))
       LessOperator(lhn, rhn) shouldBe (val1 < val2)
       GreaterOperator(lhn, rhn) shouldBe (val1 > val2)
       LessOrEqOperator(lhn, rhn) shouldBe (val1 <= val2)
@@ -203,8 +203,8 @@ class ComparisonOperatorsSpec
     }
 
     forAll(arbitrary[Float], arbitrary[Long]) { (val1, val2) =>
-      val lhn = new FloatNode(val1)
-      val rhn = new LongNode(val2)
+      val lhn = JsNumber(BigDecimal(val1))
+      val rhn = JsNumber(BigDecimal(val2))
       LessOperator(lhn, rhn) shouldBe (val1 < val2)
       GreaterOperator(lhn, rhn) shouldBe (val1 > val2)
       LessOrEqOperator(lhn, rhn) shouldBe (val1 <= val2)
@@ -212,8 +212,8 @@ class ComparisonOperatorsSpec
     }
 
     forAll(arbitrary[Float], arbitrary[Double]) { (val1, val2) =>
-      val lhn = new FloatNode(val1)
-      val rhn = new DoubleNode(val2)
+      val lhn = JsNumber(BigDecimal(val1))
+      val rhn = JsNumber(BigDecimal(val2))
       LessOperator(lhn, rhn) shouldBe (val1 < val2)
       GreaterOperator(lhn, rhn) shouldBe (val1 > val2)
       LessOrEqOperator(lhn, rhn) shouldBe (val1 <= val2)
@@ -221,8 +221,8 @@ class ComparisonOperatorsSpec
     }
 
     forAll(arbitrary[Float], arbitrary[Float]) { (val1, val2) =>
-      val lhn = new FloatNode(val1)
-      val rhn = new FloatNode(val2)
+      val lhn = JsNumber(BigDecimal(val1))
+      val rhn = JsNumber(BigDecimal(val2))
       LessOperator(lhn, rhn) shouldBe (val1 < val2)
       GreaterOperator(lhn, rhn) shouldBe (val1 > val2)
       LessOrEqOperator(lhn, rhn) shouldBe (val1 <= val2)

@@ -16,18 +16,16 @@
 
 package io.gatling.jsonpath
 
-import java.util.{ Iterator => JIterator }
-
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.JsonNodeType.{ ARRAY, OBJECT }
+import play.api.libs.json.{ JsArray, JsObject, JsValue }
 
 /**
  * Collect all nodes data (objects and leaves)
+ *
  * @param root the tree root
  */
-class RecursiveDataIterator(root: JsonNode) extends RecursiveIterator[JIterator[JsonNode]](root) {
+class RecursiveDataIterator(root: JsValue) extends RecursiveIterator[Iterator[JsValue]](root) {
 
-  override protected def visit(it: JIterator[JsonNode]): Unit = {
+  override protected def visit(it: Iterator[JsValue]): Unit = {
     while (it.hasNext && !pause) {
       visitNode(it.next())
     }
@@ -36,19 +34,18 @@ class RecursiveDataIterator(root: JsonNode) extends RecursiveIterator[JIterator[
     }
   }
 
-  override protected def visitNode(node: JsonNode): Unit =
-    node.getNodeType match {
-      case OBJECT =>
-        if (node.size > 0) {
+  override protected def visitNode(node: JsValue): Unit =
+    node match {
+      case obj: JsObject =>
+        if (obj.value.nonEmpty) {
           // only non empty objects
-          val it = node.elements
+          val it = obj.value.values.iterator
           stack = it :: stack
           nextNode = node
           pause = true
         }
-
-      case ARRAY =>
-        val it = node.elements
+      case array: JsArray =>
+        val it = array.value.iterator
         stack = it :: stack
         visit(it)
       case _ =>

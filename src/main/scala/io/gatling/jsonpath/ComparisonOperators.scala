@@ -16,12 +16,10 @@
 
 package io.gatling.jsonpath
 
-import com.fasterxml.jackson.core.JsonParser.NumberType
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.JsonNodeType._
+import play.api.libs.json.{ JsBoolean, JsNull, JsNumber, JsString, JsValue }
 
 sealed trait ComparisonOperator {
-  def apply(lhs: JsonNode, rhs: JsonNode): Boolean
+  def apply(lhs: JsValue, rhs: JsValue): Boolean
 }
 
 // Comparison operators
@@ -29,79 +27,12 @@ sealed trait ComparisonWithOrderingOperator extends ComparisonOperator {
 
   protected def compare[T: Ordering](lhs: T, rhs: T): Boolean
 
-  def apply(lhs: JsonNode, rhs: JsonNode): Boolean =
-    lhs.getNodeType match {
-      case STRING  => rhs.getNodeType == STRING && compare(lhs.textValue, rhs.textValue)
-      case BOOLEAN => rhs.getNodeType == BOOLEAN && compare(lhs.booleanValue, rhs.booleanValue)
-      case NUMBER => rhs.getNodeType match {
-        case NUMBER =>
-          lhs.numberType match {
-            case NumberType.INT =>
-              rhs.numberType match {
-                case NumberType.INT         => compare(lhs.intValue, rhs.intValue)
-                case NumberType.LONG        => compare(lhs.intValue, rhs.longValue)
-                case NumberType.DOUBLE      => compare(lhs.intValue, rhs.doubleValue)
-                case NumberType.FLOAT       => compare(lhs.intValue, rhs.floatValue)
-                case NumberType.BIG_INTEGER => compare(lhs.bigIntegerValue, rhs.bigIntegerValue)
-                case NumberType.BIG_DECIMAL => compare(lhs.decimalValue, rhs.decimalValue)
-              }
-
-            case NumberType.LONG =>
-              rhs.numberType match {
-                case NumberType.INT         => compare(lhs.longValue, rhs.intValue)
-                case NumberType.LONG        => compare(lhs.longValue, rhs.longValue)
-                case NumberType.DOUBLE      => compare(lhs.longValue, rhs.doubleValue)
-                case NumberType.FLOAT       => compare(lhs.longValue, rhs.floatValue)
-                case NumberType.BIG_INTEGER => compare(lhs.bigIntegerValue, rhs.bigIntegerValue)
-                case NumberType.BIG_DECIMAL => compare(lhs.decimalValue, rhs.decimalValue)
-              }
-
-            case NumberType.FLOAT =>
-              rhs.numberType match {
-                case NumberType.INT         => compare(lhs.floatValue, rhs.intValue)
-                case NumberType.LONG        => compare(lhs.floatValue, rhs.longValue)
-                case NumberType.DOUBLE      => compare(lhs.floatValue, rhs.doubleValue)
-                case NumberType.FLOAT       => compare(lhs.floatValue, rhs.floatValue)
-                case NumberType.BIG_INTEGER => compare(lhs.decimalValue, rhs.decimalValue)
-                case NumberType.BIG_DECIMAL => compare(lhs.decimalValue, rhs.decimalValue)
-              }
-
-            case NumberType.DOUBLE =>
-              rhs.numberType match {
-                case NumberType.INT         => compare(lhs.doubleValue, rhs.intValue)
-                case NumberType.LONG        => compare(lhs.doubleValue, rhs.longValue)
-                case NumberType.DOUBLE      => compare(lhs.doubleValue, rhs.doubleValue)
-                case NumberType.FLOAT       => compare(lhs.doubleValue, rhs.floatValue)
-                case NumberType.BIG_INTEGER => compare(lhs.decimalValue, rhs.decimalValue)
-                case NumberType.BIG_DECIMAL => compare(lhs.decimalValue, rhs.decimalValue)
-              }
-
-            case NumberType.BIG_INTEGER =>
-              rhs.numberType match {
-                case NumberType.INT         => compare(lhs.bigIntegerValue, rhs.bigIntegerValue)
-                case NumberType.LONG        => compare(lhs.bigIntegerValue, rhs.bigIntegerValue)
-                case NumberType.DOUBLE      => compare(lhs.decimalValue, rhs.decimalValue)
-                case NumberType.FLOAT       => compare(lhs.decimalValue, rhs.decimalValue)
-                case NumberType.BIG_INTEGER => compare(lhs.bigIntegerValue, rhs.bigIntegerValue)
-                case NumberType.BIG_DECIMAL => compare(lhs.decimalValue, rhs.decimalValue)
-              }
-
-            case NumberType.BIG_DECIMAL =>
-              rhs.numberType match {
-                case NumberType.INT         => compare(lhs.decimalValue, rhs.decimalValue)
-                case NumberType.LONG        => compare(lhs.decimalValue, rhs.decimalValue)
-                case NumberType.DOUBLE      => compare(lhs.decimalValue, rhs.decimalValue)
-                case NumberType.FLOAT       => compare(lhs.decimalValue, rhs.decimalValue)
-                case NumberType.BIG_INTEGER => compare(lhs.decimalValue, rhs.decimalValue)
-                case NumberType.BIG_DECIMAL => compare(lhs.decimalValue, rhs.decimalValue)
-              }
-
-            case _ => false
-          }
-        case _ => false
-      }
-
-      case _ => false
+  def apply(lhs: JsValue, rhs: JsValue): Boolean =
+    (lhs, rhs) match {
+      case (JsString(left), JsString(right))   => compare(left, right)
+      case (JsBoolean(left), JsBoolean(right)) => compare(left, right)
+      case (JsNumber(left), JsNumber(right))   => compare(left, right)
+      case _                                   => false
     }
 }
 
@@ -110,12 +41,15 @@ case object EqWithOrderingOperator extends ComparisonWithOrderingOperator {
 }
 
 case object EqOperator extends ComparisonOperator {
-  override def apply(lhs: JsonNode, rhs: JsonNode): Boolean =
-    (lhs.getNodeType == NULL && rhs.getNodeType == NULL) || EqWithOrderingOperator(lhs, rhs)
+  override def apply(lhs: JsValue, rhs: JsValue): Boolean =
+    (lhs, rhs) match {
+      case (JsNull, JsNull) => true
+      case _                => EqWithOrderingOperator(lhs, rhs)
+    }
 }
 
 case object NotEqOperator extends ComparisonOperator {
-  override def apply(lhs: JsonNode, rhs: JsonNode): Boolean = !EqOperator(lhs, rhs)
+  override def apply(lhs: JsValue, rhs: JsValue): Boolean = !EqOperator(lhs, rhs)
 }
 
 case object LessOperator extends ComparisonWithOrderingOperator {

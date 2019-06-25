@@ -69,10 +69,15 @@ object Parser extends RegexParsers {
   private def field: Parser[String] = FieldRegex
 
   private def singleQuotedField = "'" ~> SingleQuotedFieldRegex <~ "'" ^^ (fastReplaceAll(_, "\\'", "'"))
+
   private def doubleQuotedField = "\"" ~> DoubleQuotedFieldRegex <~ "\"" ^^ (fastReplaceAll(_, "\\\"", "\""))
+
   private def singleQuotedValue = "'" ~> SingleQuotedValueRegex <~ "'" ^^ (fastReplaceAll(_, "\\'", "'"))
+
   private def doubleQuotedValue = "\"" ~> DoubleQuotedValueRegex <~ "\"" ^^ (fastReplaceAll(_, "\\\"", "\""))
+
   private def quotedField: Parser[String] = singleQuotedField | doubleQuotedField
+
   private def quotedValue: Parser[String] = singleQuotedValue | doubleQuotedValue
 
   /// array parsers /////////////////////////////////////////////////////////
@@ -120,7 +125,10 @@ object Parser extends RegexParsers {
   private def nullValue: Parser[FilterValue] =
     "null" ^^^ FilterDirectValue.Null
 
-  private def stringValue: Parser[FilterDirectValue] = quotedValue ^^ { FilterDirectValue.string }
+  private def stringValue: Parser[FilterDirectValue] = quotedValue ^^ {
+    FilterDirectValue.string
+  }
+
   private def value: Parser[FilterValue] = booleanValue | numberValue | nullValue | stringValue
 
   private def comparisonOperator: Parser[ComparisonOperator] =
@@ -209,5 +217,6 @@ object Parser extends RegexParsers {
 
 class Parser {
   private val query = Parser.query
+
   def compile(jsonpath: String): Parser.ParseResult[List[PathToken]] = Parser.parse(query, jsonpath)
 }

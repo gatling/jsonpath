@@ -16,786 +16,775 @@
 
 package io.gatling.jsonpath
 
-import java.util.{ HashMap => JHashMap, List => JList }
-
-import com.fasterxml.jackson.databind.node.{ BooleanNode, DoubleNode, IntNode, NullNode, ObjectNode, TextNode }
-
-import scala.collection.JavaConverters._
 import org.scalatest.{ FlatSpec, Matchers }
 import org.scalatest.matchers.{ MatchResult, Matcher }
-import com.fasterxml.jackson.databind.{ JsonNode, ObjectMapper }
+import play.api.libs.json.{ JsBoolean, JsNull, JsNumber, JsObject, JsString, JsValue, Json }
 
 class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
 
-  val mapper = new ObjectMapper
+  def parseJson(s: String): JsValue = Json.parse(s)
+  def bool(b: Boolean): JsValue = JsBoolean(b)
+  def int(i: Int): JsValue = JsNumber(BigDecimal(i))
+  def double(f: Double): JsValue = JsNumber(BigDecimal(f))
+  def text(s: String): JsValue = JsString(s)
+  def nullNode: JsValue = JsNull
 
-  def parseJson(s: String) = mapper.readValue(s, classOf[JsonNode])
-  def bool(b: Boolean) = BooleanNode.valueOf(b)
-  def int(i: Int) = IntNode.valueOf(i)
-  def double(f: Double) = DoubleNode.valueOf(f)
-  def text(s: String) = TextNode.valueOf(s)
-  def nullNode: Any = NullNode.instance
-  //  def array(elts: Any*): JList[Any] = elts.asJava
-  //  def obj(elts: (String, Any)*) = {
-  //    val node = new ObjectNode
-  //    elts.foreach { case (key, value) =>
-  //      node.put(key, value)
-  //    }
-  //    node
-  //  }
+  // Goessner JSON example
 
-  // Goessner JSON exemple
+  val book1: String = """{"category":"reference","author":"Nigel Rees","title":"Sayings of the Century","price":8.95}"""
+  val book2: String = """{"category":"fiction","author":"Evelyn Waugh","title":"Sword of Honour","price":12.99}"""
+  val book3: String = """{"category":"fiction","author":"Herman Melville","title":"Moby Dick","isbn":"0-553-21311-3","price":8.99}"""
+  val book4: String = """{"category":"fiction","author":"J. R. R. Tolkien","title":"The Lord of the Rings","isbn":"0-395-19395-8","price":22.99}"""
+  val allBooks: String = s"[$book1,$book2,$book3,$book4]"
+  val bicycle: String = s"""{"color":"red","price":19.95}"""
+  val allStore: String = s"""{"book":$allBooks, "bicycle":$bicycle}"""
+  val goessnerData: String = s"""{"store":$allStore}"""
+  val goessnerJson: JsValue = parseJson(goessnerData)
 
-  val book1 = """{"category":"reference","author":"Nigel Rees","title":"Sayings of the Century","price":8.95}"""
-  val book2 = """{"category":"fiction","author":"Evelyn Waugh","title":"Sword of Honour","price":12.99}"""
-  val book3 = """{"category":"fiction","author":"Herman Melville","title":"Moby Dick","isbn":"0-553-21311-3","price":8.99}"""
-  val book4 = """{"category":"fiction","author":"J. R. R. Tolkien","title":"The Lord of the Rings","isbn":"0-395-19395-8","price":22.99}"""
-  val allBooks = s"[$book1,$book2,$book3,$book4]"
-  val bicycle = s"""{"color":"red","price":19.95}"""
-  val allStore = s"""{"book":$allBooks, "bicycle":$bicycle}"""
-  val goessnerData = s"""{"store":$allStore}"""
-  val goessnerJson = parseJson(goessnerData)
+  val json: String =
+    """[
+      |    {
+      |        "id":19434,
+      |        "foo":1,
+      |        "company":
+      |        {
+      |            "id":18971
+      |        },
+      |        "owner":
+      |        {
+      |            "id":18957
+      |        },
+      |        "process":
+      |        {
+      |            "id":18972
+      |        }
+      |    },
+      |    {
+      |        "id":19435,
+      |        "foo":2,
+      |        "company":
+      |        {
+      |            "id":18972
+      |        },
+      |        "owner":
+      |        {
+      |            "id":18957
+      |        },
+      |        "process":
+      |        {
+      |            "id":18974
+      |        }
+      |    }
+      |]""".stripMargin
 
-  val json = """[
-               |    {
-               |        "id":19434,
-               |        "foo":1,
-               |        "company":
-               |        {
-               |            "id":18971
-               |        },
-               |        "owner":
-               |        {
-               |            "id":18957
-               |        },
-               |        "process":
-               |        {
-               |            "id":18972
-               |        }
-               |    },
-               |    {
-               |        "id":19435,
-               |        "foo":2,
-               |        "company":
-               |        {
-               |            "id":18972
-               |        },
-               |        "owner":
-               |        {
-               |            "id":18957
-               |        },
-               |        "process":
-               |        {
-               |            "id":18974
-               |        }
-               |    }
-               |]""".stripMargin
+  val json2: String =
+    """[
+      |  {
+      |    "unit": "flow.flow-server.aaa.gatlinguser202project.gatlinguser202.service",
+      |    "machine": "f374e9a176b341d4a8ee8db3cdfb2958/10.11.12.124",
+      |    "active": "active",
+      |    "sub": "running",
+      |    "space": "aaa.gatlinguser202project.gatlinguser202",
+      |    "@timestamp": 1418285656070
+      |  },
+      |  {
+      |    "unit": "XXXXXXXflow.flow-server.aaa.gatlinguser202project.gatlinguser202.service",
+      |    "machine": "f374e9a176b341d4a8ee8db3cdfb2958/10.11.12.124",
+      |    "active": "active",
+      |    "sub": "running",
+      |    "space": "aaa.gatlinguser202project.gatlinguser202",
+      |    "@timestamp": 1418285656070
+      |  }
+      |]""".stripMargin
 
-  val json2 = """[
-                |  {
-                |    "unit": "flow.flow-server.aaa.gatlinguser202project.gatlinguser202.service",
-                |    "machine": "f374e9a176b341d4a8ee8db3cdfb2958/10.11.12.124",
-                |    "active": "active",
-                |    "sub": "running",
-                |    "space": "aaa.gatlinguser202project.gatlinguser202",
-                |    "@timestamp": 1418285656070
-                |  },
-                |  {
-                |    "unit": "XXXXXXXflow.flow-server.aaa.gatlinguser202project.gatlinguser202.service",
-                |    "machine": "f374e9a176b341d4a8ee8db3cdfb2958/10.11.12.124",
-                |    "active": "active",
-                |    "sub": "running",
-                |    "space": "aaa.gatlinguser202project.gatlinguser202",
-                |    "@timestamp": 1418285656070
-                |  }
-                |]""".stripMargin
+  val veggies: String =
+    """[
+      |    {
+      |        "vegetable": {
+      |            "name": "peas",
+      |            "color": "green"
+      |        },
+      |        "meet": {
+      |            "name":"beef",
+      |            "color":"red"
+      |        }
+      |    },
+      |    {
+      |        "vegetable": {
+      |            "name": "potato",
+      |            "color": "yellow"
+      |        },
+      |        "meet": {
+      |            "name":"lamb",
+      |            "color":"brown"
+      |        }
+      |    }
+      |]""".stripMargin
 
-  private val veggies = """[
-                          |    {
-                          |        "vegetable": {
-                          |            "name": "peas",
-                          |            "color": "green"
-                          |        },
-                          |        "meet": {
-                          |            "name":"beef",
-                          |            "color":"red"
-                          |        }
-                          |    },
-                          |    {
-                          |        "vegetable": {
-                          |            "name": "potato",
-                          |            "color": "yellow"
-                          |        },
-                          |        "meet": {
-                          |            "name":"lamb",
-                          |            "color":"brown"
-                          |        }
-                          |    }
-                          |]""".stripMargin
+  val searches: String =
+    """[
+      |  {
+      |    "changes": [
+      |      [
+      |        "change",
+      |        {
+      |          "pid": "520"
+      |        },
+      |        [
+      |          "0",
+      |          {
+      |            "id": "520",
+      |            "location": "foo",
+      |            "v": {
+      |              "action": ""
+      |            }
+      |          },
+      |          [
+      |            "actions",
+      |            {
+      |
+      |            },
+      |            [
+      |              "action",
+      |              {
+      |                "key": "1",
+      |                "kc": 81,
+      |                "mk": [
+      |                  "18",
+      |                  "16",
+      |                  "17"
+      |                ]
+      |              }
+      |            ],
+      |            [
+      |              "action",
+      |              {
+      |                "key": "2",
+      |                "kc": 13,
+      |                "mk": [
+      |
+      |                ]
+      |              }
+      |            ],
+      |            [
+      |              "action",
+      |              {
+      |                "key": "3",
+      |                "kc": 13,
+      |                "mk": [
+      |
+      |                ]
+      |              }
+      |            ]
+      |          ]
+      |        ]
+      |      ],
+      |      [
+      |        "change",
+      |        {
+      |          "pid": "1012"
+      |        },
+      |        [
+      |          "23",
+      |          {
+      |            "id": "1012",
+      |            "multiselectmode": 1,
+      |            "selectmode": "multi",
+      |            "cols": 13,
+      |            "rows": 19,
+      |            "firstrow": 0,
+      |            "totalrows": 20,
+      |            "pagelength": 19,
+      |            "colheaders": true,
+      |            "colfooters": false,
+      |            "vcolorder": [
+      |              "1",
+      |              "2",
+      |              "3",
+      |              "4",
+      |              "5",
+      |              "6",
+      |              "7",
+      |              "8",
+      |              "9",
+      |              "10",
+      |              "11",
+      |              "12",
+      |              "13"
+      |            ],
+      |            "pb-ft": 0,
+      |            "pb-l": 18,
+      |            "clearKeyMap": true,
+      |            "v": {
+      |              "selected": [
+      |
+      |              ],
+      |              "firstvisible": 0,
+      |              "sortcolumn": "null",
+      |              "sortascending": true,
+      |              "reqrows": -1,
+      |              "reqfirstrow": -1,
+      |              "columnorder": [
+      |                "1",
+      |                "2",
+      |                "3",
+      |                "4",
+      |                "5",
+      |                "6",
+      |                "7",
+      |                "8",
+      |                "9",
+      |                "10",
+      |                "11",
+      |                "12",
+      |                "13"
+      |              ],
+      |              "collapsedcolumns": [
+      |
+      |              ],
+      |              "noncollapsiblecolumns": [
+      |                "1"
+      |              ]
+      |            }
+      |          },
+      |          [
+      |            "rows",
+      |            {
+      |
+      |            },
+      |            [
+      |              "tr",
+      |              {
+      |                "key": 191,
+      |                "style-4": "perfectMatch"
+      |              },
+      |              ""
+      |            ],
+      |            [
+      |              "tr",
+      |              {
+      |                "key": 192,
+      |                "style-5": "perfectMatch",
+      |                "style-10": "perfectMatch"
+      |              },
+      |              ""
+      |            ],
+      |            [
+      |              "tr",
+      |              {
+      |                "key": 193,
+      |                "style-4": "perfectMatch",
+      |                "style-5": "perfectMatch",
+      |                "style-10": "perfectMatch"
+      |              },
+      |              ""
+      |            ],
+      |            [
+      |              "tr",
+      |              {
+      |                "key": 194,
+      |                "style-4": "perfectMatch",
+      |                "style-10": "perfectMatch"
+      |              },
+      |              ""
+      |            ],
+      |            [
+      |              "tr",
+      |              {
+      |                "key": 195,
+      |                "style-4": "perfectMatch"
+      |              },
+      |              ""
+      |            ],
+      |            [
+      |              "tr",
+      |              {
+      |                "key": 196
+      |              },
+      |              ""
+      |            ],
+      |            [
+      |              "tr",
+      |              {
+      |                "key": 197
+      |              },
+      |              ""
+      |            ],
+      |            [
+      |              "tr",
+      |              {
+      |                "key": 198
+      |              },
+      |              ""
+      |            ],
+      |            [
+      |              "tr",
+      |              {
+      |                "key": 199
+      |              },
+      |              ""
+      |            ],
+      |            [
+      |              "tr",
+      |              {
+      |                "key": 200
+      |              },
+      |              ""
+      |            ],
+      |            [
+      |              "tr",
+      |              {
+      |                "key": 201
+      |              },
+      |              ""
+      |            ],
+      |            [
+      |              "tr",
+      |              {
+      |                "key": 202
+      |              },
+      |              ""
+      |            ],
+      |            [
+      |              "tr",
+      |              {
+      |                "key": 203
+      |              },
+      |              ""
+      |            ],
+      |            [
+      |              "tr",
+      |              {
+      |                "key": 204,
+      |                "style-4": "perfectMatch",
+      |                "style-10": "perfectMatch"
+      |              },
+      |              ""
+      |            ],
+      |            [
+      |              "tr",
+      |              {
+      |                "key": 205,
+      |                "style-4": "perfectMatch",
+      |                "style-10": "perfectMatch"
+      |              },
+      |              ""
+      |            ],
+      |            [
+      |              "tr",
+      |              {
+      |                "key": 206,
+      |                "style-4": "perfectMatch",
+      |                "style-10": "perfectMatch"
+      |              },
+      |              ""
+      |            ],
+      |            [
+      |              "tr",
+      |              {
+      |                "key": 207,
+      |                "style-4": "perfectMatch",
+      |                "style-10": "perfectMatch"
+      |              },
+      |              ""
+      |            ],
+      |            [
+      |              "tr",
+      |              {
+      |                "key": 208,
+      |                "style-4": "perfectMatch",
+      |                "style-10": "perfectMatch"
+      |              },
+      |              ""
+      |            ],
+      |            [
+      |              "tr",
+      |              {
+      |                "key": 209
+      |              },
+      |              ""
+      |            ]
+      |          ],
+      |          [
+      |            "visiblecolumns",
+      |            {
+      |
+      |            },
+      |            [
+      |              "column",
+      |              {
+      |                "cid": "1",
+      |                "caption": "foo",
+      |                "fcaption": "",
+      |                "sortable": true
+      |              }
+      |            ],
+      |            [
+      |              "column",
+      |              {
+      |                "cid": "2",
+      |                "caption": "bar",
+      |                "fcaption": "",
+      |                "sortable": true
+      |              }
+      |            ],
+      |            [
+      |              "column",
+      |              {
+      |                "cid": "3",
+      |                "caption": "baz",
+      |                "fcaption": "",
+      |                "sortable": true
+      |              }
+      |            ],
+      |            [
+      |              "column",
+      |              {
+      |                "cid": "4",
+      |                "caption": "too",
+      |                "fcaption": "",
+      |                "sortable": true
+      |              }
+      |            ],
+      |            [
+      |              "column",
+      |              {
+      |                "cid": "5",
+      |                "caption": "xxx",
+      |                "fcaption": "",
+      |                "sortable": true
+      |              }
+      |            ],
+      |            [
+      |              "column",
+      |              {
+      |                "cid": "6",
+      |                "caption": "yyy",
+      |                "fcaption": "",
+      |                "sortable": true
+      |              }
+      |            ],
+      |            [
+      |              "column",
+      |              {
+      |                "cid": "7",
+      |                "caption": "zzz",
+      |                "fcaption": "",
+      |                "sortable": true
+      |              }
+      |            ],
+      |            [
+      |              "column",
+      |              {
+      |                "cid": "8",
+      |                "caption": "aaa",
+      |                "fcaption": "",
+      |                "sortable": true
+      |              }
+      |            ],
+      |            [
+      |              "column",
+      |              {
+      |                "cid": "9",
+      |                "caption": "bbb",
+      |                "fcaption": "",
+      |                "sortable": true
+      |              }
+      |            ],
+      |            [
+      |              "column",
+      |              {
+      |                "cid": "10",
+      |                "caption": "ccc",
+      |                "fcaption": "",
+      |                "sortable": true
+      |              }
+      |            ],
+      |            [
+      |              "column",
+      |              {
+      |                "cid": "11",
+      |                "caption": "ddd2",
+      |                "fcaption": "",
+      |                "sortable": true
+      |              }
+      |            ],
+      |            [
+      |              "column",
+      |              {
+      |                "cid": "12",
+      |                "caption": "eee",
+      |                "fcaption": "",
+      |                "sortable": true
+      |              }
+      |            ],
+      |            [
+      |              "column",
+      |              {
+      |                "cid": "13",
+      |                "caption": "fff",
+      |                "fcaption": "",
+      |                "sortable": true
+      |              }
+      |            ]
+      |          ]
+      |        ]
+      |      ],
+      |      [
+      |        "change",
+      |        {
+      |          "pid": "997"
+      |        },
+      |        [
+      |          "1",
+      |          {
+      |            "id": "997"
+      |          }
+      |        ]
+      |      ],
+      |      [
+      |        "change",
+      |        {
+      |          "pid": "1011"
+      |        },
+      |        [
+      |          "1",
+      |          {
+      |            "id": "1011"
+      |          }
+      |        ]
+      |      ],
+      |      [
+      |        "change",
+      |        {
+      |          "pid": "996"
+      |        },
+      |        [
+      |          "1",
+      |          {
+      |            "id": "996"
+      |          }
+      |        ]
+      |      ],
+      |      [
+      |        "change",
+      |        {
+      |          "pid": "994"
+      |        },
+      |        [
+      |          "1",
+      |          {
+      |            "id": "994"
+      |          }
+      |        ]
+      |      ],
+      |      [
+      |        "change",
+      |        {
+      |          "pid": "999"
+      |        },
+      |        [
+      |          "1",
+      |          {
+      |            "id": "999"
+      |          }
+      |        ]
+      |      ],
+      |      [
+      |        "change",
+      |        {
+      |          "pid": "993"
+      |        },
+      |        [
+      |          "1",
+      |          {
+      |            "id": "993"
+      |          }
+      |        ]
+      |      ],
+      |      [
+      |        "change",
+      |        {
+      |          "pid": "995"
+      |        },
+      |        [
+      |          "1",
+      |          {
+      |            "id": "995"
+      |          }
+      |        ]
+      |      ],
+      |      [
+      |        "change",
+      |        {
+      |          "pid": "1003"
+      |        },
+      |        [
+      |          "1",
+      |          {
+      |            "id": "1003"
+      |          }
+      |        ]
+      |      ],
+      |      [
+      |        "change",
+      |        {
+      |          "pid": "990"
+      |        },
+      |        [
+      |          "1",
+      |          {
+      |            "id": "990"
+      |          }
+      |        ]
+      |      ],
+      |      [
+      |        "change",
+      |        {
+      |          "pid": "992"
+      |        },
+      |        [
+      |          "1",
+      |          {
+      |            "id": "992"
+      |          }
+      |        ]
+      |      ],
+      |      [
+      |        "change",
+      |        {
+      |          "pid": "1005"
+      |        },
+      |        [
+      |          "1",
+      |          {
+      |            "id": "1005"
+      |          }
+      |        ]
+      |      ],
+      |      [
+      |        "change",
+      |        {
+      |          "pid": "1001"
+      |        },
+      |        [
+      |          "1",
+      |          {
+      |            "id": "1001"
+      |          }
+      |        ]
+      |      ],
+      |      [
+      |        "change",
+      |        {
+      |          "pid": "991"
+      |        },
+      |        [
+      |          "1",
+      |          {
+      |            "id": "991"
+      |          }
+      |        ]
+      |      ]
+      |    ],
+      |    "state": {
+      |      "520": {
+      |        "pollInterval": -1
+      |      },
+      |      "1011": {
+      |        "text": "(20)"
+      |      }
+      |    },
+      |    "types": {
+      |      "520": "0",
+      |      "990": "1",
+      |      "991": "1",
+      |      "992": "1",
+      |      "993": "1",
+      |      "994": "1",
+      |      "995": "1",
+      |      "996": "1",
+      |      "997": "1",
+      |      "999": "1",
+      |      "1001": "1",
+      |      "1003": "1",
+      |      "1005": "1",
+      |      "1011": "1",
+      |      "1012": "23"
+      |    },
+      |    "hierarchy": {
+      |      "520": [
+      |        "983",
+      |        "521",
+      |        "984"
+      |      ],
+      |      "990": [
+      |
+      |      ],
+      |      "991": [
+      |
+      |      ],
+      |      "992": [
+      |
+      |      ],
+      |      "993": [
+      |
+      |      ],
+      |      "994": [
+      |
+      |      ],
+      |      "995": [
+      |
+      |      ],
+      |      "996": [
+      |
+      |      ],
+      |      "997": [
+      |
+      |      ],
+      |      "999": [
+      |
+      |      ],
+      |      "1001": [
+      |
+      |      ],
+      |      "1003": [
+      |
+      |      ],
+      |      "1005": [
+      |
+      |      ],
+      |      "1011": [
+      |
+      |      ],
+      |      "1012": [
+      |
+      |      ]
+      |    },
+      |    "rpc": [
+      |
+      |    ],
+      |    "meta": {
+      |
+      |    },
+      |    "resources": {
+      |
+      |    },
+      |    "timings": [
+      |      4509,
+      |      1
+      |    ]
+      |  }
+      |]""".stripMargin
 
-  val searches = """[
-                   |  {
-                   |    "changes": [
-                   |      [
-                   |        "change",
-                   |        {
-                   |          "pid": "520"
-                   |        },
-                   |        [
-                   |          "0",
-                   |          {
-                   |            "id": "520",
-                   |            "location": "foo",
-                   |            "v": {
-                   |              "action": ""
-                   |            }
-                   |          },
-                   |          [
-                   |            "actions",
-                   |            {
-                   |
-                   |            },
-                   |            [
-                   |              "action",
-                   |              {
-                   |                "key": "1",
-                   |                "kc": 81,
-                   |                "mk": [
-                   |                  "18",
-                   |                  "16",
-                   |                  "17"
-                   |                ]
-                   |              }
-                   |            ],
-                   |            [
-                   |              "action",
-                   |              {
-                   |                "key": "2",
-                   |                "kc": 13,
-                   |                "mk": [
-                   |
-                   |                ]
-                   |              }
-                   |            ],
-                   |            [
-                   |              "action",
-                   |              {
-                   |                "key": "3",
-                   |                "kc": 13,
-                   |                "mk": [
-                   |
-                   |                ]
-                   |              }
-                   |            ]
-                   |          ]
-                   |        ]
-                   |      ],
-                   |      [
-                   |        "change",
-                   |        {
-                   |          "pid": "1012"
-                   |        },
-                   |        [
-                   |          "23",
-                   |          {
-                   |            "id": "1012",
-                   |            "multiselectmode": 1,
-                   |            "selectmode": "multi",
-                   |            "cols": 13,
-                   |            "rows": 19,
-                   |            "firstrow": 0,
-                   |            "totalrows": 20,
-                   |            "pagelength": 19,
-                   |            "colheaders": true,
-                   |            "colfooters": false,
-                   |            "vcolorder": [
-                   |              "1",
-                   |              "2",
-                   |              "3",
-                   |              "4",
-                   |              "5",
-                   |              "6",
-                   |              "7",
-                   |              "8",
-                   |              "9",
-                   |              "10",
-                   |              "11",
-                   |              "12",
-                   |              "13"
-                   |            ],
-                   |            "pb-ft": 0,
-                   |            "pb-l": 18,
-                   |            "clearKeyMap": true,
-                   |            "v": {
-                   |              "selected": [
-                   |
-                   |              ],
-                   |              "firstvisible": 0,
-                   |              "sortcolumn": "null",
-                   |              "sortascending": true,
-                   |              "reqrows": -1,
-                   |              "reqfirstrow": -1,
-                   |              "columnorder": [
-                   |                "1",
-                   |                "2",
-                   |                "3",
-                   |                "4",
-                   |                "5",
-                   |                "6",
-                   |                "7",
-                   |                "8",
-                   |                "9",
-                   |                "10",
-                   |                "11",
-                   |                "12",
-                   |                "13"
-                   |              ],
-                   |              "collapsedcolumns": [
-                   |
-                   |              ],
-                   |              "noncollapsiblecolumns": [
-                   |                "1"
-                   |              ]
-                   |            }
-                   |          },
-                   |          [
-                   |            "rows",
-                   |            {
-                   |
-                   |            },
-                   |            [
-                   |              "tr",
-                   |              {
-                   |                "key": 191,
-                   |                "style-4": "perfectMatch"
-                   |              },
-                   |              ""
-                   |            ],
-                   |            [
-                   |              "tr",
-                   |              {
-                   |                "key": 192,
-                   |                "style-5": "perfectMatch",
-                   |                "style-10": "perfectMatch"
-                   |              },
-                   |              ""
-                   |            ],
-                   |            [
-                   |              "tr",
-                   |              {
-                   |                "key": 193,
-                   |                "style-4": "perfectMatch",
-                   |                "style-5": "perfectMatch",
-                   |                "style-10": "perfectMatch"
-                   |              },
-                   |              ""
-                   |            ],
-                   |            [
-                   |              "tr",
-                   |              {
-                   |                "key": 194,
-                   |                "style-4": "perfectMatch",
-                   |                "style-10": "perfectMatch"
-                   |              },
-                   |              ""
-                   |            ],
-                   |            [
-                   |              "tr",
-                   |              {
-                   |                "key": 195,
-                   |                "style-4": "perfectMatch"
-                   |              },
-                   |              ""
-                   |            ],
-                   |            [
-                   |              "tr",
-                   |              {
-                   |                "key": 196
-                   |              },
-                   |              ""
-                   |            ],
-                   |            [
-                   |              "tr",
-                   |              {
-                   |                "key": 197
-                   |              },
-                   |              ""
-                   |            ],
-                   |            [
-                   |              "tr",
-                   |              {
-                   |                "key": 198
-                   |              },
-                   |              ""
-                   |            ],
-                   |            [
-                   |              "tr",
-                   |              {
-                   |                "key": 199
-                   |              },
-                   |              ""
-                   |            ],
-                   |            [
-                   |              "tr",
-                   |              {
-                   |                "key": 200
-                   |              },
-                   |              ""
-                   |            ],
-                   |            [
-                   |              "tr",
-                   |              {
-                   |                "key": 201
-                   |              },
-                   |              ""
-                   |            ],
-                   |            [
-                   |              "tr",
-                   |              {
-                   |                "key": 202
-                   |              },
-                   |              ""
-                   |            ],
-                   |            [
-                   |              "tr",
-                   |              {
-                   |                "key": 203
-                   |              },
-                   |              ""
-                   |            ],
-                   |            [
-                   |              "tr",
-                   |              {
-                   |                "key": 204,
-                   |                "style-4": "perfectMatch",
-                   |                "style-10": "perfectMatch"
-                   |              },
-                   |              ""
-                   |            ],
-                   |            [
-                   |              "tr",
-                   |              {
-                   |                "key": 205,
-                   |                "style-4": "perfectMatch",
-                   |                "style-10": "perfectMatch"
-                   |              },
-                   |              ""
-                   |            ],
-                   |            [
-                   |              "tr",
-                   |              {
-                   |                "key": 206,
-                   |                "style-4": "perfectMatch",
-                   |                "style-10": "perfectMatch"
-                   |              },
-                   |              ""
-                   |            ],
-                   |            [
-                   |              "tr",
-                   |              {
-                   |                "key": 207,
-                   |                "style-4": "perfectMatch",
-                   |                "style-10": "perfectMatch"
-                   |              },
-                   |              ""
-                   |            ],
-                   |            [
-                   |              "tr",
-                   |              {
-                   |                "key": 208,
-                   |                "style-4": "perfectMatch",
-                   |                "style-10": "perfectMatch"
-                   |              },
-                   |              ""
-                   |            ],
-                   |            [
-                   |              "tr",
-                   |              {
-                   |                "key": 209
-                   |              },
-                   |              ""
-                   |            ]
-                   |          ],
-                   |          [
-                   |            "visiblecolumns",
-                   |            {
-                   |
-                   |            },
-                   |            [
-                   |              "column",
-                   |              {
-                   |                "cid": "1",
-                   |                "caption": "foo",
-                   |                "fcaption": "",
-                   |                "sortable": true
-                   |              }
-                   |            ],
-                   |            [
-                   |              "column",
-                   |              {
-                   |                "cid": "2",
-                   |                "caption": "bar",
-                   |                "fcaption": "",
-                   |                "sortable": true
-                   |              }
-                   |            ],
-                   |            [
-                   |              "column",
-                   |              {
-                   |                "cid": "3",
-                   |                "caption": "baz",
-                   |                "fcaption": "",
-                   |                "sortable": true
-                   |              }
-                   |            ],
-                   |            [
-                   |              "column",
-                   |              {
-                   |                "cid": "4",
-                   |                "caption": "too",
-                   |                "fcaption": "",
-                   |                "sortable": true
-                   |              }
-                   |            ],
-                   |            [
-                   |              "column",
-                   |              {
-                   |                "cid": "5",
-                   |                "caption": "xxx",
-                   |                "fcaption": "",
-                   |                "sortable": true
-                   |              }
-                   |            ],
-                   |            [
-                   |              "column",
-                   |              {
-                   |                "cid": "6",
-                   |                "caption": "yyy",
-                   |                "fcaption": "",
-                   |                "sortable": true
-                   |              }
-                   |            ],
-                   |            [
-                   |              "column",
-                   |              {
-                   |                "cid": "7",
-                   |                "caption": "zzz",
-                   |                "fcaption": "",
-                   |                "sortable": true
-                   |              }
-                   |            ],
-                   |            [
-                   |              "column",
-                   |              {
-                   |                "cid": "8",
-                   |                "caption": "aaa",
-                   |                "fcaption": "",
-                   |                "sortable": true
-                   |              }
-                   |            ],
-                   |            [
-                   |              "column",
-                   |              {
-                   |                "cid": "9",
-                   |                "caption": "bbb",
-                   |                "fcaption": "",
-                   |                "sortable": true
-                   |              }
-                   |            ],
-                   |            [
-                   |              "column",
-                   |              {
-                   |                "cid": "10",
-                   |                "caption": "ccc",
-                   |                "fcaption": "",
-                   |                "sortable": true
-                   |              }
-                   |            ],
-                   |            [
-                   |              "column",
-                   |              {
-                   |                "cid": "11",
-                   |                "caption": "ddd2",
-                   |                "fcaption": "",
-                   |                "sortable": true
-                   |              }
-                   |            ],
-                   |            [
-                   |              "column",
-                   |              {
-                   |                "cid": "12",
-                   |                "caption": "eee",
-                   |                "fcaption": "",
-                   |                "sortable": true
-                   |              }
-                   |            ],
-                   |            [
-                   |              "column",
-                   |              {
-                   |                "cid": "13",
-                   |                "caption": "fff",
-                   |                "fcaption": "",
-                   |                "sortable": true
-                   |              }
-                   |            ]
-                   |          ]
-                   |        ]
-                   |      ],
-                   |      [
-                   |        "change",
-                   |        {
-                   |          "pid": "997"
-                   |        },
-                   |        [
-                   |          "1",
-                   |          {
-                   |            "id": "997"
-                   |          }
-                   |        ]
-                   |      ],
-                   |      [
-                   |        "change",
-                   |        {
-                   |          "pid": "1011"
-                   |        },
-                   |        [
-                   |          "1",
-                   |          {
-                   |            "id": "1011"
-                   |          }
-                   |        ]
-                   |      ],
-                   |      [
-                   |        "change",
-                   |        {
-                   |          "pid": "996"
-                   |        },
-                   |        [
-                   |          "1",
-                   |          {
-                   |            "id": "996"
-                   |          }
-                   |        ]
-                   |      ],
-                   |      [
-                   |        "change",
-                   |        {
-                   |          "pid": "994"
-                   |        },
-                   |        [
-                   |          "1",
-                   |          {
-                   |            "id": "994"
-                   |          }
-                   |        ]
-                   |      ],
-                   |      [
-                   |        "change",
-                   |        {
-                   |          "pid": "999"
-                   |        },
-                   |        [
-                   |          "1",
-                   |          {
-                   |            "id": "999"
-                   |          }
-                   |        ]
-                   |      ],
-                   |      [
-                   |        "change",
-                   |        {
-                   |          "pid": "993"
-                   |        },
-                   |        [
-                   |          "1",
-                   |          {
-                   |            "id": "993"
-                   |          }
-                   |        ]
-                   |      ],
-                   |      [
-                   |        "change",
-                   |        {
-                   |          "pid": "995"
-                   |        },
-                   |        [
-                   |          "1",
-                   |          {
-                   |            "id": "995"
-                   |          }
-                   |        ]
-                   |      ],
-                   |      [
-                   |        "change",
-                   |        {
-                   |          "pid": "1003"
-                   |        },
-                   |        [
-                   |          "1",
-                   |          {
-                   |            "id": "1003"
-                   |          }
-                   |        ]
-                   |      ],
-                   |      [
-                   |        "change",
-                   |        {
-                   |          "pid": "990"
-                   |        },
-                   |        [
-                   |          "1",
-                   |          {
-                   |            "id": "990"
-                   |          }
-                   |        ]
-                   |      ],
-                   |      [
-                   |        "change",
-                   |        {
-                   |          "pid": "992"
-                   |        },
-                   |        [
-                   |          "1",
-                   |          {
-                   |            "id": "992"
-                   |          }
-                   |        ]
-                   |      ],
-                   |      [
-                   |        "change",
-                   |        {
-                   |          "pid": "1005"
-                   |        },
-                   |        [
-                   |          "1",
-                   |          {
-                   |            "id": "1005"
-                   |          }
-                   |        ]
-                   |      ],
-                   |      [
-                   |        "change",
-                   |        {
-                   |          "pid": "1001"
-                   |        },
-                   |        [
-                   |          "1",
-                   |          {
-                   |            "id": "1001"
-                   |          }
-                   |        ]
-                   |      ],
-                   |      [
-                   |        "change",
-                   |        {
-                   |          "pid": "991"
-                   |        },
-                   |        [
-                   |          "1",
-                   |          {
-                   |            "id": "991"
-                   |          }
-                   |        ]
-                   |      ]
-                   |    ],
-                   |    "state": {
-                   |      "520": {
-                   |        "pollInterval": -1
-                   |      },
-                   |      "1011": {
-                   |        "text": "(20)"
-                   |      }
-                   |    },
-                   |    "types": {
-                   |      "520": "0",
-                   |      "990": "1",
-                   |      "991": "1",
-                   |      "992": "1",
-                   |      "993": "1",
-                   |      "994": "1",
-                   |      "995": "1",
-                   |      "996": "1",
-                   |      "997": "1",
-                   |      "999": "1",
-                   |      "1001": "1",
-                   |      "1003": "1",
-                   |      "1005": "1",
-                   |      "1011": "1",
-                   |      "1012": "23"
-                   |    },
-                   |    "hierarchy": {
-                   |      "520": [
-                   |        "983",
-                   |        "521",
-                   |        "984"
-                   |      ],
-                   |      "990": [
-                   |
-                   |      ],
-                   |      "991": [
-                   |
-                   |      ],
-                   |      "992": [
-                   |
-                   |      ],
-                   |      "993": [
-                   |
-                   |      ],
-                   |      "994": [
-                   |
-                   |      ],
-                   |      "995": [
-                   |
-                   |      ],
-                   |      "996": [
-                   |
-                   |      ],
-                   |      "997": [
-                   |
-                   |      ],
-                   |      "999": [
-                   |
-                   |      ],
-                   |      "1001": [
-                   |
-                   |      ],
-                   |      "1003": [
-                   |
-                   |      ],
-                   |      "1005": [
-                   |
-                   |      ],
-                   |      "1011": [
-                   |
-                   |      ],
-                   |      "1012": [
-                   |
-                   |      ]
-                   |    },
-                   |    "rpc": [
-                   |
-                   |    ],
-                   |    "meta": {
-                   |
-                   |    },
-                   |    "resources": {
-                   |
-                   |    },
-                   |    "timings": [
-                   |      4509,
-                   |      1
-                   |    ]
-                   |  }
-                   |]""".stripMargin
-
-  val valuesWithParensAndBraces =
+  val valuesWithParensAndBraces: String =
     """{
-    |  "error": {
-    |     "id": 1,
-    |    "message1": "bar(baz)",
-    |    "message2": "bar[baz]"
-    |  }
-    |}""".stripMargin
+      |  "error": {
+      |     "id": 1,
+      |    "message1": "bar(baz)",
+      |    "message2": "bar[baz]"
+      |  }
+      |}""".stripMargin
 
   //////////////
 
@@ -831,7 +820,8 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
   }
 
   it should "work with test set 3" in {
-    val json = parseJson("""{ "points": [
+    val json = parseJson(
+      """{ "points": [
           				             { "id":"i1", "x": 4, "y":-5 },
           				             { "id":"i2", "x":-2, "y": 2, "z":1 },
           				             { "id":"i3", "x": 8, "y": 3 },
@@ -839,7 +829,8 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
           				             { "id":"i5", "x": 0, "y": 2, "z":1 },
           				             { "id":"i6", "x": 1, "y": 4 }
           				           ]
-          				         }""")
+          				         }"""
+    )
 
     JsonPath.query("$.points[1]", json) should findOrderedElements(parseJson("""{ "id":"i2", "x":-2, "y": 2, "z":1 }"""))
     JsonPath.query("$.points[4].x", json) should findOrderedElements(int(0))
@@ -852,9 +843,11 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
   }
 
   it should "work with boolean filters" in {
-    val json = parseJson("""{ "conditions":
+    val json = parseJson(
+      """{ "conditions":
           			[true, false, true]
-          		}""")
+          		}"""
+    )
 
     JsonPath.query("$.conditions[?(@ == true)]", json) should findElements(bool(true), bool(true))
     JsonPath.query("$.conditions[?(@ == false)]", json) should findElements(bool(false))
@@ -862,12 +855,14 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
   }
 
   it should "work with nested boolean filters" in {
-    val json = parseJson("""{ "conditions":
+    val json = parseJson(
+      """{ "conditions":
           			[
           				{ "id": "i1", "condition": true },
           				{ "id": "i2", "condition": false }
           			]
-          		}""")
+          		}"""
+    )
 
     JsonPath.query("$.conditions[?(@['condition'] == true)].id", json) should findElements(text("i1"))
     JsonPath.query("$.conditions[?(@['condition'] == false)].id", json) should findElements(text("i2"))
@@ -884,8 +879,7 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
   it should "work with nested objects" in {
     val json = parseJson(""" { "foo" : {"bar" : "baz"} }""")
     val x = JsonPath.query("$.foo", json)
-    val expected = mapper.getNodeFactory.objectNode
-    expected.put("bar", "baz")
+    val expected = JsObject(Map("bar" -> JsString("baz")))
     x should findElements(expected)
     JsonPath.query("$.foo.bar", json) should findElements(text("baz"))
     JsonPath.query("$..bar", json) should findElements(text("baz"))
@@ -920,7 +914,7 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
     JsonPath.query("$..options[*]['bold','size']", json) should findOrderedElements(bool(true), int(3))
   }
 
-  val ten = parseJson("[1,2,3,4,5,6,7,8,9,10]")
+  val ten: JsValue = parseJson("[1,2,3,4,5,6,7,8,9,10]")
 
   "Array field slicing" should "work with random accessors" in {
     JsonPath.query("$[0]", goessnerJson) should findElements()
@@ -957,10 +951,8 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
   "Filters" should "be applied on array children and pick all matching ones" in {
     val json = parseJson("""[{"foo":1},{"foo":2},{"bar":3}]""")
 
-    val expected1 = mapper.getNodeFactory.objectNode
-    expected1.put("foo", 1)
-    val expected2 = mapper.getNodeFactory.objectNode
-    expected2.put("foo", 2)
+    val expected1 = JsObject(Map("foo" -> JsNumber(BigDecimal(1))))
+    val expected2 = JsObject(Map("foo" -> JsNumber(BigDecimal(2))))
 
     JsonPath.query("$[?(@.foo)]", json) should findOrderedElements(expected1, expected2)
   }
@@ -990,17 +982,18 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
 
     val json = parseJson("""[{"foo":"a"},{"foo":"b"},{"bar":"c"}]""")
 
-    val expected = mapper.getNodeFactory.objectNode
-    expected.put("foo", "a")
+    val expected = JsObject(Map("foo" -> JsString("a")))
 
     JsonPath.query("$[?(@.foo=='a' )]", json) should findOrderedElements(expected)
   }
 
   it should "work with non-alphanumeric values" in {
-    val json = parseJson("""{ "a":[{ "a":5, "@":2, "$":5 },
+    val json = parseJson(
+      """{ "a":[{ "a":5, "@":2, "$":5 },
             						              { "a":6, "@":3, "$":4 },
             						              { "a":7, "@":4, "$":5 }
-            						             ]}""")
+            						             ]}"""
+    )
     JsonPath.query("""$.a[?(@['@']==3)]""", json) should findElements(parseJson("""{"a":6,"@":3,"$":4}"""))
     JsonPath.query("""$.a[?(@['$']!=5)]""", json) should findElements(parseJson("""{"a":6,"@":3,"$":4}"""))
   }
@@ -1030,7 +1023,7 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
 
   it should "not mess up with node with the same name at different depths in the hierarchy" in {
     val json = """{"foo":{"nico":{"nico":42}}}"""
-    JsonPath.query("""$..foo[?(@.nico)]""", parseJson(json)) should findElements(parseJson("""{"nico":{"nico":42}}}"""))
+    JsonPath.query("""$..foo[?(@.nico)]""", parseJson(json)) should findElements(parseJson("""{"nico":{"nico":42}}"""))
   }
 
   "`null` elements" should "be correctly handled" in {
@@ -1039,7 +1032,7 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
     //    JsonPath.query("$.foo.bar", fooNull) should findElements()
 
     val arrayWithNull = parseJson("""{"foo":[1,null,3,"woot"]}""")
-    JsonPath.query("$.foo[?(@==null)]", arrayWithNull) should findElements(NullNode.instance)
+    JsonPath.query("$.foo[?(@==null)]", arrayWithNull) should findElements(nullNode)
     //    JsonPath.query("$.foo[?(@>=null)]", arrayWithNull) should findElements()
     //    JsonPath.query("$.foo[?(@>=0.5)]", arrayWithNull) should findOrderedElements(int(1), int(3))
   }
@@ -1171,8 +1164,8 @@ class JsonPathSpec extends FlatSpec with Matchers with JsonPathMatchers {
 
 trait JsonPathMatchers {
 
-  class OrderedElementsMatcher(expected: Traversable[Any]) extends Matcher[Either[JPError, Iterator[Any]]] {
-    override def apply(input: Either[JPError, Iterator[Any]]): MatchResult =
+  class OrderedElementsMatcher(expected: Traversable[JsValue]) extends Matcher[Either[JPError, Iterator[JsValue]]] {
+    override def apply(input: Either[JPError, Iterator[JsValue]]): MatchResult =
       input match {
         case Right(it) =>
           val seq = it.toVector
@@ -1188,10 +1181,11 @@ trait JsonPathMatchers {
         )
       }
   }
-  def findOrderedElements(expected: Any*) = new OrderedElementsMatcher(expected)
 
-  class ElementsMatcher(expected: Traversable[Any]) extends Matcher[Either[JPError, Iterator[Any]]] {
-    override def apply(input: Either[JPError, Iterator[Any]]): MatchResult =
+  def findOrderedElements(expected: JsValue*) = new OrderedElementsMatcher(expected)
+
+  class ElementsMatcher(expected: Traversable[JsValue]) extends Matcher[Either[JPError, Iterator[JsValue]]] {
+    override def apply(input: Either[JPError, Iterator[JsValue]]): MatchResult =
       input match {
         case Right(it) =>
           val actualSeq = it.toVector
@@ -1204,7 +1198,7 @@ trait JsonPathMatchers {
             if (missing.isEmpty) {
               s"$actualSeq should not contains $added"
             } else if (added.isEmpty) {
-              s"$actualSeq is missing $missing",
+              s"$actualSeq is missing $missing"
             } else {
               s"$actualSeq is missing $missing and should not contains $added"
             },
@@ -1217,5 +1211,6 @@ trait JsonPathMatchers {
         )
       }
   }
-  def findElements(expected: Any*) = new ElementsMatcher(expected)
+
+  def findElements(expected: JsValue*) = new ElementsMatcher(expected)
 }

@@ -16,18 +16,18 @@
 
 package io.gatling.jsonpath
 
-import com.fasterxml.jackson.databind.JsonNode
+import play.api.libs.json.JsValue
 
 import scala.collection.AbstractIterator
 
-abstract class RecursiveIterator[T](root: JsonNode) extends AbstractIterator[JsonNode] {
+abstract class RecursiveIterator[T](root: JsValue) extends AbstractIterator[JsValue] {
 
-  protected var nextNode: JsonNode = _
+  protected var nextNode: JsValue = _
   protected var finished: Boolean = _
   protected var pause: Boolean = _
   protected var stack: List[T] = _
 
-  protected def visitNode(node: JsonNode): Unit
+  protected def visitNode(node: JsValue): Unit
 
   protected def visit(t: T): Unit
 
@@ -49,7 +49,7 @@ abstract class RecursiveIterator[T](root: JsonNode) extends AbstractIterator[Jso
       !finished
     }
 
-  override def next(): JsonNode =
+  override def next(): JsValue =
     if (finished) {
       throw new UnsupportedOperationException("Can't call next on empty Iterator")
     } else if (nextNode == null) {

@@ -16,8 +16,7 @@
 
 package io.gatling.jsonpath
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.{ BooleanNode, DoubleNode, LongNode, NullNode, TextNode }
+import play.api.libs.json.{ JsBoolean, JsNull, JsNumber, JsString, JsValue }
 
 object AST {
   sealed trait AstToken
@@ -37,30 +36,37 @@ object AST {
    * Slicing of an array, indices start at zero
    *
    * @param start is the first item that you want (of course)
-   * @param stop is the first item that you do not want
-   * @param step, being positive or negative, defines whether you are moving
+   * @param stop  is the first item that you do not want
+   * @param step  being positive or negative, defines whether you are moving
    */
   case class ArraySlice(start: Option[Int], stop: Option[Int], step: Int = 1) extends ArrayAccessor
+
   object ArraySlice {
     val All = ArraySlice(None, None)
   }
+
   case class ArrayRandomAccess(indices: List[Int]) extends ArrayAccessor
 
   // JsonPath Filter AST //////////////////////////////////////////////
 
   case object CurrentNode extends PathToken
+
   sealed trait FilterValue extends AstToken
 
   object FilterDirectValue {
-    def long(value: Long) = FilterDirectValue(new LongNode(value))
-    def double(value: Double) = FilterDirectValue(new DoubleNode(value))
-    val True = FilterDirectValue(BooleanNode.TRUE)
-    val False = FilterDirectValue(BooleanNode.FALSE)
-    def string(value: String) = FilterDirectValue(new TextNode(value))
-    val Null = FilterDirectValue(NullNode.instance)
+    def long(value: Long) = FilterDirectValue(JsNumber(BigDecimal(value)))
+
+    def double(value: Double) = FilterDirectValue(JsNumber(BigDecimal(value)))
+
+    val True = FilterDirectValue(JsBoolean(true))
+    val False = FilterDirectValue(JsBoolean(false))
+
+    def string(value: String) = FilterDirectValue(JsString(value))
+
+    val Null = FilterDirectValue(JsNull)
   }
 
-  case class FilterDirectValue(node: JsonNode) extends FilterValue
+  case class FilterDirectValue(node: JsValue) extends FilterValue
 
   case class SubQuery(path: List[PathToken]) extends FilterValue
 
@@ -70,4 +76,5 @@ object AST {
   case class BooleanFilter(operator: BinaryBooleanOperator, lhs: FilterToken, rhs: FilterToken) extends FilterToken
 
   case class RecursiveFilterToken(filter: FilterToken) extends PathToken
+
 }
