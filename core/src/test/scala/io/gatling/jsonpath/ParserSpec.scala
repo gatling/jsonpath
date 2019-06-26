@@ -172,14 +172,13 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
   }
 
   "Failures" should "be handled gracefully" in {
-    def gracefulFailure(query: String): Unit = {
-      val result = new Parser().compile(query)
-      if (!result.successful) {
-        info(s"""that's an expected failure for "$query": $result""")
-      } else {
-        fail(s"""a Failure was expected but instead, for "$query" got: $result""")
+    def gracefulFailure(query: String): Unit =
+      new Parser().compile(query) match {
+        case Parser.Failure(msg, _) =>
+          info(s"""that's an expected failure for "$query": $msg""")
+        case other =>
+          fail(s"""a Failure was expected but instead, for "$query" got: $other""")
       }
-    }
 
     gracefulFailure("")
     gracefulFailure("foo")
