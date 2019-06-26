@@ -1,0 +1,1 @@
+name := "jsonpath-core"
