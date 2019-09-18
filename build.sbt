@@ -15,6 +15,4 @@ useSonatypeRepositories := true
 
 githubPath := "gatling/jsonpath"
 
-scalaVersion := "2.12.8"
-
 crossPaths := true
