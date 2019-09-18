@@ -109,8 +109,8 @@ object Parser extends RegexParsers {
 
   /// filters parsers ///////////////////////////////////////////////////////
 
-  private def numberValue: Parser[FilterDirectValue] = NumberValueRegex ^^ {
-    s => if (s.indexOf('.') != -1) FilterDirectValue.double(s.toDouble) else FilterDirectValue.long(s.toLong)
+  private def numberValue: Parser[FilterDirectValue] = NumberValueRegex ^^ { s =>
+    if (s.indexOf('.') != -1) FilterDirectValue.double(s.toDouble) else FilterDirectValue.long(s.toLong)
   }
 
   private def booleanValue: Parser[FilterDirectValue] =
@@ -188,11 +188,11 @@ object Parser extends RegexParsers {
 
   private[jsonpath] def fieldAccessors = (
     dotField
-    | recursiveSubscriptFilter
-    | recursiveAny
-    | recursiveField
-    | anyChild
-    | subscriptField
+      | recursiveSubscriptFilter
+      | recursiveAny
+      | recursiveField
+      | anyChild
+      | subscriptField
   )
 
   /// Main parsers //////////////////////////////////////////////////////////

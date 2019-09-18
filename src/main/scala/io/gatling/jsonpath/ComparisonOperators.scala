@@ -33,73 +33,74 @@ sealed trait ComparisonWithOrderingOperator extends ComparisonOperator {
     lhs.getNodeType match {
       case STRING  => rhs.getNodeType == STRING && compare(lhs.textValue, rhs.textValue)
       case BOOLEAN => rhs.getNodeType == BOOLEAN && compare(lhs.booleanValue, rhs.booleanValue)
-      case NUMBER => rhs.getNodeType match {
-        case NUMBER =>
-          lhs.numberType match {
-            case NumberType.INT =>
-              rhs.numberType match {
-                case NumberType.INT         => compare(lhs.intValue, rhs.intValue)
-                case NumberType.LONG        => compare(lhs.intValue, rhs.longValue)
-                case NumberType.DOUBLE      => compare(lhs.intValue, rhs.doubleValue)
-                case NumberType.FLOAT       => compare(lhs.intValue, rhs.floatValue)
-                case NumberType.BIG_INTEGER => compare(lhs.bigIntegerValue, rhs.bigIntegerValue)
-                case NumberType.BIG_DECIMAL => compare(lhs.decimalValue, rhs.decimalValue)
-              }
+      case NUMBER =>
+        rhs.getNodeType match {
+          case NUMBER =>
+            lhs.numberType match {
+              case NumberType.INT =>
+                rhs.numberType match {
+                  case NumberType.INT         => compare(lhs.intValue, rhs.intValue)
+                  case NumberType.LONG        => compare(lhs.intValue, rhs.longValue)
+                  case NumberType.DOUBLE      => compare(lhs.intValue, rhs.doubleValue)
+                  case NumberType.FLOAT       => compare(lhs.intValue, rhs.floatValue)
+                  case NumberType.BIG_INTEGER => compare(lhs.bigIntegerValue, rhs.bigIntegerValue)
+                  case NumberType.BIG_DECIMAL => compare(lhs.decimalValue, rhs.decimalValue)
+                }
 
-            case NumberType.LONG =>
-              rhs.numberType match {
-                case NumberType.INT         => compare(lhs.longValue, rhs.intValue)
-                case NumberType.LONG        => compare(lhs.longValue, rhs.longValue)
-                case NumberType.DOUBLE      => compare(lhs.longValue, rhs.doubleValue)
-                case NumberType.FLOAT       => compare(lhs.longValue, rhs.floatValue)
-                case NumberType.BIG_INTEGER => compare(lhs.bigIntegerValue, rhs.bigIntegerValue)
-                case NumberType.BIG_DECIMAL => compare(lhs.decimalValue, rhs.decimalValue)
-              }
+              case NumberType.LONG =>
+                rhs.numberType match {
+                  case NumberType.INT         => compare(lhs.longValue, rhs.intValue)
+                  case NumberType.LONG        => compare(lhs.longValue, rhs.longValue)
+                  case NumberType.DOUBLE      => compare(lhs.longValue, rhs.doubleValue)
+                  case NumberType.FLOAT       => compare(lhs.longValue, rhs.floatValue)
+                  case NumberType.BIG_INTEGER => compare(lhs.bigIntegerValue, rhs.bigIntegerValue)
+                  case NumberType.BIG_DECIMAL => compare(lhs.decimalValue, rhs.decimalValue)
+                }
 
-            case NumberType.FLOAT =>
-              rhs.numberType match {
-                case NumberType.INT         => compare(lhs.floatValue, rhs.intValue)
-                case NumberType.LONG        => compare(lhs.floatValue, rhs.longValue)
-                case NumberType.DOUBLE      => compare(lhs.floatValue, rhs.doubleValue)
-                case NumberType.FLOAT       => compare(lhs.floatValue, rhs.floatValue)
-                case NumberType.BIG_INTEGER => compare(lhs.decimalValue, rhs.decimalValue)
-                case NumberType.BIG_DECIMAL => compare(lhs.decimalValue, rhs.decimalValue)
-              }
+              case NumberType.FLOAT =>
+                rhs.numberType match {
+                  case NumberType.INT         => compare(lhs.floatValue, rhs.intValue)
+                  case NumberType.LONG        => compare(lhs.floatValue, rhs.longValue)
+                  case NumberType.DOUBLE      => compare(lhs.floatValue, rhs.doubleValue)
+                  case NumberType.FLOAT       => compare(lhs.floatValue, rhs.floatValue)
+                  case NumberType.BIG_INTEGER => compare(lhs.decimalValue, rhs.decimalValue)
+                  case NumberType.BIG_DECIMAL => compare(lhs.decimalValue, rhs.decimalValue)
+                }
 
-            case NumberType.DOUBLE =>
-              rhs.numberType match {
-                case NumberType.INT         => compare(lhs.doubleValue, rhs.intValue)
-                case NumberType.LONG        => compare(lhs.doubleValue, rhs.longValue)
-                case NumberType.DOUBLE      => compare(lhs.doubleValue, rhs.doubleValue)
-                case NumberType.FLOAT       => compare(lhs.doubleValue, rhs.floatValue)
-                case NumberType.BIG_INTEGER => compare(lhs.decimalValue, rhs.decimalValue)
-                case NumberType.BIG_DECIMAL => compare(lhs.decimalValue, rhs.decimalValue)
-              }
+              case NumberType.DOUBLE =>
+                rhs.numberType match {
+                  case NumberType.INT         => compare(lhs.doubleValue, rhs.intValue)
+                  case NumberType.LONG        => compare(lhs.doubleValue, rhs.longValue)
+                  case NumberType.DOUBLE      => compare(lhs.doubleValue, rhs.doubleValue)
+                  case NumberType.FLOAT       => compare(lhs.doubleValue, rhs.floatValue)
+                  case NumberType.BIG_INTEGER => compare(lhs.decimalValue, rhs.decimalValue)
+                  case NumberType.BIG_DECIMAL => compare(lhs.decimalValue, rhs.decimalValue)
+                }
 
-            case NumberType.BIG_INTEGER =>
-              rhs.numberType match {
-                case NumberType.INT         => compare(lhs.bigIntegerValue, rhs.bigIntegerValue)
-                case NumberType.LONG        => compare(lhs.bigIntegerValue, rhs.bigIntegerValue)
-                case NumberType.DOUBLE      => compare(lhs.decimalValue, rhs.decimalValue)
-                case NumberType.FLOAT       => compare(lhs.decimalValue, rhs.decimalValue)
-                case NumberType.BIG_INTEGER => compare(lhs.bigIntegerValue, rhs.bigIntegerValue)
-                case NumberType.BIG_DECIMAL => compare(lhs.decimalValue, rhs.decimalValue)
-              }
+              case NumberType.BIG_INTEGER =>
+                rhs.numberType match {
+                  case NumberType.INT         => compare(lhs.bigIntegerValue, rhs.bigIntegerValue)
+                  case NumberType.LONG        => compare(lhs.bigIntegerValue, rhs.bigIntegerValue)
+                  case NumberType.DOUBLE      => compare(lhs.decimalValue, rhs.decimalValue)
+                  case NumberType.FLOAT       => compare(lhs.decimalValue, rhs.decimalValue)
+                  case NumberType.BIG_INTEGER => compare(lhs.bigIntegerValue, rhs.bigIntegerValue)
+                  case NumberType.BIG_DECIMAL => compare(lhs.decimalValue, rhs.decimalValue)
+                }
 
-            case NumberType.BIG_DECIMAL =>
-              rhs.numberType match {
-                case NumberType.INT         => compare(lhs.decimalValue, rhs.decimalValue)
-                case NumberType.LONG        => compare(lhs.decimalValue, rhs.decimalValue)
-                case NumberType.DOUBLE      => compare(lhs.decimalValue, rhs.decimalValue)
-                case NumberType.FLOAT       => compare(lhs.decimalValue, rhs.decimalValue)
-                case NumberType.BIG_INTEGER => compare(lhs.decimalValue, rhs.decimalValue)
-                case NumberType.BIG_DECIMAL => compare(lhs.decimalValue, rhs.decimalValue)
-              }
+              case NumberType.BIG_DECIMAL =>
+                rhs.numberType match {
+                  case NumberType.INT         => compare(lhs.decimalValue, rhs.decimalValue)
+                  case NumberType.LONG        => compare(lhs.decimalValue, rhs.decimalValue)
+                  case NumberType.DOUBLE      => compare(lhs.decimalValue, rhs.decimalValue)
+                  case NumberType.FLOAT       => compare(lhs.decimalValue, rhs.decimalValue)
+                  case NumberType.BIG_INTEGER => compare(lhs.decimalValue, rhs.decimalValue)
+                  case NumberType.BIG_DECIMAL => compare(lhs.decimalValue, rhs.decimalValue)
+                }
 
-            case _ => false
-          }
-        case _ => false
-      }
+              case _ => false
+            }
+          case _ => false
+        }
 
       case _ => false
     }
