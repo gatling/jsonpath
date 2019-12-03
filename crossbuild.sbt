@@ -5,3 +5,5 @@ lazy val supportedScalaVersions = List(scala213, scala212, scala211)
 
 scalaVersion := scala213
 crossScalaVersions := supportedScalaVersions
+
+fork in (ThisBuild, Test) := scalaVersion.value.startsWith("2.11.")

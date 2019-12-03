@@ -17,8 +17,8 @@
 package io.gatling.jsonpath
 
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.{ Matcher, MatchResult }
-import io.gatling.jsonpath.Parser._
+import org.scalatest.matchers.{ MatchResult, Matcher }
+import io.gatling.jsonpath.Parser.{ Parser => _, _ }
 import io.gatling.jsonpath.AST._
 import org.scalatest.Matchers
 
@@ -131,24 +131,36 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
       new Parser().compile(query).get should be(expected)
     }
 
-    shouldParse("$.store.book[0].title", List(
-      RootNode,
-      Field("store"),
-      Field("book"), ArrayRandomAccess(List(0)),
-      Field("title")
-    ))
-    shouldParse("$['store']['book'][0]['title']", List(
-      RootNode,
-      Field("store"),
-      Field("book"), ArrayRandomAccess(List(0)),
-      Field("title")
-    ))
-    shouldParse("$.store.book[*].author", List(
-      RootNode,
-      Field("store"),
-      Field("book"), ArraySlice(None, None),
-      Field("author")
-    ))
+    shouldParse(
+      "$.store.book[0].title",
+      List(
+        RootNode,
+        Field("store"),
+        Field("book"),
+        ArrayRandomAccess(List(0)),
+        Field("title")
+      )
+    )
+    shouldParse(
+      "$['store']['book'][0]['title']",
+      List(
+        RootNode,
+        Field("store"),
+        Field("book"),
+        ArrayRandomAccess(List(0)),
+        Field("title")
+      )
+    )
+    shouldParse(
+      "$.store.book[*].author",
+      List(
+        RootNode,
+        Field("store"),
+        Field("book"),
+        ArraySlice(None, None),
+        Field("author")
+      )
+    )
     shouldParse("$..author", List(RootNode, RecursiveField("author")))
     shouldParse("$.store.*", List(RootNode, Field("store"), AnyField))
     shouldParse("$.store..price", List(RootNode, Field("store"), RecursiveField("price")))
@@ -157,20 +169,26 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
     shouldParse("$..book[2]", List(RootNode, RecursiveField("book"), ArrayRandomAccess(List(2))))
     shouldParse("$.book[*]", List(RootNode, Field("book"), ArraySlice(None, None)))
     shouldParse("$..book[*]", List(RootNode, RecursiveField("book"), ArraySlice(None, None)))
-    shouldParse("$.store['store']..book['book'][0].title..title['title'].*..*.book[*]..book[*]", List(
-      RootNode,
-      Field("store"),
-      Field("store"),
-      RecursiveField("book"),
-      Field("book"), ArrayRandomAccess(List(0)),
-      Field("title"),
-      RecursiveField("title"),
-      Field("title"),
-      AnyField,
-      RecursiveAnyField,
-      Field("book"), ArraySlice(None, None),
-      RecursiveField("book"), ArraySlice(None, None)
-    ))
+    shouldParse(
+      "$.store['store']..book['book'][0].title..title['title'].*..*.book[*]..book[*]",
+      List(
+        RootNode,
+        Field("store"),
+        Field("store"),
+        RecursiveField("book"),
+        Field("book"),
+        ArrayRandomAccess(List(0)),
+        Field("title"),
+        RecursiveField("title"),
+        Field("title"),
+        AnyField,
+        RecursiveAnyField,
+        Field("book"),
+        ArraySlice(None, None),
+        RecursiveField("book"),
+        ArraySlice(None, None)
+      )
+    )
   }
 
   "Failures" should "be handled gracefully" in {
@@ -201,10 +219,12 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
       HasFilter(SubQuery(List(CurrentNode, Field("foo"))))
     )
 
-    new Parser().compile("$.things[?(@.foo.bar)]").get should be(RootNode
-      :: Field("things")
-      :: HasFilter(SubQuery(CurrentNode :: Field("foo") :: Field("bar") :: Nil))
-      :: Nil)
+    new Parser().compile("$.things[?(@.foo.bar)]").get should be(
+      RootNode
+        :: Field("things")
+        :: HasFilter(SubQuery(CurrentNode :: Field("foo") :: Field("bar") :: Nil))
+        :: Nil
+    )
 
   }
 
@@ -276,20 +296,26 @@ class ParserSpec extends FlatSpec with Matchers with ParsingMatchers {
       ComparisonFilter(EqOperator, SubQuery(List(CurrentNode)), SubQuery(List(RootNode, Field("foo"))))
     )
 
-    new Parser().compile("$['points'][?(@['y'] >= 3)].id").get should be(RootNode
-      :: Field("points")
-      :: ComparisonFilter(GreaterOrEqOperator, SubQuery(List(CurrentNode, Field("y"))), FilterDirectValue.long(3))
-      :: Field("id") :: Nil)
+    new Parser().compile("$['points'][?(@['y'] >= 3)].id").get should be(
+      RootNode
+        :: Field("points")
+        :: ComparisonFilter(GreaterOrEqOperator, SubQuery(List(CurrentNode, Field("y"))), FilterDirectValue.long(3))
+        :: Field("id") :: Nil
+    )
 
-    new Parser().compile("$.points[?(@['id']=='i4')].x").get should be(RootNode
-      :: Field("points")
-      :: ComparisonFilter(EqOperator, SubQuery(List(CurrentNode, Field("id"))), FilterDirectValue.string("i4"))
-      :: Field("x") :: Nil)
+    new Parser().compile("$.points[?(@['id']=='i4')].x").get should be(
+      RootNode
+        :: Field("points")
+        :: ComparisonFilter(EqOperator, SubQuery(List(CurrentNode, Field("id"))), FilterDirectValue.string("i4"))
+        :: Field("x") :: Nil
+    )
 
-    new Parser().compile("""$.points[?(@['id']=="i4")].x""").get should be(RootNode
-      :: Field("points")
-      :: ComparisonFilter(EqOperator, SubQuery(List(CurrentNode, Field("id"))), FilterDirectValue.string("i4"))
-      :: Field("x") :: Nil)
+    new Parser().compile("""$.points[?(@['id']=="i4")].x""").get should be(
+      RootNode
+        :: Field("points")
+        :: ComparisonFilter(EqOperator, SubQuery(List(CurrentNode, Field("id"))), FilterDirectValue.string("i4"))
+        :: Field("x") :: Nil
+    )
   }
 
   it should "work with some predefined boolean operators" in {
@@ -348,16 +374,18 @@ trait ParsingMatchers {
   class SuccessBeMatcher[+T <: AstToken](expected: T) extends Matcher[Parser.ParseResult[AstToken]] {
     def apply(left: Parser.ParseResult[AstToken]): MatchResult = {
       left match {
-        case Parser.Success(res, _) => MatchResult(
-          expected == res,
-          s"$res is not equal to expected value $expected",
-          s"$res is equal to $expected but it shouldn't be"
-        )
-        case Parser.NoSuccess(msg, _) => MatchResult(
-          matches = false,
-          s"parsing issue, $msg",
-          s"parsing issue, $msg"
-        )
+        case Parser.Success(res, _) =>
+          MatchResult(
+            expected == res,
+            s"$res is not equal to expected value $expected",
+            s"$res is equal to $expected but it shouldn't be"
+          )
+        case Parser.NoSuccess(msg, _) =>
+          MatchResult(
+            matches = false,
+            s"parsing issue, $msg",
+            s"parsing issue, $msg"
+          )
       }
     }
   }
